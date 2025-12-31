@@ -23,11 +23,11 @@ export const FormResetPassword = () => {
     const { register, handleSubmit, reset, formState: { errors }} = useForm<TLogin>();
 
     const submit: SubmitHandler<TLogin> = async (body: TLogin) => {
-        // if(body.codeAccess) {
-        //     await resetPassword(body)
-        // } else {
-        //     await requestForgotPassword(body)
-        // }
+        if(body.codeAccess) {
+            await resetPassword(body)
+        } else {
+            await requestForgotPassword(body)
+        }
     };
 
     const requestForgotPassword = async (body: TLogin) => {

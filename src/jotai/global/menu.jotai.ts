@@ -28,22 +28,22 @@ export const menuRoutinesAtom = atom<TMenuRoutine[]>([
                     delete: false
                 }
             },     
-            {
-                code: 'A12',
-                isOpen: true,
-                subMenu: [],
-                description: 'Clientes',
-                icon: '',
-                link: 'master-data/customers',
-                padding: 'px-4',
-                authorized: false,
-                permissions: {
-                    create: false,
-                    update: false,
-                    read: false,
-                    delete: false
-                }
-            },          
+            // {
+            //     code: 'A12',
+            //     isOpen: true,
+            //     subMenu: [],
+            //     description: 'Clientes',
+            //     icon: '',
+            //     link: 'master-data/customers',
+            //     padding: 'px-4',
+            //     authorized: false,
+            //     permissions: {
+            //         create: false,
+            //         update: false,
+            //         read: false,
+            //         delete: false
+            //     }
+            // },          
             {
                 code: 'A23',
                 isOpen: true,

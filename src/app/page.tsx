@@ -23,21 +23,21 @@ export default function Home() {
   const { register, handleSubmit, reset, formState: { errors }} = useForm<TLogin>();
 
   const login: SubmitHandler<TLogin> = async (body: TLogin) => {
-    // try {
-    //   setIsLoading(true);
-    //   const {data} = await api.post(`/auth/login`, body);
+    try {
+      setIsLoading(true);
+      const {data} = await api.post(`/auth/login`, body);
 
-    //   localStorage.setItem("token", data.data.token);
-    //   localStorage.setItem("name", data.data.name);
-    //   localStorage.setItem("admin", data.data.admin);
-    //   localStorage.setItem("photo", data.data.photo);
-    //   localStorage.setItem("modules", JSON.stringify(data.data.modules));
-    //   router.push("/dashboard");
-    // } catch (error) {
-    //   resolveResponse(error);
-    // } finally {
-    //   setIsLoading(false);
-    // }
+      localStorage.setItem("token", data.data.token);
+      localStorage.setItem("name", data.data.name);
+      localStorage.setItem("admin", data.data.admin);
+      localStorage.setItem("photo", data.data.photo);
+      localStorage.setItem("modules", JSON.stringify(data.data.modules));
+      router.push("/dashboard");
+    } catch (error) {
+      resolveResponse(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

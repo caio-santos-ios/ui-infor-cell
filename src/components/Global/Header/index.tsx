@@ -12,6 +12,7 @@ import { Button } from "../Button";
 import { api, uriBase } from "@/service/api.service";
 import { loadingAtom } from "@/jotai/global/loading.jotai";
 import { configApi, resolveResponse } from "@/service/config.service";
+import { Logo } from "../logo";
 
 export const Header = () => {
     const [_, setLoading] = useAtom(loadingAtom);
@@ -56,19 +57,16 @@ export const Header = () => {
             </div>
 
             <a href="dashboard">
-                <Image
-                    src="/assets/images/logo.png"
-                    alt="Logo"
-                    width={150}
-                    height={150}
-                />
+                <Logo width={100} height={100} />
             </a>
 
             <div className="flex items-center gap-3 container-profile-header">
                 <div className="relative">
                     {
                         photo ? 
-                        <img onClick={() => setSincron(!sincron)} className="rounded-full object-cover h-18" src={`${uriBase}/${photo}`} alt="" />
+                        <div className="border border-gray-600 rounded-full w-18 h-18 flex items-center justify-center">
+                            <img onClick={() => setSincron(!sincron)} className="rounded-full object-cover w-full h-full" src={`${uriBase}/${photo}`} alt="" />
+                        </div>
                         :
                         <FaUserCircle onClick={() => setSincron(!sincron)} size={50} />
                     }
