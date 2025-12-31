@@ -29,12 +29,6 @@ export const ModalData = ({onClose, handleReturnModal, id}: TProp) => {
     });
 
     const onSubmit: SubmitHandler<TSupplier> = async (body: TSupplier) => {
-        if(body.effectiveDate) {
-            body.effectiveDate = new Date(body.effectiveDate);
-        } else {
-            body.effectiveDate = null;
-        };
-
         if(body.address.id == null) {
             body.address.id = "";
         };
@@ -198,10 +192,6 @@ export const ModalData = ({onClose, handleReturnModal, id}: TProp) => {
                     <label className={`label slim-label-primary`}>Telefone</label>
                     <input onInput={(e: React.ChangeEvent<HTMLInputElement>) => maskPhone(e)} {...register("phone")} type="text" className={`input slim-input-primary`} placeholder="Digite"/>
                 </div> 
-                <div className={`flex flex-col col-span-1 mb-2`}>
-                    <label className={`label slim-label-primary`}>Vigência</label>
-                    <input {...register("effectiveDate")} type="date" className={`input slim-input-primary`} placeholder="Digite"/>
-                </div>
                 <div className={`flex flex-col mb-2`}>
                     <label className={`label slim-label-primary`}>CEP</label>
                     <input onInput={(e: React.ChangeEvent<HTMLInputElement>) => getAddressByZipCode(e, '')} {...register("address.zipCode", {minLength: {value: 8, message: "CEP inválido"}})} type="text" className={`input slim-input-primary`} placeholder="Digite"/>
