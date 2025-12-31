@@ -10,8 +10,6 @@ import "../styles/slim-textarea.css";
 import "../styles/slim-text.css";
 import "../styles/slim-table.css";
 import "../styles/login/login.css";
-import { ToastContainer } from "react-toastify";
-import { Loading } from "@/components/Global/Loading";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,7 +32,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
