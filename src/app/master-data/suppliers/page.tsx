@@ -1,6 +1,5 @@
 "use client";
 
-import { ModalAccountsPayable } from "@/components/AccountsPayable/Modal";
 import { Autorization } from "@/components/Global/Autorization";
 import { Header } from "@/components/Global/Header";
 import { NotData } from "@/components/Global/NotData";
