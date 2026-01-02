@@ -4,15 +4,15 @@ import Pagination from "@/components/tables/Pagination";
 import { loadingAtom } from "@/jotai/global/loading.jotai";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
-import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/global/table";
-import { NotData } from "@/components/global/notData";
+// import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/global/table";
+// import { NotData } from "@/components/global/notData";
 import { api } from "@/service/api.service";
 import { configApi, resolveResponse } from "@/service/config.service";
 import { paginationAtom } from "@/jotai/global/pagination.jotai";
 import { maskDate } from "@/utils/mask.util";
 import { permissionDelete, permissionUpdate } from "@/utils/permission.util";
-import { IconEdit } from "@/components/global/iconEdit";
-import { IconDelete } from "@/components/global/iconDelete";
+// import { IconEdit } from "@/components/global/iconEdit";
+// import { IconDelete } from "@/components/global/iconDelete";
 import { TCompany } from "@/jotai/masterData/company.type";
 import { useRouter } from "next/navigation";
 
@@ -61,7 +61,7 @@ export default function CompanyTable() {
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3 mb-3">
         <div className="max-w-full overflow-x-auto">
           <div className="min-w-[1102px]">
-            <Table>
+            {/* <Table>
               <TableHeader className="border-b border-gray-100 dark:border-white/5">
                 <TableRow>
                   <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Razão Social</TableCell>
@@ -94,13 +94,14 @@ export default function CompanyTable() {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
+            </Table> */}
           </div>
         </div>
       </div>
       <Pagination currentPage={pagination.currentPage} totalCount={pagination.totalCount} totalData={pagination.data.length} totalPages={pagination.totalPages} onPageChange={() => {}} />
     </>
     :
-    <NotData />
+    // <NotData />
+    <></>
   );
 }

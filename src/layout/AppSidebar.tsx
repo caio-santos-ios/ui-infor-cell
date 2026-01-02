@@ -18,7 +18,7 @@ import {
   UserCircleIcon,
 } from "../icons/index";
 import SidebarWidget from "./SidebarWidget";
-import { Logo } from "@/components/global/logo";
+// import { Logo } from "@/components/global/logo";
 import { useAtom } from "jotai";
 import { iconAtom } from "@/jotai/global/icons.jotai";
 import { syncAtom, userAdmin } from "@/jotai/auth/auth.jotai";
@@ -198,10 +198,11 @@ const AppSidebar: React.FC = () => {
         <Link href={`${isAdmin ? '/dashboard' : '/master-data/profile'}`} className="w-full flex justify-center">
           {isExpanded || isHovered || isMobileOpen ? (
             <div className="hidden lg:flex">
-              <Logo width={100} height={100} />
+              {/* <Logo width={100} height={100} /> */}
             </div>
           ) : (
-            <Logo width={100} height={100} />
+            <></>
+            // <Logo width={100} height={100} />
           )}
         </Link>
       </div>
