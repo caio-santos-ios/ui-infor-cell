@@ -1,14 +1,15 @@
 import { FaTrash } from "react-icons/fa";
 
 type TProp = {
-    obj: any,
-    getObj: (obj: any) => void;
+    action: string; 
+    obj?: any;
+    getObj: (action: string, obj?: any) => void;
 }
 
-export const IconDelete = ({obj, getObj}: TProp) => {
+export const IconDelete = ({obj, getObj, action}: TProp) => {
 
     return (
-        <div onClick={() => getObj(obj)} className="cursor-pointer text-red-400 hover:text-red-500">
+        <div onClick={() => getObj(obj, action)} className="cursor-pointer text-red-400 hover:text-red-500">
             <FaTrash />
         </div>
     )
