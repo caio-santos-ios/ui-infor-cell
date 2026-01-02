@@ -16,7 +16,7 @@ export default async function CompanyDetail({ params }: { params: Promise<{ id: 
 
   return (
     <div>
-      <PageBreadcrumb pageTitle="Empresas" pageSubTitle="Cadastros" />
+      {/* <PageBreadcrumb pageTitle="Empresas" pageSubTitle="Cadastros" /> */}
       <div className="flex justify-end mb-2">
         <Link href="/master-data/companies">
           <Button type="submit" variant="outline" size="sm">Voltar</Button>
