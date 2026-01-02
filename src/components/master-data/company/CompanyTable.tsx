@@ -16,6 +16,7 @@ import { IconDelete } from "@/components/global/iconDelete";
 import { TCompany } from "@/jotai/masterData/company.type";
 import { useRouter } from "next/navigation";
 
+
 export default function CompanyTable() {
   const [_, setLoading] = useAtom(loadingAtom);
   const [pagination, setPagination] = useAtom(paginationAtom); 
