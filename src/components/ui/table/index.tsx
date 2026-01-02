@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react";
 
 interface TableProps {
-  children: ReactNode; // Table content (thead, tbody, etc.)
+  children: ReactNode; 
   className?: string; // Optional className for styling
 }
 

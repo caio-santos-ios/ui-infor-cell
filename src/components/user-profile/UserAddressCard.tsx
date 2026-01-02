@@ -3,7 +3,6 @@ import React from "react";
 import { useModal } from "../../hooks/useModal";
 import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
-import Input from "../form/input/InputField";
 import Label from "../form/Label";
 
 export default function UserAddressCard() {
@@ -96,7 +95,7 @@ export default function UserAddressCard() {
           </div>
           <form className="flex flex-col">
             <div className="px-2 overflow-y-auto custom-scrollbar">
-              <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
+              {/* <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                 <div>
                   <Label>Country</Label>
                   <Input type="text" defaultValue="United States" />
@@ -116,7 +115,7 @@ export default function UserAddressCard() {
                   <Label>TAX ID</Label>
                   <Input type="text" defaultValue="AS4568384" />
                 </div>
-              </div>
+              </div> */}
             </div>
             <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
               <Button size="sm" variant="outline" onClick={closeModal}>
