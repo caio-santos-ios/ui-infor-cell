@@ -28,7 +28,7 @@ export default function NotFound() {
         />
 
         <p className="mt-10 mb-6 text-base text-gray-700 dark:text-gray-400 sm:text-lg">
-          We can’t seem to find the page you are looking for!
+          Não conseguimos encontrar a página que você está procurando!
         </p>
 
         <Link
@@ -38,9 +38,9 @@ export default function NotFound() {
           Voltar
         </Link>
       </div>
-      {/* <!-- Footer --> */}
+
       <p className="absolute text-sm text-center text-gray-500 -translate-x-1/2 bottom-6 left-1/2 dark:text-gray-400">
-        &copy; {new Date().getFullYear()} - TailAdmin
+        &copy; {new Date().getFullYear()} - ERP Mais
       </p>
     </div>
   );

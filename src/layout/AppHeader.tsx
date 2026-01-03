@@ -1,7 +1,7 @@
 "use client";
 
 import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
-// import { Logo } from "@/components/global/logo";
+import { Logo } from "@/components/global/logo";
 import NotificationDropdown from "@/components/header/NotificationDropdown";
 import UserDropdown from "@/components/header/UserDropdown";
 import { useSidebar } from "@/context/SidebarContext";
@@ -87,7 +87,7 @@ const AppHeader: React.FC = () => {
           </button>
 
           <Link href={`${isAdmin ? '/dashboard' : '/master-data/profile'}`} className="lg:hidden">
-            {/* <Logo height={100} width={100} /> */}
+            <Logo height={100} width={100} />
           </Link>
 
           <button onClick={toggleApplicationMenu} className="flex items-center justify-center w-10 h-10 text-gray-700 rounded-lg z-1 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 lg:hidden" >
