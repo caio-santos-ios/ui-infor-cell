@@ -4,6 +4,7 @@ import "flatpickr/dist/flatpickr.css";
 import { SidebarProvider } from '@/context/SidebarContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { ToastContainer, toast } from 'react-toastify';
+import { Autorization } from '@/components/autorization/Autorization';
 // import { Loading } from '@/components/global/loading';
 // import { Autorization } from '@/components/global/autorization';
 
@@ -20,7 +21,8 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className={`${outfit.className} dark:bg-gray-900`}>
         {/* <Loading />
-        <Autorization /> */}
+        */}
+        <Autorization /> 
         <ToastContainer />
         <ThemeProvider>
           <SidebarProvider>{children}</SidebarProvider>
