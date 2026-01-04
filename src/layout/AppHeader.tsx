@@ -2,8 +2,6 @@
 
 import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
 import { Logo } from "@/components/companyLogo";
-import { CompanyLogo } from "@/components/global/companyLogo";
-// import { Logo } from "@/components/global/Logo";
 import NotificationDropdown from "@/components/header/NotificationDropdown";
 import UserDropdown from "@/components/header/UserDropdown";
 import { useSidebar } from "@/context/SidebarContext";
