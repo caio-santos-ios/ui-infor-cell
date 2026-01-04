@@ -5,7 +5,6 @@ import Button from "../ui/button/Button";
 import Label from "../form/Label";
 import { userLoggerAtom } from "@/jotai/auth/auth.jotai";
 import { useAtom } from "jotai";
-import { ResetUserProfile, TUserProfile } from "@/types/user/user.type";
 import { useForm } from "react-hook-form";
 import { maskPhone } from "@/utils/mask.util";
 import DropzoneComponent from "../form/form-elements/DropZone";
@@ -13,7 +12,7 @@ import { loadingAtom } from "@/jotai/global/loading.jotai";
 import { api, uriBase } from "@/service/api.service";
 import { configApi, resolveResponse } from "@/service/config.service";
 import { useEffect } from "react";
-
+import { ResetUserProfile, TUserProfile } from "@/types/master-data/user/user.type";
 
 export default function UserMetaCard() {
   const [userLogger, setUserLogger] = useAtom(userLoggerAtom);
@@ -83,7 +82,8 @@ export default function UserMetaCard() {
         email: result.email,
         phone: result.phone,
         whatsapp: result.whatsapp,
-        photo: result.photo
+        photo: result.photo,
+        address: result.address
       });
     } catch (error) {
       resolveResponse(error);

@@ -5,6 +5,7 @@ import { SidebarProvider } from '@/context/SidebarContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { ToastContainer, toast } from 'react-toastify';
 import { Autorization } from '@/components/autorization/Autorization';
+import { Loading } from '@/components/loading/Loading';
 // import { Loading } from '@/components/global/loading';
 // import { Autorization } from '@/components/global/autorization';
 
@@ -20,8 +21,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={`${outfit.className} dark:bg-gray-900`}>
-        {/* <Loading />
-        */}
+        <Loading />
         <Autorization /> 
         <ToastContainer />
         <ThemeProvider>
