@@ -14,42 +14,5 @@ export const Autorization = () => {
     const router = useRouter();
     const pathname = usePathname();
 
-    useEffect(() => {
-        const localToken = localStorage.getItem("token");
-        const token = localToken ? localToken : "";
-
-        if(!token) {
-            setUserLogger(ResetUserLogged);
-            if(!pathname.includes("/reset-password")) {
-                router.push("/");
-                removeLocalStorage();
-                setIsAdmin(false);
-            };
-        } else {
-            const admin = localStorage.getItem("admin");
-            const name = localStorage.getItem("name");
-            const email = localStorage.getItem("email");
-            const photo = localStorage.getItem("photo");
-
-            setUserLogger({
-                name: name ? name : "",
-                email: email ? email : "",
-                photo: photo ? photo : ""
-            });
-            
-            setIsAdmin(admin == 'true');
-
-            if(admin == "true") {
-                if(pathname == "/" || pathname == "/reset-password") {
-                    router.push("/dashboard");
-                };
-            } else {
-                if(pathname == "/" || pathname == "/reset-password") {
-                    router.push("/master-data/profile");
-                };
-            };
-        };
-    }, [pathname, router]);
-
     return <></>
 }
