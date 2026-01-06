@@ -1,7 +1,6 @@
 import UserAddressCard from "@/components/user-profile/UserAddressCard";
 import UserMetaCard from "@/components/user-profile/UserMetaCard";
 import { Metadata } from "next";
-// import { BtnBack } from "@/components/global/btnBack";
 
 export const metadata: Metadata = {
   title: "ERP Mais | Perfil",
@@ -17,8 +16,6 @@ export default function Profile() {
           <h3 className="mb-5 text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-0">
             Perfil
           </h3>
-
-          {/* <BtnBack uri="/dashboard" /> */}
         </div>
         <div className="space-y-6">
           <UserMetaCard />

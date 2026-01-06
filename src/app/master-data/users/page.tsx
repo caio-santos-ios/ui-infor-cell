@@ -1,25 +1,25 @@
-import CompanyTable from "@/components/master-data/company/CompanyTable";
+import StoreTable from "@/components/master-data/store/StoreTable";
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
 import Button from "@/components/ui/button/Button";
 import { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "ERP Mais | Empresas",
+  title: "ERP Mais | Usuários",
   description:
     "This is Next.js Form Elements page for TailAdmin - Next.js Tailwind CSS Admin Dashboard Template",
 };
 
-export default function Company() {
+export default function User() {
   return (
     <div>
-      <PageBreadcrumb pageTitle="Empresas" pageSubTitle="Cadastros" />
+      <PageBreadcrumb pageTitle="Usuários" pageSubTitle="Cadastros" />
       <div className="flex justify-end mb-2">
-        <Link href="companies/create">
+        <Link href="stores/create">
           <Button type="submit" className="" size="sm">Adicionar</Button>
         </Link>
       </div>
-      <CompanyTable />
+      <StoreTable />
     </div>
   );
 }

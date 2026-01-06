@@ -67,12 +67,14 @@ export default function UserMetaCard() {
       setIsLoading(true);
       const {data} = await api.get(`/users/logged`, configApi());
       const result = data.result.data;
-
+      
       if(result.photo) {
         setUserLogger({
           name: result.name,
           email: result.email,
-          photo: result.photo
+          photo: result.photo,
+          nameCompany: result.nameCompany,
+          nameStore: result.nameStore
         });
       };
   

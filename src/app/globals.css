@@ -18,7 +18,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --erp-primary-color: red;
+  --erp-primary-color: #7127A7;
 
 
   --font-*: initial;

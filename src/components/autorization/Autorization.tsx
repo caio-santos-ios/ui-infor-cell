@@ -19,7 +19,7 @@ export const Autorization = () => {
 
         if(!token) {
             setUserLogger(ResetUserLogged);
-            if(!pathname.includes("/reset-password")) {
+            if(!["/reset-password", "/signup", "/new-code-confirm", "/confirm-account"].includes(pathname)) {
                 router.push("/");
                 removeLocalStorage();
                 setIsAdmin(false);
@@ -29,11 +29,15 @@ export const Autorization = () => {
             const name = localStorage.getItem("name");
             const email = localStorage.getItem("email");
             const photo = localStorage.getItem("photo");
+            const nameCompany = localStorage.getItem("nameCompany");
+            const nameStore = localStorage.getItem("nameStore");
 
             setUserLogger({
                 name: name ? name : "",
                 email: email ? email : "",
-                photo: photo ? photo : ""
+                photo: photo ? photo : "",
+                nameCompany: nameCompany ? nameCompany : "",
+                nameStore: nameStore ? nameStore : ""
             });
             
             setIsAdmin(admin == 'true');

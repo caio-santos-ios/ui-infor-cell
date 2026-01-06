@@ -14,6 +14,13 @@ export const configApi = (contentTypeJson: boolean = true) => {
 }
 
 export const resolveResponse = (response: any) => {
+  if(response["code"] == "ERR_NETWORK") {
+    toast.error("Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.", {
+      theme: 'colored'
+    });
+    return;
+  }
+
   if(response.status >= 200 && response.status < 300) {
     toast.success(response.message, {
       theme: 'colored'
@@ -22,7 +29,6 @@ export const resolveResponse = (response: any) => {
   };
 
   const result = response.response.data.result;
-  console.log(result)
 
   if(response.status >= 400 && response.status < 500) {
     if(response.status === 401) {
@@ -43,7 +49,7 @@ export const resolveResponse = (response: any) => {
     return;
   };
 
-  toast.error(result.message, {
+  toast.error("Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.", {
     theme: 'colored'
   });
 };
@@ -58,6 +64,8 @@ export const saveLocalStorage = (data: TDataLocal, hasToken: boolean = false) =>
   localStorage.setItem("admin", data.admin);
   localStorage.setItem("photo", data.photo);
   localStorage.setItem("logoCompany", data.logoCompany);
+  localStorage.setItem("nameCompany", data.nameCompany);
+  localStorage.setItem("nameStore", data.nameStore);
   localStorage.setItem("modules", JSON.stringify(data.modules));
 };
 
@@ -68,5 +76,7 @@ export const removeLocalStorage = () => {
   localStorage.removeItem("admin");
   localStorage.removeItem("photo");
   localStorage.removeItem("logoCompany");
+  localStorage.removeItem("nameCompany");
+  localStorage.removeItem("nameStore");
   localStorage.removeItem("modules");
 };

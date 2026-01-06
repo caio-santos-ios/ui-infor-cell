@@ -9,27 +9,28 @@ import { configApi, resolveResponse } from "@/service/config.service";
 import { paginationAtom } from "@/jotai/global/pagination.jotai";
 import { maskDate } from "@/utils/mask.util";
 import { permissionDelete, permissionUpdate } from "@/utils/permission.util";
-import { ResetCompany, TCompany } from "@/types/master-data/company/company.type";
 import { useRouter } from "next/navigation";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { IconEdit } from "@/components/iconEdit/IconEdit";
 import { IconDelete } from "@/components/iconDelete/IconDelete";
 import { Modal } from "@/components/ui/modal";
 import { useModal } from "@/hooks/useModal";
+import Button from "@/components/ui/button/Button";
 import { ModalDelete } from "@/components/modalDelete/ModalDelete";
+import { ResetStore, TStore } from "@/types/master-data/store/store.type";
 
 
-export default function CompanyTable() {
+export default function StoreTable() {
   const [_, setLoading] = useAtom(loadingAtom);
   const [pagination, setPagination] = useAtom(paginationAtom); 
   const { isOpen, openModal, closeModal } = useModal();
-  const [company, setCompany] = useState<TCompany>(ResetCompany);
+  const [company, setStore] = useState<TStore>(ResetStore);
   const router = useRouter();
 
   const getAll = async () => {
     try {
       setLoading(true);
-      const {data} = await api.get(`/companies?deleted=false&orderBy=createdAt&sort=desc&pageSize=10&pageNumber=${pagination.currentPage}`, configApi());
+      const {data} = await api.get(`/stores?deleted=false&orderBy=createdAt&sort=desc&pageSize=10&pageNumber=${pagination.currentPage}`, configApi());
       const result = data.result;
       
       setPagination({
@@ -49,7 +50,7 @@ export default function CompanyTable() {
   const destroy = async () => {
     try {
       setLoading(true);
-      await api.delete(`/companies/${company.id}`, configApi());
+      await api.delete(`/stores/${company.id}`, configApi());
       resolveResponse({status: 204, message: "Excluída com sucesso"});
       closeModal();
       await getAll();
@@ -61,10 +62,10 @@ export default function CompanyTable() {
   };
 
   const getObj = (obj: any, action: string) => {
-    setCompany(obj);
+    setStore(obj);
 
     if(action == "edit") {
-      router.push(`/master-data/companies/${obj.id}`);
+      router.push(`/master-data/stores/${obj.id}`);
     };
 
     if(action == "delete") {
@@ -94,7 +95,7 @@ export default function CompanyTable() {
               </TableHeader>
 
               <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
-                {pagination.data.map((x: TCompany) => (
+                {pagination.data.map((x: TStore) => (
                   <TableRow key={x.id}>
                     <TableCell className="px-5 py-4 sm:px-6 text-start">{x.corporateName}</TableCell>
                     <TableCell className="px-5 py-4 sm:px-6 text-start">{x.tradeName}</TableCell>
@@ -103,11 +104,11 @@ export default function CompanyTable() {
                     <TableCell className="px-5 py-4 sm:px-6 text-start">
                       <div className="flex gap-3">       
                         {
-                          permissionUpdate("A", "A1") &&
+                          permissionUpdate("A", "A2") &&
                           <IconEdit action="edit" obj={x} getObj={getObj}/>
                         }   
                         {
-                          permissionDelete("A", "A1") &&
+                          permissionDelete("A", "A2") &&
                           <IconDelete action="delete" obj={x} getObj={getObj}/>                                                   
                         }                                          
                     </div>
@@ -121,7 +122,7 @@ export default function CompanyTable() {
       </div>
       <Pagination currentPage={pagination.currentPage} totalCount={pagination.totalCount} totalData={pagination.data.length} totalPages={pagination.totalPages} onPageChange={() => {}} />
 
-      <ModalDelete confirm={destroy} isOpen={isOpen} closeModal={closeModal} title="Excluir Empresa" />          
+      <ModalDelete confirm={destroy} isOpen={isOpen} closeModal={closeModal} title="Excluir Loja" />          
     </>
     :
     // <NotData />

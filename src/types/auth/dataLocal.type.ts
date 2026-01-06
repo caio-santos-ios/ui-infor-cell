@@ -5,6 +5,8 @@ export type TDataLocal = {
     admin: string;
     photo: string;
     logoCompany: string;
+    nameCompany: string;
+    nameStore: string;
     modules: any[];
 }
 
@@ -15,5 +17,7 @@ export const ResetDataLocal: TDataLocal = {
     admin: "",
     photo: "",
     logoCompany: "",
+    nameCompany: "",
+    nameStore: "",
     modules: []
 } 

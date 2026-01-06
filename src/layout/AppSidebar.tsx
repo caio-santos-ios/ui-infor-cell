@@ -22,6 +22,7 @@ import SidebarWidget from "./SidebarWidget";
 import { useAtom } from "jotai";
 import { iconAtom } from "@/jotai/global/icons.jotai";
 import { syncAtom, userAdmin } from "@/jotai/auth/auth.jotai";
+import { CompanyLogo } from "@/components/logoCompany/LogoCompany";
 
 type NavItem = {
   name: string;
@@ -46,7 +47,7 @@ const navItems: NavItem[] = [
     subItems: [
       {name: "Empresas", path: "/master-data/companies", code: "A1", pro: false, authorized: false },
       {name: "Lojas", path: "/master-data/stores", code: "A2", pro: false, authorized: false },
-      {name: "Usuários", path: "/master-data/users", code: "A3", pro: false, authorized: false },
+      // {name: "Usuários", path: "/master-data/users", code: "A3", pro: false, authorized: false },
     ]
   }
 ];
@@ -182,13 +183,6 @@ const AppSidebar: React.FC = () => {
     }
   }, [sync]);
 
-  useEffect(() => {
-    const logo = localStorage.getItem("logoCompany");
-    if(logo) {
-      console.log(logo)
-    };
-  }, []);
-
   return (
     <aside className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-2 border-r border-gray-200 
       ${isExpanded || isMobileOpen ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"} ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
@@ -198,11 +192,10 @@ const AppSidebar: React.FC = () => {
         <Link href={`${isAdmin ? '/dashboard' : '/master-data/profile'}`} className="w-full flex justify-center">
           {isExpanded || isHovered || isMobileOpen ? (
             <div className="hidden lg:flex">
-              {/* <Logo width={100} height={100} /> */}
+              <CompanyLogo width={80} height={80} />
             </div>
           ) : (
-            <></>
-            // <Logo width={100} height={100} />
+            <CompanyLogo width={40} height={40} />
           )}
         </Link>
       </div>

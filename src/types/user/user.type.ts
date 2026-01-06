@@ -1,13 +1,17 @@
 export type TUserLogged = {
     photo: string;
     name: string;
+    nameCompany: string;
+    nameStore: string;
     email: string;
 }
 
 export const ResetUserLogged: TUserLogged = {
     photo: "",
     name: "",
-    email: ""
+    email: "",
+    nameCompany: "",
+    nameStore: ""
 }
 
 export type TUserProfile = {

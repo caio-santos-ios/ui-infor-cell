@@ -1,3 +1,5 @@
+import { ResetAddress, TAddress } from "../address/address";
+
 export type TCompany = {
     id?: string;
     document: string;
@@ -11,6 +13,8 @@ export type TCompany = {
     photo: string;
     website: string;
     createdAt: any;
+
+    address: TAddress;
 }
 
 export const ResetCompany: TCompany = {
@@ -25,5 +29,7 @@ export const ResetCompany: TCompany = {
     whatsapp: "",
     photo: "",
     website: "",
-    createdAt: ""
+    createdAt: "",
+
+    address: ResetAddress
 }
