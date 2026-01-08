@@ -15,7 +15,7 @@ export default async function StoreDetail({ params }: { params: Promise<{ id: st
 
   return (
     <div>
-      <PageBreadcrumb pageTitle="Lojas" pageSubTitle="Cadastros" />
+      <PageBreadcrumb pageIcon="MdStore" pageTitle="Lojas" pageSubTitle="Cadastros" />
       <div className="flex justify-end mb-2">
         <Link href="/master-data/stores">
           <Button type="submit" variant="outline" size="sm">Voltar</Button>
