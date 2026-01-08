@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default function User() {
   return (
     <div>
-      <PageBreadcrumb pageTitle="Usuários" pageSubTitle="Cadastros" />
+      <PageBreadcrumb pageIcon="MdPeople" pageTitle="Usuários" pageSubTitle="Cadastros" />
       <div className="flex justify-end mb-2">
         <Link href="stores/create">
           <Button type="submit" className="" size="sm">Adicionar</Button>
