@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default function Store() {
   return (
     <div>
-      <PageBreadcrumb pageTitle="Lojas" pageSubTitle="Cadastros" />
+      <PageBreadcrumb pageIcon="MdStore" pageTitle="Lojas" pageSubTitle="Cadastros" />
       <div className="flex justify-end mb-2">
         <Link href="stores/create">
           <Button type="submit" className="" size="sm">Adicionar</Button>
