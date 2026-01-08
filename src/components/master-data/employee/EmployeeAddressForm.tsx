@@ -8,7 +8,6 @@ import { maskCNPJ, maskPhone } from "@/utils/mask.util";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import "./style.css";
 import DropzoneComponent from "@/components/form/form-elements/DropZone";
 import { CompanyLogo } from "@/components/logoCompany/LogoCompany";
 import { useRouter } from "next/navigation";
@@ -22,7 +21,7 @@ type TProp = {
   parentId?: string;
 };
 
-export default function CompanyAddressForm({address, parentId}: TProp) {
+export default function EmployeeAddressForm({address, parentId}: TProp) {
   const [_, setIsLoading] = useAtom(loadingAtom);
   const [logoCompany, setLogoCompany] = useState<string>("");
   const router = useRouter();
@@ -132,7 +131,7 @@ export default function CompanyAddressForm({address, parentId}: TProp) {
         </div>
       </ComponentCard>
 
-      <Button onClick={() => save({...getValues()})} type="submit" className="w-full xl:w-20 mt-2" size="sm">Salvar</Button>
+      <Button onClick={() => save({...getValues()})} type="submit" className="w-full xl:max-w-20 mt-2" size="sm">Salvar</Button>
     </>
   );
 }

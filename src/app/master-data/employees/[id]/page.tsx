@@ -1,27 +1,28 @@
-import CompanyForm from "@/components/master-data/company/CompanyForm";
+import EmployeeForm from "@/components/master-data/employee/EmployeeForm";
+import StoreForm from "@/components/master-data/store/StoreForm";
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
 import Button from "@/components/ui/button/Button";
 import { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Telemovvi | Empresas",
+  title: "Telemovvi | Lojas",
   description:
     "This is Next.js Form Elements page for TailAdmin - Next.js Tailwind CSS Admin Dashboard Template",
 };
 
-export default async function CompanyDetail({ params }: { params: Promise<{ id: string }> }) {
+export default async function StoreDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
   return (
     <div>
-      <PageBreadcrumb pageTitle="Empresas" pageSubTitle="Cadastros" />
+      <PageBreadcrumb pageIcon="HiOutlineUserGroup" pageTitle="Profissionais" pageSubTitle="Cadastros" />
       <div className="flex justify-end mb-2">
-        <Link href="/master-data/companies">
+        <Link href="/master-data/stores">
           <Button type="submit" variant="outline" size="sm">Voltar</Button>
         </Link>
       </div>
-      <CompanyForm id={id} />
+      <EmployeeForm id={id} />
     </div>
   );
 }

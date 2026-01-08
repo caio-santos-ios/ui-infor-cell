@@ -156,21 +156,21 @@ export default function UserMetaCard() {
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                   <div className="col-span-2 lg:col-span-1">
                     <Label title="Nome completo" />
-                    <input placeholder="Seu nome" {...register("name")} type="text" className="input-erp input-erp-default"/>
+                    <input placeholder="Seu nome" {...register("name")} type="text" className="input-erp-primary input-erp-default"/>
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label title="E-mail" />
-                    <input placeholder="Seu e-mail" {...register("email")} type="email" className="input-erp input-erp-default"/>
+                    <input placeholder="Seu e-mail" {...register("email")} type="email" className="input-erp-primary input-erp-default"/>
                   </div>
                   <div className="col-span-2 lg:col-span-1">
                     <Label title="Telefone"/>
-                    <input placeholder="Seu telefone" onInput={(e: React.ChangeEvent<HTMLInputElement>) => maskPhone(e)} {...register("phone")} type="text" className="input-erp input-erp-default"/>
+                    <input placeholder="Seu telefone" onInput={(e: React.ChangeEvent<HTMLInputElement>) => maskPhone(e)} {...register("phone")} type="text" className="input-erp-primary input-erp-default"/>
                   </div>
                   
                   <div className="col-span-2 lg:col-span-1">
                     <Label title="WhatsApp (Opcional)" required={false}/>
-                    <input placeholder="Seu whatsapp" onInput={(e: React.ChangeEvent<HTMLInputElement>) => maskPhone(e)} {...register("whatsapp")} type="text" className="input-erp input-erp-default"/>
+                    <input placeholder="Seu whatsapp" onInput={(e: React.ChangeEvent<HTMLInputElement>) => maskPhone(e)} {...register("whatsapp")} type="text" className="input-erp-primary input-erp-default"/>
                   </div>
                   <div className="col-span-2">
                     <DropzoneComponent sendFile={uploadFile} title="Foto de Perfil" />

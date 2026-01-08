@@ -42,7 +42,7 @@ export default function NewCodeConfirmForm() {
             <div className="space-y-5">
               <div>
                 <Label title="E-mail"/>
-                <input placeholder="Seu e-mail" {...register("email")} type="text" className="input-erp input-erp-default"/>
+                <input placeholder="Seu e-mail" {...register("email")} type="text" className="input-erp-primary input-erp-default"/>
               </div>
 
               <div>

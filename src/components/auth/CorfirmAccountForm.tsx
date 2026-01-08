@@ -43,7 +43,7 @@ export default function CorfirmAccountForm() {
             <div className="space-y-5">
               <div>
                 <Label title="Código de confirmação"/>
-                <input placeholder="Seu código de confirmação" {...register("code")} type="text" className="input-erp input-erp-default"/>
+                <input placeholder="Seu código de confirmação" {...register("code")} type="text" className="input-erp-primary input-erp-default"/>
               </div>
 
               <div>

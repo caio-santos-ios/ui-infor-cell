@@ -54,33 +54,33 @@ export default function SignUpForm() {
             <div className="space-y-5">
               <div>
                 <Label title="Nome da empresa"/>
-                <input placeholder="Nome da sua empresa" {...register("companyName")} type="text" className="input-erp input-erp-default"/>
+                <input placeholder="Nome da sua empresa" {...register("companyName")} type="text" className="input-erp-primary input-erp-default"/>
               </div>
 
               <div>
                 <Label title="Nome completo"/>
-                <input placeholder="Seu nome completo" {...register("name")} type="text" className="input-erp input-erp-default"/>
+                <input placeholder="Seu nome completo" {...register("name")} type="text" className="input-erp-primary input-erp-default"/>
               </div>
 
               <div>
                 <Label title="E-mail"/>
-                <input placeholder="Seu e-mail" {...register("email")} type="email" className="input-erp input-erp-default"/>
+                <input placeholder="Seu e-mail" {...register("email")} type="email" className="input-erp-primary input-erp-default"/>
               </div>
               
               <div>
                 <Label title="Telefone"/>
-                <input placeholder="Seu telefone" onInput={(e: React.ChangeEvent<HTMLInputElement>) => maskPhone(e)} {...register("phone")} type="text" className="input-erp input-erp-default"/>
+                <input placeholder="Seu telefone" onInput={(e: React.ChangeEvent<HTMLInputElement>) => maskPhone(e)} {...register("phone")} type="text" className="input-erp-primary input-erp-default"/>
               </div>
               
               <div>
                 <Label title="WhatsApp (Opcional)" required={false}/>
-                <input placeholder="Seu whatsapp" onInput={(e: React.ChangeEvent<HTMLInputElement>) => maskPhone(e)} {...register("whatsapp")} type="text" className="input-erp input-erp-default"/>
+                <input placeholder="Seu whatsapp" onInput={(e: React.ChangeEvent<HTMLInputElement>) => maskPhone(e)} {...register("whatsapp")} type="text" className="input-erp-primary input-erp-default"/>
               </div>
 
               <div>
                 <Label title="Senha"/>
                 <div className="relative">
-                  <input placeholder="Sua senha" {...register("password")} type={showPassword ? "text" : "password"} className="input-erp input-erp-default"/>
+                  <input placeholder="Sua senha" {...register("password")} type={showPassword ? "text" : "password"} className="input-erp-primary input-erp-default"/>
                   <span onClick={() => setShowPassword(!showPassword)} className="absolute z-1 -translate-y-1/2 cursor-pointer right-4 top-1/2">
                     {showPassword ? (
                       <EyeIcon className="fill-gray-500 dark:fill-gray-400" />

@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { resolveResponse, saveLocalStorage } from "@/service/config.service";
 import { loadingAtom } from "@/jotai/global/loading.jotai";
 import { useAtom } from "jotai";
+import { Logo } from "../logo/Logo";
 
 export default function SignInForm() {
   const [_, setIsLoading] = useAtom(loadingAtom);
@@ -43,17 +44,20 @@ export default function SignInForm() {
   return (
     <div className="flex flex-col flex-1 lg:w-1/2 w-full max-w-[90dvw]">
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
+        <div className="flex justify-center mb-6">
+          <Logo width={250} height={100}/>
+        </div>
         <div>
           <form onSubmit={handleSubmit(login)}>
             <div className="space-y-6">
               <div>
                 <Label title="E-mail"/>
-                <input placeholder="Seu e-mail" {...register("email")} type="email" className="input-erp input-erp-default"/>
+                <input placeholder="Seu e-mail" {...register("email")} type="email" className="input-erp-primary input-erp-default"/>
               </div>
               <div>
                 <Label title="Senha"/>
                 <div className="relative">
-                  <input placeholder="Sua senha" {...register("password")} type={showPassword ? "text" : "password"} className="input-erp input-erp-default"/>
+                  <input placeholder="Sua senha" {...register("password")} type={showPassword ? "text" : "password"} className="input-erp-primary input-erp-default"/>
                   <span onClick={() => setShowPassword(!showPassword)} className="absolute z-1 -translate-y-1/2 cursor-pointer right-4 top-1/2">
                     {showPassword ? (
                       <EyeIcon className="fill-gray-500 dark:fill-gray-400" />
@@ -87,7 +91,7 @@ export default function SignInForm() {
           <div className="mt-5">
             <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
               Não tem uma conta? {""}
-              <Link href="/signup" className="text-brand-500 hover:text-brand-600 dark:text-brand-400">
+              <Link href="/signup" className="text-erp-primary dark:text-erp-primary">
                 Cadastre-se
               </Link>
             </p>

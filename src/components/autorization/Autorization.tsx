@@ -19,7 +19,8 @@ export const Autorization = () => {
 
         if(!token) {
             setUserLogger(ResetUserLogged);
-            if(!["/reset-password", "/signup", "/new-code-confirm", "/confirm-account"].includes(pathname)) {
+            console.log(pathname.split("/")[1])
+            if(!["reset-password", "signup", "new-code-confirm", "confirm-account"].includes(pathname.split("/")[1])) {
                 router.push("/");
                 removeLocalStorage();
                 setIsAdmin(false);

@@ -103,31 +103,31 @@ export default function StoreAddressForm({address, parentId}: TProp) {
         <div className="grid grid-cols-6 gap-2 container-form">
           <div className={`flex flex-col col-span-6 lg:col-span-1 mb-2`}>
             <Label title="CEP" />
-            <input placeholder="Digite" onInput={(e: React.ChangeEvent<HTMLInputElement>) => getAddressByZipCode(e, '')} {...register("zipCode")} type="text" className="input-erp input-erp-default"/>
+            <input placeholder="Digite" onInput={(e: React.ChangeEvent<HTMLInputElement>) => getAddressByZipCode(e, '')} {...register("zipCode")} type="text" className="input-erp-primary input-erp-default"/>
           </div>
           <div className={`flex flex-col col-span-6 lg:col-span-1 mb-2`}>
             <Label title="Número" />
-            <input {...register("number")} type="text" className={`input-erp input-erp-default`} placeholder="Digite"/>
+            <input {...register("number")} type="text" className={`input-erp-primary input-erp-default`} placeholder="Digite"/>
           </div>
           <div className={`flex flex-col col-span-6 lg:col-span-4 mb-2`}>
             <Label title="Rua" />
-            <input {...register("street")} type="text" className={`input-erp input-erp-default`} placeholder="Digite"/>
+            <input {...register("street")} type="text" className={`input-erp-primary input-erp-default`} placeholder="Digite"/>
           </div>
           <div className={`flex flex-col col-span-6 lg:col-span-2 mb-2`}>
             <Label title="Bairro" />
-            <input {...register("neighborhood")} type="text" className={`input-erp input-erp-default`} placeholder="Digite"/>
+            <input {...register("neighborhood")} type="text" className={`input-erp-primary input-erp-default`} placeholder="Digite"/>
           </div>
           <div className={`flex flex-col col-span-6 lg:col-span-2 mb-2`}>
             <Label title="Cidade" />
-            <input {...register("city")} type="text" className={`input-erp input-erp-default`} placeholder="Digite"/>
+            <input {...register("city")} type="text" className={`input-erp-primary input-erp-default`} placeholder="Digite"/>
           </div>
           <div className={`flex flex-col col-span-6 lg:col-span-2 mb-2`}>
             <Label title="Estado" />
-            <input {...register("state")} type="text" className={`input-erp input-erp-default`} placeholder="Digite"/>
+            <input {...register("state")} type="text" className={`input-erp-primary input-erp-default`} placeholder="Digite"/>
           </div>
           <div className={`flex flex-col col-span-6 mb-2`}>
             <Label title="Complemento" required={false} />
-            <input {...register("complement")} type="text" className={`input-erp input-erp-default`} placeholder="Digite"/>
+            <input {...register("complement")} type="text" className={`input-erp-primary input-erp-default`} placeholder="Digite"/>
           </div>          
         </div>
       </ComponentCard>

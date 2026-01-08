@@ -62,7 +62,7 @@ export default function ResetPasswordForm({code}: TProps) {
                 !code &&
                 <div>
                   <Label title="E-mail"/>
-                  <input placeholder="Seu e-mail" {...register("email")} type="email" className="input-erp input-erp-default"/>
+                  <input placeholder="Seu e-mail" {...register("email")} type="email" className="input-erp-primary input-erp-default"/>
                 </div>
               }
               
@@ -72,7 +72,7 @@ export default function ResetPasswordForm({code}: TProps) {
                   <div>
                     <Label title="Nova senha"/>
                     <div className="relative">
-                      <input placeholder="Sua nova senha" {...register("password")} type={showPassword ? "text" : "password"} className="input-erp input-erp-default"/>
+                      <input placeholder="Sua nova senha" {...register("password")} type={showPassword ? "text" : "password"} className="input-erp-primary input-erp-default"/>
                       <span onClick={() => setShowPassword(!showPassword)} className="absolute z-1 -translate-y-1/2 cursor-pointer right-4 top-1/2">
                         {showPassword ? (
                           <EyeIcon className="fill-gray-500 dark:fill-gray-400" />
@@ -85,7 +85,7 @@ export default function ResetPasswordForm({code}: TProps) {
                   <div>
                     <Label title="Confirmar senha"/>
                     <div className="relative">
-                      <input placeholder="Sua confirmação da senha" {...register("newPassword")} type={showNewPassword ? "text" : "password"} className="input-erp input-erp-default"/>
+                      <input placeholder="Sua confirmação da senha" {...register("newPassword")} type={showNewPassword ? "text" : "password"} className="input-erp-primary input-erp-default"/>
                       <span onClick={() => setNewShowPassword(!showNewPassword)} className="absolute z-1 -translate-y-1/2 cursor-pointer right-4 top-1/2">
                         {showNewPassword ? (
                           <EyeIcon className="fill-gray-500 dark:fill-gray-400" />

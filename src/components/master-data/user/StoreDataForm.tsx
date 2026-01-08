@@ -87,47 +87,47 @@ export default function StoreDataForm({id}: TProp) {
         <div className="grid grid-cols-6 gap-2 container-form">
           <div className="col-span-6 xl:col-span-2">
             <Label title="Razão social"/>
-            <input placeholder="Razão social" {...register("corporateName")} type="text" className="input-erp input-erp-default"/>
+            <input placeholder="Razão social" {...register("corporateName")} type="text" className="input-erp-primary input-erp-default"/>
           </div>
 
           <div className="col-span-6 xl:col-span-2">
             <Label title="Nome fantasia"/>
-            <input placeholder="Nome fantasia" {...register("tradeName")} type="text" className="input-erp input-erp-default"/>
+            <input placeholder="Nome fantasia" {...register("tradeName")} type="text" className="input-erp-primary input-erp-default"/>
           </div>
           
           <div className="col-span-6 xl:col-span-2">
             <Label title="CNPJ"/>
-            <input placeholder="CNPJ" onInput={(e: React.ChangeEvent<HTMLInputElement>) => maskCNPJ(e)} {...register("document")} type="text" className="input-erp input-erp-default"/>
+            <input placeholder="CNPJ" onInput={(e: React.ChangeEvent<HTMLInputElement>) => maskCNPJ(e)} {...register("document")} type="text" className="input-erp-primary input-erp-default"/>
           </div>
 
           <div className="col-span-6 xl:col-span-2">
             <Label title="E-mail"/>
-            <input placeholder="E-mail" {...register("email")} type="email" className="input-erp input-erp-default"/>
+            <input placeholder="E-mail" {...register("email")} type="email" className="input-erp-primary input-erp-default"/>
           </div>
           
           <div className="col-span-6 xl:col-span-2">
             <Label title="Telefone"/>
-            <input placeholder="Telefone" onInput={(e: React.ChangeEvent<HTMLInputElement>) => maskPhone(e)} {...register("phone")} type="text" className="input-erp input-erp-default"/>
+            <input placeholder="Telefone" onInput={(e: React.ChangeEvent<HTMLInputElement>) => maskPhone(e)} {...register("phone")} type="text" className="input-erp-primary input-erp-default"/>
           </div>
           
           <div className="col-span-6 xl:col-span-2">
             <Label title="WhatsApp (Opcional)" required={false}/>
-            <input placeholder="Whatsapp" onInput={(e: React.ChangeEvent<HTMLInputElement>) => maskPhone(e)} {...register("whatsapp")} type="text" className="input-erp input-erp-default"/>
+            <input placeholder="Whatsapp" onInput={(e: React.ChangeEvent<HTMLInputElement>) => maskPhone(e)} {...register("whatsapp")} type="text" className="input-erp-primary input-erp-default"/>
           </div>
           
           <div className="col-span-6 xl:col-span-2">
             <Label title="Inscrição estadual"/>
-            <input placeholder="Inscrição estadual" {...register("stateRegistration")} type="text" className="input-erp input-erp-default"/>
+            <input placeholder="Inscrição estadual" {...register("stateRegistration")} type="text" className="input-erp-primary input-erp-default"/>
           </div>           
 
           <div className="col-span-6 xl:col-span-2">
             <Label title="Inscrição municipal"/>
-            <input placeholder="Inscrição municipal" {...register("municipalRegistration")} type="text" className="input-erp input-erp-default"/>
+            <input placeholder="Inscrição municipal" {...register("municipalRegistration")} type="text" className="input-erp-primary input-erp-default"/>
           </div>           
           
           <div className="col-span-6 xl:col-span-2">
             <Label title="Site" required={false}/>
-            <input placeholder="Site" {...register("website")} type="text" className="input-erp input-erp-default"/>
+            <input placeholder="Site" {...register("website")} type="text" className="input-erp-primary input-erp-default"/>
           </div>          
         </div>
       </ComponentCard>
