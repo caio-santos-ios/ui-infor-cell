@@ -6,10 +6,12 @@ import { useRouter, usePathname } from "next/navigation";
 import { userAdmin, userLoggerAtom } from "@/jotai/auth/auth.jotai";
 import { ResetUserLogged } from "@/types/user/user.type";
 import { removeLocalStorage } from "@/service/config.service";
+import { loadingAtom } from "@/jotai/global/loading.jotai";
 
 export const Autorization = () => {
-    const [_, setUserLogger] = useAtom(userLoggerAtom);
-    const [__, setIsAdmin] = useAtom(userAdmin);
+    const [_, setIsLoading] = useAtom(loadingAtom);
+    const [__, setUserLogger] = useAtom(userLoggerAtom);
+    const [___, setIsAdmin] = useAtom(userAdmin);
     const router = useRouter();
     const pathname = usePathname();
 
@@ -19,7 +21,8 @@ export const Autorization = () => {
 
         if(!token) {
             setUserLogger(ResetUserLogged);
-            console.log(pathname.split("/")[1])
+            setIsLoading(false);
+
             if(!["reset-password", "signup", "new-code-confirm", "confirm-account"].includes(pathname.split("/")[1])) {
                 router.push("/");
                 removeLocalStorage();
@@ -32,13 +35,15 @@ export const Autorization = () => {
             const photo = localStorage.getItem("photo");
             const nameCompany = localStorage.getItem("nameCompany");
             const nameStore = localStorage.getItem("nameStore");
+            const typeUser = localStorage.getItem("typeUser");
 
             setUserLogger({
                 name: name ? name : "",
                 email: email ? email : "",
                 photo: photo ? photo : "",
                 nameCompany: nameCompany ? nameCompany : "",
-                nameStore: nameStore ? nameStore : ""
+                nameStore: nameStore ? nameStore : "",
+                typeUser: typeUser ? typeUser : ""
             });
             
             setIsAdmin(admin == 'true');

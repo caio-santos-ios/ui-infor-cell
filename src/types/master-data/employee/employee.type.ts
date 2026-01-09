@@ -1,3 +1,25 @@
+import { ResetAddress, TAddress } from "../address/address";
+
+export type TEmployeeCalendar = {
+    monday : string[];
+    tuesday : string[];
+    wednesday : string[];
+    thursday : string[];
+    friday : string[];
+    saturday : string[];
+    sunday : string[];
+}
+
+export const ResetEmployeeCalendar: TEmployeeCalendar = {
+    monday : [],
+    tuesday : [],
+    wednesday : [],
+    thursday : [],
+    friday : [],
+    saturday : [],
+    sunday : []
+}
+
 export type TEmployee = {
     id?: string;
     cpf: string;
@@ -7,8 +29,12 @@ export type TEmployee = {
     phone: string;
     whatsapp: string;
     photo: string;
-    age: number | null;
+    type: string;
+    dateOfBirth: any | null;
     createdAt: any;
+    address: TAddress;
+    modules: TModule[];
+    calendar: TEmployeeCalendar;
 }
 
 export const ResetEmployee: TEmployee = {
@@ -20,6 +46,36 @@ export const ResetEmployee: TEmployee = {
     phone: "",
     whatsapp: "",
     photo: "",
-    age: null,
-    createdAt: ""
+    type: "technical",
+    dateOfBirth: null,
+    createdAt: "",
+    address: ResetAddress,
+    modules: [],
+    calendar: ResetEmployeeCalendar
+}
+
+export type TRoutine = {
+    module: string;
+    code: string;
+    description: string;
+    permissions: {
+        create: boolean;
+        update: boolean;
+        read: boolean;
+        delete: boolean;
+    }
+}
+
+export type TModule = {
+    id: string;
+    code: string;
+    description: string;
+    routines: TRoutine[]
+}
+
+export const ResetModule: TModule = {
+    id: "",
+    code: "",
+    description: "",
+    routines: []
 }

@@ -21,17 +21,17 @@ interface TableRowProps {
 }
 
 interface TableCellProps {
-  children: ReactNode; // Cell content
-  isHeader?: boolean; // If true, renders as <th>, otherwise <td>
-  className?: string; // Optional className for styling
+  children: ReactNode; 
+  isHeader?: boolean; 
+  className?: string; 
 }
 
 const Table: React.FC<TableProps> = ({ children, className }) => {
-  return <table className={`min-w-full  ${className}`}>{children}</table>;
+  return <table className={`min-w-full tele-table ${className}`}>{children}</table>;
 };
 
 const TableHeader: React.FC<TableHeaderProps> = ({ children, className }) => {
-  return <thead className={className}>{children}</thead>;
+  return <thead className={`tele-table-thead ${className}`}>{children}</thead>;
 };
 
 const TableBody: React.FC<TableBodyProps> = ({ children, className }) => {

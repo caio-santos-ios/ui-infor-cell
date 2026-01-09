@@ -781,10 +781,29 @@ span.flatpickr-weekday,
   background-color: var(--erp-primary-color);
 }
 
-.container-form {
-  max-height: calc(100dvh - 28rem);
+.container-card {
+  max-height: calc(100dvh - 22rem);
+  /* min-height: calc(100dvh - 22rem); */
   overflow-y: auto;
   margin-bottom: .5rem;
+}
+
+.container-form {
+  max-height: calc(100dvh - 26rem);
+  /* min-height: calc(100dvh - 25.7rem); */
+  overflow-y: auto;
+  margin-bottom: .5rem;
+}
+
+.container-form-not-scroll {
+  max-height: calc(100dvh - 30rem);
+  /* overflow-y: hidden;
+  margin-bottom: .5rem; */
+}
+
+.erp-container-table {
+  max-height: calc(100dvh - 18rem);
+  overflow-y: auto;
 }
 
 .text-erp-primary {
@@ -793,4 +812,42 @@ span.flatpickr-weekday,
 
 .input-erp-primary {
   @apply h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 focus:border-(--erp-primary-color) dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-(--erp-primary-color)
+}
+
+/* TABLE */
+.tele-container-table {
+  max-height: calc(100dvh - (var(--height-header) +  7rem));
+  overflow-y: auto;
+  border-radius: 0.75rem 0.75rem 0 0;
+}
+
+.tele-table {
+  position: relative;
+  width: 100%;
+  border-radius: 0.75rem;
+}
+
+.tele-table-thead {
+  /* position: sticky;
+  top: 0;
+  z-index: 1; */
+}
+
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--erp-primary-color);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--erp-primary-color);
 }

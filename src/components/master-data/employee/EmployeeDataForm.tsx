@@ -6,7 +6,7 @@ import Button from "@/components/ui/button/Button";
 import { loadingAtom } from "@/jotai/global/loading.jotai";
 import { api } from "@/service/api.service";
 import { configApi, resolveResponse } from "@/service/config.service";
-import { maskCNPJ, maskCPF, maskPhone } from "@/utils/mask.util";
+import { maskCPF, maskPhone } from "@/utils/mask.util";
 import { useAtom } from "jotai";
 import { useEffect } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -36,9 +36,10 @@ export default function EmployeeDataForm({id}: TProp) {
   const create: SubmitHandler<TEmployee> = async (body: TEmployee) => {
     try {
       setIsLoading(true);
-      const {data} = await api.post(`/stores`, body, configApi());
-      resolveResponse({status: 201, message: data.result.message});
-      router.push(`/master-data/stores/${data.result.data.id}`)
+      const {data} = await api.post(`/employees`, body, configApi());
+      const result = data.result;
+      resolveResponse({status: 201, message: result.message});
+      router.push(`/master-data/employees/${result.data.id}`)
     } catch (error) {
       resolveResponse(error);
     } finally {
@@ -49,8 +50,9 @@ export default function EmployeeDataForm({id}: TProp) {
   const update: SubmitHandler<TEmployee> = async (body: TEmployee) => {
     try {
       setIsLoading(true);
-      const {data} = await api.put(`/stores`, body, configApi());
-      resolveResponse({status: 200, message: data.result.message});
+      const {data} = await api.put(`/employees`, body, configApi());
+      const result = data.result;
+      resolveResponse({status: 200, message: result.message});
     } catch (error) {
       resolveResponse(error);
     } finally {
@@ -61,9 +63,8 @@ export default function EmployeeDataForm({id}: TProp) {
   const getById = async (id: string) => {
     try {
       setIsLoading(true);
-      const {data} = await api.get(`/stores/${id}`, configApi());
+      const {data} = await api.get(`/employees/${id}`, configApi());
       const result = data.result.data;
-      console.log(result)
       reset(result);
     } catch (error) {
       resolveResponse(error);
@@ -80,7 +81,7 @@ export default function EmployeeDataForm({id}: TProp) {
 
   return (
     <>
-      <ComponentCard title="Dados Gerais">
+      <ComponentCard title="Dados Gerais" hasHeader={false}>
         <div className="grid grid-cols-6 gap-2 container-form">
           <div className="col-span-6 xl:col-span-2">
             <Label title="Nome"/>
@@ -109,20 +110,21 @@ export default function EmployeeDataForm({id}: TProp) {
           </div>
           
           <div className="col-span-6 xl:col-span-2">
-            <Label title="WhatsApp (Opcional)" required={false}/>
+            <Label title="WhatsApp" required={false}/>
             <input placeholder="Whatsapp" onInput={(e: React.ChangeEvent<HTMLInputElement>) => maskPhone(e)} {...register("whatsapp")} type="text" className="input-erp-primary input-erp-default"/>
           </div>
           
           <div className="col-span-6 xl:col-span-2">
             <Label title="Tipo"/>
-            <select className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:text-white/90 dark:bg-dark-900">
+            <select {...register("type")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
               <option value="technical" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Técnico</option>
               <option value="seller" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Vendedor</option>
             </select>
-          </div>                
-          <div className="col-span-6 xl:col-span-2">
-            <Label title="Idade" required={false}/>
-            <input placeholder="Idade" onInput={(e: React.ChangeEvent<HTMLInputElement>) => maskPhone(e)} {...register("whatsapp")} type="text" className="input-erp-primary input-erp-default"/>
+          </div>  
+
+          <div className="col-span-6 xl:col-span-1">
+            <Label title="Data de Nascimento" required={false}/>
+            <input placeholder="Whatsapp" {...register("dateOfBirth")} type="date" className="input-erp-primary input-erp-default"/>
           </div>
         </div>
       </ComponentCard>

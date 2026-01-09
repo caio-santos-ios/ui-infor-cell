@@ -9,7 +9,7 @@ import { loadingAtom } from "@/jotai/global/loading.jotai";
 import { api } from "@/service/api.service";
 import { configApi, resolveResponse } from "@/service/config.service";
 import { useForm } from "react-hook-form";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ResetUserProfile, TUserProfile } from "@/types/master-data/user/user.type";
 import Label from "../form/Label";
 import axios from "axios";
@@ -60,7 +60,10 @@ export default function UserAddressCard() {
   const getUser = async () => {
     try {
       setIsLoading(true);
-      const {data} = await api.get(`/users/logged`, configApi());
+      const typeUser = localStorage.getItem("typeUser");
+      const uri = typeUser ? typeUser : "";
+
+      const {data} = await api.get(`/${['technical', 'seller'].includes(uri) ? 'employees' : 'users'}/logged`, configApi());
       const result = data.result.data;
 
       reset({

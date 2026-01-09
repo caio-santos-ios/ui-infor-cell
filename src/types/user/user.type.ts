@@ -4,6 +4,7 @@ export type TUserLogged = {
     nameCompany: string;
     nameStore: string;
     email: string;
+    typeUser: string;
 }
 
 export const ResetUserLogged: TUserLogged = {
@@ -11,7 +12,8 @@ export const ResetUserLogged: TUserLogged = {
     name: "",
     email: "",
     nameCompany: "",
-    nameStore: ""
+    nameStore: "",
+    typeUser: ""
 }
 
 export type TUserProfile = {

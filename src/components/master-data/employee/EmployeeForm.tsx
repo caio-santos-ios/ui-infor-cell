@@ -7,14 +7,11 @@ import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import StoreAddressForm from "./EmployeeAddressForm";
-import { ResetStore, TStore } from "@/types/master-data/store/store.type";
-import StoreDataForm from "./EmployeeDataForm";
-import { Tab } from "@/components/ui/tab/Tab";
-import { TabCard } from "@/components/ui/tab/TabCard";
 import EmployeeDataForm from "./EmployeeDataForm";
 import EmployeeAddressForm from "./EmployeeAddressForm";
-// import {Tabs, Tab, Card, CardBody} from "@heroui/react";
+import EmployeeModulesForm from "./EmployeeModulesForm";
+import { ResetEmployee, TEmployee } from "@/types/master-data/employee/employee.type";
+import EmployeeHourForm from "./EmployeeHourForm";
 
 type TProp = {
   id?: string;
@@ -22,25 +19,25 @@ type TProp = {
 
 export default function EmployeeForm({id}: TProp) {
   const [_, setIsLoading] = useAtom(loadingAtom);
-  const [logoStore, setLogoStore] = useState<any>("");
-  const [tabs] = useState<any[]>([
+  const [tabs] = useState<{key: string; title: string;}[]>([
     {key: 'data', title: 'Dados Gerais'},
     {key: 'address', title: 'Endereço'},
+    {key: 'modules', title: 'Módulos'},
+    {key: 'hours', title: 'Horários'},
   ]);
   const [currentTab, setCurrentTab] = useState<any>({key: 'data', title: 'Dados Gerais'});
   const router = useRouter();
 
-  const { reset, watch } = useForm<TStore>({
-    defaultValues: ResetStore
+  const { reset, watch } = useForm<TEmployee>({
+    defaultValues: ResetEmployee
   });
 
   const getById = async (id: string) => {
     try {
       setIsLoading(true);
-      const {data} = await api.get(`/stores/${id}`, configApi());
+      const {data} = await api.get(`/employees/${id}`, configApi());
       const result = data.result.data;
       reset(result);
-      setLogoStore(result.photo)
     } catch (error) {
       resolveResponse(error);
     } finally {
@@ -67,6 +64,8 @@ export default function EmployeeForm({id}: TProp) {
       <div className="mb-2">
         {currentTab.key == "data" && <EmployeeDataForm id={id} />}
         {currentTab.key == "address" && <EmployeeAddressForm parentId={id} address={watch("address")} />}
+        {currentTab.key == "modules" && <EmployeeModulesForm id={id} modules={watch("modules")}/>}
+        {currentTab.key == "hours" && <EmployeeHourForm id={id} calendar={watch("calendar")}/>}
       </div>     
     </>
   );

@@ -11,7 +11,7 @@ import DropzoneComponent from "../form/form-elements/DropZone";
 import { loadingAtom } from "@/jotai/global/loading.jotai";
 import { api, uriBase } from "@/service/api.service";
 import { configApi, resolveResponse } from "@/service/config.service";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ResetUserProfile, TUserProfile } from "@/types/master-data/user/user.type";
 
 export default function UserMetaCard() {
@@ -65,7 +65,10 @@ export default function UserMetaCard() {
   const getUser = async () => {
     try {
       setIsLoading(true);
-      const {data} = await api.get(`/users/logged`, configApi());
+      const typeUser = localStorage.getItem("typeUser");
+      const uri = typeUser ? typeUser : "";
+
+      const {data} = await api.get(`/${['technical', 'seller'].includes(uri) ? 'employees' : 'users'}/logged`, configApi());
       const result = data.result.data;
       
       if(result.photo) {
@@ -74,7 +77,8 @@ export default function UserMetaCard() {
           email: result.email,
           photo: result.photo,
           nameCompany: result.nameCompany,
-          nameStore: result.nameStore
+          nameStore: result.nameStore,
+          typeUser: result.typeUser
         });
       };
   
@@ -108,7 +112,7 @@ export default function UserMetaCard() {
                 userLogger.photo ?
                 <img className="w-full h-full object-cover rounded-full" src={`${uriBase}/${userLogger.photo}`} alt="foto do usuário" />
                 :
-                <p className="font-bold text-3xl">{normalizeName(userLogger.name)}</p>
+                <p className="font-bold text-6xl text-gray-800 dark:text-white/90">{normalizeName(userLogger.name)}</p>
               }
             </div>
             <div className="order-3 xl:order-2">

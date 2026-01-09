@@ -27,14 +27,14 @@ export const ModalDelete = ({isOpen, closeModal, confirm, title}: TProp) => {
                             <div className="grid grid-cols-1 gap-x-6 gap-y-5">
                                 <div className="h-full flex col-span-1 justify-center items-center flex-col">
                                     <GoAlert className="text-red-600" size={80} />
-                                    <h1 className="font-semibold text-lg">Deseja exluir esse registro?</h1>
+                                    <h1 className="font-semibold text-lg text-gray-800 dark:text-white/90">Deseja exluir esse registro?</h1>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
                         <Button size="sm" variant="outline" onClick={closeModal}>Cancelar</Button>
-                        <Button onClick={confirm} size="sm">Confirmar</Button>
+                        <Button size="sm" variant="primary" onClick={confirm}>Confirmar</Button>
                     </div>
                 </form>
             </div>

@@ -21,15 +21,7 @@ import { useAtom } from "jotai";
 import { iconAtom } from "@/jotai/global/icons.jotai";
 import { syncAtom, userAdmin } from "@/jotai/auth/auth.jotai";
 import { CompanyLogo } from "@/components/logoCompany/LogoCompany";
-
-type NavItem = {
-  name: string;
-  code: string;
-  icon: string;
-  path?: string;
-  authorized: boolean;
-  subItems?: { name: string; path: string; pro?: boolean; new?: boolean, code: string, authorized: boolean }[];
-};
+import { NavItem } from "@/types/global/menu.type";
 
 const navItems: NavItem[] = [
   {
@@ -41,6 +33,8 @@ const navItems: NavItem[] = [
       {name: "Empresas", path: "/master-data/companies", code: "A1", pro: false, authorized: false },
       {name: "Lojas", path: "/master-data/stores", code: "A2", pro: false, authorized: false },
       {name: "Profissionais", path: "/master-data/employees", code: "A3", pro: false, authorized: false },
+      {name: "Clientes", path: "/master-data/customers", code: "A4", pro: false, authorized: false },
+      {name: "Fornecedores", path: "/master-data/suppliers", code: "A5", pro: false, authorized: false },
     ]
   },
   {

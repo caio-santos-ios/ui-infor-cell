@@ -15,23 +15,23 @@ import { IconEdit } from "@/components/iconEdit/IconEdit";
 import { IconDelete } from "@/components/iconDelete/IconDelete";
 import { useModal } from "@/hooks/useModal";
 import { ModalDelete } from "@/components/modalDelete/ModalDelete";
-import { ResetStore, TStore } from "@/types/master-data/store/store.type";
 import { NotData } from "@/components/not-data/NotData";
+import { ResetEmployee, TEmployee } from "@/types/master-data/employee/employee.type";
 
 
 export default function EmployeeTable() {
   const [_, setLoading] = useAtom(loadingAtom);
   const [pagination, setPagination] = useAtom(paginationAtom); 
   const { isOpen, openModal, closeModal } = useModal();
-  const [company, setStore] = useState<TStore>(ResetStore);
+  const [company, setStore] = useState<TEmployee>(ResetEmployee);
   const router = useRouter();
 
-  const getAll = async () => {
+  const getAll = async (page: number) => {
     try {
       setLoading(true);
-      const {data} = await api.get(`/employees?deleted=false&orderBy=createdAt&sort=desc&pageSize=10&pageNumber=${pagination.currentPage}`, configApi());
+      const {data} = await api.get(`/employees?deleted=false&orderBy=createdAt&sort=desc&pageSize=10&pageNumber=${page}`, configApi());
       const result = data.result;
-      
+
       setPagination({
         currentPage: result.currentPage,
         data: result.data,
@@ -52,7 +52,7 @@ export default function EmployeeTable() {
       await api.delete(`/employees/${company.id}`, configApi());
       resolveResponse({status: 204, message: "Excluído com sucesso"});
       closeModal();
-      await getAll();
+      await getAll(pagination.currentPage);
     } catch (error) {
       resolveResponse(error);
     } finally {
@@ -72,33 +72,46 @@ export default function EmployeeTable() {
     };
   };
 
+  const changePage = async (page: number) => {
+    setPagination(prev => ({
+      ...prev,
+      currentPage: page
+    }));
+
+    await getAll(page);
+  };
+
   useEffect(() => {
-    getAll();
+    getAll(1);
   }, []);
 
   return (
     pagination.data.length > 0 ?
     <>
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3 mb-3">
-        <div className="max-w-full overflow-x-auto">
-          <div className="min-w-[1102px]">
-            <Table>
-              <TableHeader className="border-b border-gray-100 dark:border-white/5">
+      <div className="erp-container-table rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3 mb-3">
+        <div className="max-w-full overflow-x-auto tele-container-table">
+          <div className="min-w-[1102px] divide-y">
+            <Table className="divide-y">
+              <TableHeader className="border-b border-gray-100 dark:border-white/5 tele-table-thead">
                 <TableRow>
-                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Razão Social</TableCell>
-                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Nome Fantasia</TableCell>
-                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">CNPJ</TableCell>
+                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Nome</TableCell>
+                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">E-mail</TableCell>
+                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">CPF</TableCell>
+                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Tipo</TableCell>
+                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Data de Nascimento</TableCell>
                   <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Data de Criação</TableCell>
                   <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Ações</TableCell>
                 </TableRow>
               </TableHeader>
 
               <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
-                {pagination.data.map((x: TStore) => (
+                {pagination.data.map((x: TEmployee) => (
                   <TableRow key={x.id}>
-                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.corporateName}</TableCell>
-                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.tradeName}</TableCell>
-                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.document}</TableCell>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.name}</TableCell>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.email}</TableCell>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.cpf}</TableCell>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.type == 'technical' ? 'Técnico' : 'Vendedor'}</TableCell>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{maskDate(x.dateOfBirth)}</TableCell>
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{maskDate(x.createdAt)}</TableCell>
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
                       <div className="flex gap-3">       
@@ -119,7 +132,7 @@ export default function EmployeeTable() {
           </div>
         </div>
       </div>
-      <Pagination currentPage={pagination.currentPage} totalCount={pagination.totalCount} totalData={pagination.data.length} totalPages={pagination.totalPages} onPageChange={() => {}} />
+      <Pagination currentPage={pagination.currentPage} totalCount={pagination.totalCount} totalData={pagination.data.length} totalPages={pagination.totalPages} onPageChange={changePage} />
 
       <ModalDelete confirm={destroy} isOpen={isOpen} closeModal={closeModal} title="Excluir Profissional" />          
     </>

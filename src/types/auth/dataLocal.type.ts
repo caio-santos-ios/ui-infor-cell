@@ -8,6 +8,7 @@ export type TDataLocal = {
     nameCompany: string;
     nameStore: string;
     modules: any[];
+    typeUser: string;
 }
 
 export const ResetDataLocal: TDataLocal = {
@@ -19,5 +20,6 @@ export const ResetDataLocal: TDataLocal = {
     logoCompany: "",
     nameCompany: "",
     nameStore: "",
-    modules: []
+    modules: [],
+    typeUser: "",
 } 

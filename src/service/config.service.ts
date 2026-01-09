@@ -14,6 +14,13 @@ export const configApi = (contentTypeJson: boolean = true) => {
 }
 
 export const resolveResponse = (response: any) => {
+  if(response.status == 400) {
+    if(response.response.data["errors"]) {
+      handleApiErrors(response);
+      return;
+    };
+  };
+
   if(response["code"] == "ERR_NETWORK") {
     toast.error("Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.", {
       theme: 'colored'
@@ -54,11 +61,29 @@ export const resolveResponse = (response: any) => {
   });
 };
 
+const handleApiErrors = (error: any) => {
+    if (error.response && error.response.status === 400) {
+        const data = error.response.data;
+        
+        if (data.errors && Array.isArray(data.errors)) {
+          return toast.warn(data.errors[0].message, {theme: 'colored'}); 
+        }
+        
+        if (data.errors && typeof data.errors === 'object') {
+          const firstKey = Object.keys(data.errors)[0];
+          return toast.warn(data.errors[firstKey][0], {theme: 'colored'}); 
+        }
+    }
+
+    return error.message || "Ocorreu um erro inesperado. Tente novamente.";
+};
+
 export const saveLocalStorage = (data: TDataLocal, hasToken: boolean = false) => {
   if(hasToken) {
     localStorage.setItem("token", data.token);
   };
 
+  localStorage.setItem("typeUser", data.typeUser);
   localStorage.setItem("name", data.name);
   localStorage.setItem("email", data.email);
   localStorage.setItem("admin", data.admin);
@@ -70,6 +95,7 @@ export const saveLocalStorage = (data: TDataLocal, hasToken: boolean = false) =>
 };
 
 export const removeLocalStorage = () => { 
+  localStorage.removeItem("typeUser");
   localStorage.removeItem("token");
   localStorage.removeItem("name");
   localStorage.removeItem("email");

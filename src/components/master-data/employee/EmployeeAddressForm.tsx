@@ -4,12 +4,9 @@ import Label from "@/components/form/Label";
 import { loadingAtom } from "@/jotai/global/loading.jotai";
 import { api } from "@/service/api.service";
 import { configApi, resolveResponse } from "@/service/config.service";
-import { maskCNPJ, maskPhone } from "@/utils/mask.util";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import DropzoneComponent from "@/components/form/form-elements/DropZone";
-import { CompanyLogo } from "@/components/logoCompany/LogoCompany";
 import { useRouter } from "next/navigation";
 import { ResetAddress, TAddress } from "@/types/master-data/address/address";
 import axios from "axios";
@@ -98,7 +95,7 @@ export default function EmployeeAddressForm({address, parentId}: TProp) {
 
   return (
     <>
-      <ComponentCard title="Endereço">
+      <ComponentCard title="Endereço" hasHeader={false}>
         <div className="grid grid-cols-6 gap-2 container-form">
           <div className={`flex flex-col col-span-6 lg:col-span-1 mb-2`}>
             <Label title="CEP" />
