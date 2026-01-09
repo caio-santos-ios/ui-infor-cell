@@ -21,7 +21,7 @@ export const Autorization = () => {
 
         if(!token) {
             setUserLogger(ResetUserLogged);
-            setIsLoading(false);
+            // setIsLoading(false);
 
             if(!["reset-password", "signup", "new-code-confirm", "confirm-account"].includes(pathname.split("/")[1])) {
                 router.push("/");
