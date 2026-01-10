@@ -6,7 +6,7 @@ import AppSidebar from "@/layout/AppSidebar";
 import Backdrop from "@/layout/Backdrop";
 import React from "react";
 
-export default function MasterDataLayout({
+export default function PurchaseLayout({
   children,
 }: {
   children: React.ReactNode;
