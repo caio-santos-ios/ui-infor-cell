@@ -1,4 +1,4 @@
-import EmployeeTable from "@/components/master-data/employee/EmployeeTable";
+import CustomerTable from "@/components/master-data/customer/CustomerTable";
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
 import Button from "@/components/ui/button/Button";
 import { Metadata } from "next";
@@ -15,11 +15,11 @@ export default function Employee() {
     <div>
       <PageBreadcrumb pageIcon="MdPeople" pageTitle="Clientes" pageSubTitle="Cadastros" />
       <div className="flex justify-end mb-2">
-        <Link href="customer/create">
+        <Link href="customers/create">
           <Button type="submit" className="" size="sm">Adicionar</Button>
         </Link>
       </div>
-      <EmployeeTable />
+      <CustomerTable />
     </div>
   );
 }

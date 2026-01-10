@@ -1,4 +1,4 @@
-import EmployeeForm from "@/components/master-data/employee/EmployeeForm";
+import CustomerForm from "@/components/master-data/customer/CustomerForm";
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
 import Button from "@/components/ui/button/Button";
 import { Metadata } from "next";
@@ -21,7 +21,7 @@ export default async function StoreDetail({ params }: { params: Promise<{ id: st
           <Button type="submit" variant="outline" size="sm">Voltar</Button>
         </Link>
       </div>
-      <EmployeeForm id={id} />
+      <CustomerForm id={id} />
     </div>
   );
 }

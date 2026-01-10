@@ -50,6 +50,7 @@ export default function CompanyDropdown() {
         photo: result.photo,
         nameCompany: result.nameCompany,
         nameStore: result.nameStore,
+        typeUser: ""
       });
   
       saveLocalStorage(result);
@@ -91,11 +92,9 @@ export default function CompanyDropdown() {
       </button>
 
       <Dropdown isOpen={isOpen} onClose={closeDropdown} className="absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark">
-        <li>
-          <div className="flex items-center gap-3 px-3 py-2 font-bold text-gray-700 rounded-lg group text-theme-md dark:text-gray-400">
-            Lojas ({stores.length})
-          </div>
-        </li>
+        <div className="flex items-center gap-3 px-3 py-2 font-bold text-gray-700 rounded-lg group text-theme-md dark:text-gray-400">
+          Lojas ({stores.length})
+        </div>
 
         <ul className="flex flex-col gap-1 pt-4 pb-3 border-b border-gray-200 dark:border-gray-800">
           {

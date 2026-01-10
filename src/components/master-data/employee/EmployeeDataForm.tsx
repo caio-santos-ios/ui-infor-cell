@@ -8,10 +8,12 @@ import { api } from "@/service/api.service";
 import { configApi, resolveResponse } from "@/service/config.service";
 import { maskCPF, maskPhone } from "@/utils/mask.util";
 import { useAtom } from "jotai";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { ResetEmployee, TEmployee } from "@/types/master-data/employee/employee.type";
+import MultiSelect from "@/components/form/MuiltSelect";
+import { TStore } from "@/types/master-data/store/store.type";
 
 type TProp = {
   id?: string;
@@ -19,6 +21,8 @@ type TProp = {
 
 export default function EmployeeDataForm({id}: TProp) {
   const [_, setIsLoading] = useAtom(loadingAtom);
+  const [stores, setStore] = useState<any[]>([]);
+  const [myStores, setMyStore] = useState<string[]>([])
   const router = useRouter();
 
   const { register, handleSubmit, reset, setValue, watch, getValues, formState: { errors }} = useForm<TEmployee>({
@@ -65,7 +69,22 @@ export default function EmployeeDataForm({id}: TProp) {
       setIsLoading(true);
       const {data} = await api.get(`/employees/${id}`, configApi());
       const result = data.result.data;
+      setMyStore(result.stores);
       reset(result);
+    } catch (error) {
+      resolveResponse(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getSelectStore = async () => {
+    try {
+      setIsLoading(true);
+      const {data} = await api.get(`/stores/select?deleted=false`, configApi());
+      const result = data.result.data;
+      const list = result.map((x: TStore) => ({value: x.id, text: x.tradeName, selected: false}));
+      setStore(list);
     } catch (error) {
       resolveResponse(error);
     } finally {
@@ -75,6 +94,7 @@ export default function EmployeeDataForm({id}: TProp) {
 
   useEffect(() => {
     if(id != "create") {
+      getSelectStore();
       getById(id!);
     };
   }, []);
@@ -83,6 +103,16 @@ export default function EmployeeDataForm({id}: TProp) {
     <>
       <ComponentCard title="Dados Gerais" hasHeader={false}>
         <div className="grid grid-cols-6 gap-2 container-form">
+          <div className="col-span-6 xl:col-span-2">
+            <Label title="Lojas" required={false}/>
+            <MultiSelect 
+              options={stores}
+              selectedValues={myStores}
+              placeholder="Selecione as lojas"
+              onChange={(selectedStores) => setValue("stores", selectedStores)}
+            />
+          </div>
+
           <div className="col-span-6 xl:col-span-2">
             <Label title="Nome"/>
             <input placeholder="Nome" {...register("name")} type="text" className="input-erp-primary input-erp-default"/>
@@ -126,6 +156,8 @@ export default function EmployeeDataForm({id}: TProp) {
             <Label title="Data de Nascimento" required={false}/>
             <input placeholder="Whatsapp" {...register("dateOfBirth")} type="date" className="input-erp-primary input-erp-default"/>
           </div>
+          
+          
         </div>
       </ComponentCard>
       <Button onClick={() => save({...getValues()})} type="submit" className="w-full xl:max-w-20 mt-2" size="sm">Salvar</Button>

@@ -35,6 +35,7 @@ export type TEmployee = {
     address: TAddress;
     modules: TModule[];
     calendar: TEmployeeCalendar;
+    stores: string[]
 }
 
 export const ResetEmployee: TEmployee = {
@@ -51,7 +52,8 @@ export const ResetEmployee: TEmployee = {
     createdAt: "",
     address: ResetAddress,
     modules: [],
-    calendar: ResetEmployeeCalendar
+    calendar: ResetEmployeeCalendar,
+    stores: []
 }
 
 export type TRoutine = {

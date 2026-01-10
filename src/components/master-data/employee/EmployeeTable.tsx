@@ -8,7 +8,7 @@ import { api } from "@/service/api.service";
 import { configApi, resolveResponse } from "@/service/config.service";
 import { paginationAtom } from "@/jotai/global/pagination.jotai";
 import { maskDate } from "@/utils/mask.util";
-import { permissionDelete, permissionUpdate } from "@/utils/permission.util";
+import { permissionDelete, permissionRead, permissionUpdate } from "@/utils/permission.util";
 import { useRouter } from "next/navigation";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { IconEdit } from "@/components/iconEdit/IconEdit";
@@ -82,7 +82,9 @@ export default function EmployeeTable() {
   };
 
   useEffect(() => {
-    getAll(1);
+    if(permissionRead("A", "A3")) {
+      getAll(1);
+    };
   }, []);
 
   return (
@@ -116,11 +118,11 @@ export default function EmployeeTable() {
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
                       <div className="flex gap-3">       
                         {
-                          permissionUpdate("A", "A2") &&
+                          permissionUpdate("A", "A3") &&
                           <IconEdit action="edit" obj={x} getObj={getObj}/>
                         }   
                         {
-                          permissionDelete("A", "A2") &&
+                          permissionDelete("A", "A3") &&
                           <IconDelete action="delete" obj={x} getObj={getObj}/>                                                   
                         }                                          
                     </div>

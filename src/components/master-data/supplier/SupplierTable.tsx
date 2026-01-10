@@ -9,29 +9,29 @@ import { configApi, resolveResponse } from "@/service/config.service";
 import { paginationAtom } from "@/jotai/global/pagination.jotai";
 import { maskDate } from "@/utils/mask.util";
 import { permissionDelete, permissionRead, permissionUpdate } from "@/utils/permission.util";
-import { ResetCompany, TCompany } from "@/types/master-data/company/company.type";
 import { useRouter } from "next/navigation";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { IconEdit } from "@/components/iconEdit/IconEdit";
 import { IconDelete } from "@/components/iconDelete/IconDelete";
-import { Modal } from "@/components/ui/modal";
 import { useModal } from "@/hooks/useModal";
 import { ModalDelete } from "@/components/modalDelete/ModalDelete";
+import { NotData } from "@/components/not-data/NotData";
+import { ResetSupplier, TSupplier } from "@/types/master-data/supplier/supplier.type";
 
 
-export default function CompanyTable() {
+export default function SupplierTable() {
   const [_, setLoading] = useAtom(loadingAtom);
   const [pagination, setPagination] = useAtom(paginationAtom); 
   const { isOpen, openModal, closeModal } = useModal();
-  const [company, setCompany] = useState<TCompany>(ResetCompany);
+  const [company, setStore] = useState<TSupplier>(ResetSupplier);
   const router = useRouter();
 
   const getAll = async (page: number) => {
     try {
       setLoading(true);
-      const {data} = await api.get(`/companies?deleted=false&orderBy=createdAt&sort=desc&pageSize=10&pageNumber=${page}`, configApi());
+      const {data} = await api.get(`/suppliers?deleted=false&orderBy=createdAt&sort=desc&pageSize=10&pageNumber=${page}`, configApi());
       const result = data.result;
-      
+
       setPagination({
         currentPage: result.currentPage,
         data: result.data,
@@ -49,8 +49,8 @@ export default function CompanyTable() {
   const destroy = async () => {
     try {
       setLoading(true);
-      await api.delete(`/companies/${company.id}`, configApi());
-      resolveResponse({status: 204, message: "Excluída com sucesso"});
+      await api.delete(`/suppliers/${company.id}`, configApi());
+      resolveResponse({status: 204, message: "Excluído com sucesso"});
       closeModal();
       await getAll(pagination.currentPage);
     } catch (error) {
@@ -61,10 +61,10 @@ export default function CompanyTable() {
   };
 
   const getObj = (obj: any, action: string) => {
-    setCompany(obj);
+    setStore(obj);
 
     if(action == "edit") {
-      router.push(`/master-data/companies/${obj.id}`);
+      router.push(`/master-data/suppliers/${obj.id}`);
     };
 
     if(action == "delete") {
@@ -72,8 +72,17 @@ export default function CompanyTable() {
     };
   };
 
+  const changePage = async (page: number) => {
+    setPagination(prev => ({
+      ...prev,
+      currentPage: page
+    }));
+
+    await getAll(page);
+  };
+
   useEffect(() => {
-    if(permissionRead("A", "A1")) {
+    if(permissionRead("A", "A5")) {
       getAll(1);
     };
   }, []);
@@ -81,35 +90,37 @@ export default function CompanyTable() {
   return (
     pagination.data.length > 0 ?
     <>
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3 mb-3">
-        <div className="max-w-full overflow-x-auto">
-          <div className="min-w-[1102px]">
-            <Table>
-              <TableHeader className="border-b border-gray-100 dark:border-white/5">
+      <div className="erp-container-table rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3 mb-3">
+        <div className="max-w-full overflow-x-auto tele-container-table">
+          <div className="min-w-[1102px] divide-y">
+            <Table className="divide-y">
+              <TableHeader className="border-b border-gray-100 dark:border-white/5 tele-table-thead">
                 <TableRow>
-                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Razão Social</TableCell>
-                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Nome Fantasia</TableCell>
-                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">CNPJ</TableCell>
+                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Tipo</TableCell>
+                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Nome do Cliente</TableCell>
+                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">E-mail</TableCell>
+                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Documento</TableCell>
                   <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Data de Criação</TableCell>
                   <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Ações</TableCell>
                 </TableRow>
               </TableHeader>
 
               <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
-                {pagination.data.map((x: TCompany) => (
+                {pagination.data.map((x: any) => (
                   <TableRow key={x.id}>
-                    <TableCell className="px-5 py-4 sm:px-6 text-start">{x.corporateName}</TableCell>
-                    <TableCell className="px-5 py-4 sm:px-6 text-start">{x.tradeName}</TableCell>
-                    <TableCell className="px-5 py-4 sm:px-6 text-start">{x.document}</TableCell>
-                    <TableCell className="px-5 py-4 sm:px-6 text-start">{maskDate(x.createdAt)}</TableCell>
-                    <TableCell className="px-5 py-4 sm:px-6 text-start">
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.type == "F" ? "Pessoa Física" : "Pessoa Juridica"}</TableCell>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.corporateName}</TableCell>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.email}</TableCell>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.document}</TableCell>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{maskDate(x.createdAt)}</TableCell>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
                       <div className="flex gap-3">       
                         {
-                          permissionUpdate("A", "A1") &&
+                          permissionUpdate("A", "A2") &&
                           <IconEdit action="edit" obj={x} getObj={getObj}/>
                         }   
                         {
-                          permissionDelete("A", "A1") &&
+                          permissionDelete("A", "A2") &&
                           <IconDelete action="delete" obj={x} getObj={getObj}/>                                                   
                         }                                          
                     </div>
@@ -121,12 +132,11 @@ export default function CompanyTable() {
           </div>
         </div>
       </div>
-      <Pagination currentPage={pagination.currentPage} totalCount={pagination.totalCount} totalData={pagination.data.length} totalPages={pagination.totalPages} onPageChange={() => {}} />
+      <Pagination currentPage={pagination.currentPage} totalCount={pagination.totalCount} totalData={pagination.data.length} totalPages={pagination.totalPages} onPageChange={changePage} />
 
-      <ModalDelete confirm={destroy} isOpen={isOpen} closeModal={closeModal} title="Excluir Empresa" />          
+      <ModalDelete confirm={destroy} isOpen={isOpen} closeModal={closeModal} title="Excluir Cliente" />          
     </>
     :
-    // <NotData />
-    <></>
+    <NotData />
   );
 }

@@ -4,14 +4,9 @@ import Label from "@/components/form/Label";
 import { loadingAtom } from "@/jotai/global/loading.jotai";
 import { api } from "@/service/api.service";
 import { configApi, resolveResponse } from "@/service/config.service";
-import { maskCNPJ, maskPhone } from "@/utils/mask.util";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import "./style.css";
-import DropzoneComponent from "@/components/form/form-elements/DropZone";
-import { CompanyLogo } from "@/components/logoCompany/LogoCompany";
-import { useRouter } from "next/navigation";
 import { ResetAddress, TAddress } from "@/types/master-data/address/address";
 import axios from "axios";
 import Button from "@/components/ui/button/Button";
@@ -22,18 +17,15 @@ type TProp = {
   parentId?: string;
 };
 
-export default function StoreAddressForm({address, parentId}: TProp) {
+export default function CustomerAddressForm({address, parentId}: TProp) {
   const [_, setIsLoading] = useAtom(loadingAtom);
-  const [logoCompany, setLogoCompany] = useState<string>("");
-  const router = useRouter();
 
-  const { register, handleSubmit, reset, setValue, watch, getValues, formState: { errors }} = useForm<TAddress>({
+  const { register, reset, watch, getValues, formState: { errors }} = useForm<TAddress>({
     defaultValues: ResetAddress
   });
 
   const save = async (body: TAddress) => {
     if(!body.id) {
-      console.log(body)
       await create(body);
     } else {
       await update(body);
@@ -78,7 +70,7 @@ export default function StoreAddressForm({address, parentId}: TProp) {
         complement: data.complemento,
         neighborhood: data.bairro,
         number: watch("number"),
-        parent: "company",
+        parent: "customer",
         parentId,
         state: data.estado,
         street: data.logradouro,
@@ -99,7 +91,7 @@ export default function StoreAddressForm({address, parentId}: TProp) {
 
   return (
     <>
-      <ComponentCard title="Endereço">
+      <ComponentCard title="Endereço" hasHeader={false}>
         <div className="grid grid-cols-6 gap-2 container-form">
           <div className={`flex flex-col col-span-6 lg:col-span-1 mb-2`}>
             <Label title="CEP" />
@@ -132,7 +124,7 @@ export default function StoreAddressForm({address, parentId}: TProp) {
         </div>
       </ComponentCard>
 
-      <Button onClick={() => save({...getValues()})} type="submit" className="w-full xl:w-20 mt-2" size="sm">Salvar</Button>
+      <Button onClick={() => save({...getValues()})} type="submit" className="w-full xl:max-w-20 mt-2" size="sm">Salvar</Button>
     </>
   );
 }

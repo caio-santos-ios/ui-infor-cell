@@ -48,6 +48,7 @@ export default function UserDropdown() {
         photo: result.photo,
         nameCompany: result.nameCompany,
         nameStore: result.nameStore,
+        typeUser: ""
       });
   
       saveLocalStorage(result);
@@ -119,10 +120,13 @@ export default function UserDropdown() {
             </DropdownItem>
           </li>
           <li>
-            <DropdownItem onItemClick={handlerSync} tag="a" href="/master-data/profile" className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300" >
-              <MdSync className="fill-gray-500 group-hover:fill-gray-700 dark:fill-gray-400 dark:group-hover:fill-gray-300" size={22} />
-              Sincronizar
-            </DropdownItem>
+            {
+              isAdmin &&
+              <DropdownItem onItemClick={handlerSync} tag="a" href="/master-data/profile" className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300" >
+                <MdSync className="fill-gray-500 group-hover:fill-gray-700 dark:fill-gray-400 dark:group-hover:fill-gray-300" size={22} />
+                Sincronizar
+              </DropdownItem>
+            }
           </li>
         </ul>
         <button onClick={logout} className="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300">

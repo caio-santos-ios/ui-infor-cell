@@ -10,7 +10,7 @@ interface Option {
 
 interface MultiSelectProps {
   options: Option[];
-  selectedValues?: string[]; // Mudamos para ser controlado
+  selectedValues?: string[]; // Estado controlado pelo pai
   onChange?: (selected: string[]) => void;
   disabled?: boolean;
   placeholder?: string;
@@ -27,12 +27,12 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Sincroniza o estado interno quando os valores mudam externamente (ex: via useEffect do pai)
+  // 1. Sincronização reativa: Quando o useEffect do pai mudar o estado, o componente atualiza
   useEffect(() => {
     setSelectedOptions(selectedValues);
   }, [selectedValues]);
 
-  // Fecha o dropdown ao clicar fora
+  // 2. Fechar ao clicar fora do componente
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -58,29 +58,29 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
   };
 
   const removeOption = (e: React.MouseEvent, value: string) => {
-    e.stopPropagation(); // Impede de abrir/fechar o dropdown ao clicar no 'x'
+    e.stopPropagation(); // Evita que o dropdown abra/feche ao clicar no 'x'
     const newSelectedOptions = selectedOptions.filter((opt) => opt !== value);
     setSelectedOptions(newSelectedOptions);
     if (onChange) onChange(newSelectedOptions);
   };
 
-  const selectedValuesText = selectedOptions.map(
-    (value) => options.find((option) => option.value === value)?.text || ""
-  );
-
   return (
-    <div className="relative z-20 inline-block w-full" ref={containerRef}>
+    /* AJUSTE DE LAYOUT: O z-index aumenta quando aberto para ficar sobre os outros campos */
+    <div 
+      className={`relative inline-block w-full ${isOpen ? "z-[100]" : "z-10"}`} 
+      ref={containerRef}
+    >
       <div className="relative flex flex-col items-center">
         <div onClick={toggleDropdown} className="w-full cursor-pointer">
-          <div className="flex min-h-11 h-auto rounded-lg border border-gray-300 py-1.5 pl-3 pr-3 shadow-theme-xs outline-hidden transition focus-within:border-brand-300 dark:border-gray-700 dark:bg-gray-900">
+          <div className="flex min-h-11 h-auto rounded-lg border border-gray-300 py-1.5 pl-3 pr-3 shadow-sm outline-none transition focus-within:border-brand-500 dark:border-gray-700 dark:bg-gray-900">
             <div className="flex flex-wrap flex-auto gap-2">
               {selectedOptions.length > 0 ? (
-                selectedOptions.map((value, index) => {
+                selectedOptions.map((value) => {
                   const option = options.find((o) => o.value === value);
                   return (
                     <div
                       key={value}
-                      className="group flex items-center justify-center rounded-full border-[0.7px] border-transparent bg-gray-100 py-1 pl-2.5 pr-2 text-sm text-gray-800 dark:bg-gray-800 dark:text-white/90"
+                      className="group flex items-center justify-center rounded-full border border-transparent bg-gray-100 py-1 pl-2.5 pr-2 text-sm text-gray-800 dark:bg-gray-800 dark:text-white/90"
                     >
                       <span className="flex-initial max-w-full">{option?.text}</span>
                       <div
@@ -100,7 +100,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
             </div>
             <div className="flex items-center w-7">
               <svg
-                className={`transition-transform ${isOpen ? "rotate-180" : ""} text-gray-400`}
+                className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""} text-gray-400`}
                 width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor"
               >
                 <path d="M4.79175 7.39551L10.0001 12.6038L15.2084 7.39551" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -109,26 +109,33 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
           </div>
         </div>
 
+        {/* LISTAGEM FLUTUANTE: O uso de absolute e z-[1000] garante que fique por cima de tudo */}
         {isOpen && (
-          <div className="absolute left-0 z-99 w-full mt-1 overflow-y-auto bg-white rounded-lg shadow-lg border border-gray-200 top-full max-h-60 dark:bg-gray-900 dark:border-gray-700">
+          <div className="absolute top-full left-0 w-full z-[1000] mt-1 bg-white dark:bg-gray-900 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 max-h-60 overflow-y-auto overflow-x-hidden animate-in fade-in zoom-in-95 duration-100">
             <div className="flex flex-col">
-              {options.map((option) => {
-                const isSelected = selectedOptions.includes(option.value);
-                return (
-                  <div
-                    key={option.value}
-                    className={`flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-100 dark:border-gray-800 last:border-0 ${isSelected ? "bg-blue-50/50 dark:bg-blue-900/20" : ""}`}
-                    onClick={() => handleSelect(option.value)}
-                  >
-                    <span className="text-sm text-gray-800 dark:text-white/90">{option.text}</span>
-                    {isSelected && (
-                       <svg className="text-blue-500" width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                       </svg>
-                    )}
-                  </div>
-                );
-              })}
+              {options.length > 0 ? (
+                options.map((option) => {
+                  const isSelected = selectedOptions.includes(option.value);
+                  return (
+                    <div
+                      key={option.value}
+                      className={`flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-100 dark:border-gray-800 last:border-0 ${isSelected ? "bg-brand-50/30 dark:bg-brand-900/20" : ""}`}
+                      onClick={() => handleSelect(option.value)}
+                    >
+                      <span className="text-sm text-gray-800 dark:text-white/90">{option.text}</span>
+                      {isSelected && (
+                        <svg className="text-brand-500" width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="p-3 text-sm text-gray-500 text-center italic">
+                  Nenhuma opção disponível
+                </div>
+              )}
             </div>
           </div>
         )}

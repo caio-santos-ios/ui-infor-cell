@@ -14,7 +14,6 @@ import { ResetModule, TModule, TRoutine } from "@/types/master-data/employee/emp
 import { iconAtom } from "@/jotai/global/icons.jotai";
 import { menuRoutinesAtom } from "@/jotai/global/menu.jotai";
 import { NavItem } from "@/types/global/menu.type";
-import MultiSelect from "@/components/form/MuiltSelect";
 
 type TProp = {
   id?: string;

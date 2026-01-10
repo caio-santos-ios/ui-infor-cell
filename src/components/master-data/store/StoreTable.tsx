@@ -8,14 +8,12 @@ import { api } from "@/service/api.service";
 import { configApi, resolveResponse } from "@/service/config.service";
 import { paginationAtom } from "@/jotai/global/pagination.jotai";
 import { maskDate } from "@/utils/mask.util";
-import { permissionDelete, permissionUpdate } from "@/utils/permission.util";
+import { permissionDelete, permissionRead, permissionUpdate } from "@/utils/permission.util";
 import { useRouter } from "next/navigation";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { IconEdit } from "@/components/iconEdit/IconEdit";
 import { IconDelete } from "@/components/iconDelete/IconDelete";
-import { Modal } from "@/components/ui/modal";
 import { useModal } from "@/hooks/useModal";
-import Button from "@/components/ui/button/Button";
 import { ModalDelete } from "@/components/modalDelete/ModalDelete";
 import { ResetStore, TStore } from "@/types/master-data/store/store.type";
 
@@ -27,10 +25,10 @@ export default function StoreTable() {
   const [company, setStore] = useState<TStore>(ResetStore);
   const router = useRouter();
 
-  const getAll = async () => {
+  const getAll = async (page: number) => {
     try {
       setLoading(true);
-      const {data} = await api.get(`/stores?deleted=false&orderBy=createdAt&sort=desc&pageSize=10&pageNumber=${pagination.currentPage}`, configApi());
+      const {data} = await api.get(`/stores?deleted=false&orderBy=createdAt&sort=desc&pageSize=10&pageNumber=${page}`, configApi());
       const result = data.result;
       
       setPagination({
@@ -53,7 +51,7 @@ export default function StoreTable() {
       await api.delete(`/stores/${company.id}`, configApi());
       resolveResponse({status: 204, message: "Excluída com sucesso"});
       closeModal();
-      await getAll();
+      await getAll(1);
     } catch (error) {
       resolveResponse(error);
     } finally {
@@ -74,7 +72,9 @@ export default function StoreTable() {
   };
 
   useEffect(() => {
-    getAll();
+    if(permissionRead("A", "A2")) {
+      getAll(1);
+    };
   }, []);
 
   return (

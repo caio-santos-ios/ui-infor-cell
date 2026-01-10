@@ -1,11 +1,11 @@
-import EmployeeTable from "@/components/master-data/employee/EmployeeTable";
+import SupplierTable from "@/components/master-data/supplier/SupplierTable";
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
 import Button from "@/components/ui/button/Button";
 import { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Telemovvi | Profissionais",
+  title: "Telemovvi | Fornecedores",
   description:
     "This is Next.js Form Elements page for TailAdmin - Next.js Tailwind CSS Admin Dashboard Template",
 };
@@ -13,13 +13,13 @@ export const metadata: Metadata = {
 export default function Employee() {
   return (
     <div>
-      <PageBreadcrumb pageIcon="HiOutlineUserGroup" pageTitle="Profissionais" pageSubTitle="Cadastros" />
+      <PageBreadcrumb pageIcon="MdLocalShipping" pageTitle="Fornecedores" pageSubTitle="Cadastros" />
       <div className="flex justify-end mb-2">
-        <Link href="employees/create">
+        <Link href="suppliers/create">
           <Button type="submit" className="" size="sm">Adicionar</Button>
         </Link>
       </div>
-      <EmployeeTable />
+      <SupplierTable />
     </div>
   );
 }
