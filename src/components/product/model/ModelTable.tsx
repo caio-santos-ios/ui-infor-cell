@@ -134,7 +134,7 @@ export default function ModelTable() {
       </div>
       <Pagination currentPage={pagination.currentPage} totalCount={pagination.totalCount} totalData={pagination.data.length} totalPages={pagination.totalPages} onPageChange={changePage} />
 
-      <ModalDelete confirm={destroy} isOpen={isOpen} closeModal={closeModal} title="Excluir Categoria" />          
+      <ModalDelete confirm={destroy} isOpen={isOpen} closeModal={closeModal} title="Excluir Modelo" />          
     </>
     :
     <NotData />
