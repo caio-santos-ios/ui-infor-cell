@@ -1,5 +1,5 @@
-import CompanyTable from "@/components/master-data/company/CompanyTable";
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
+import ProductTable from "@/components/product/product/ProductTable";
 import Button from "@/components/ui/button/Button";
 import { Metadata } from "next";
 import Link from "next/link";
@@ -13,13 +13,13 @@ export const metadata: Metadata = {
 export default function Products() {
   return (
     <div>
-      <PageBreadcrumb pageIcon="MdOutlineInventory" pageTitle="Produtos" pageSubTitle="Gestão de Produtos" />
+      <PageBreadcrumb pageIcon="BsBoxSeam" pageTitle="Produtos" pageSubTitle="Gestão de Produtos" />
       <div className="flex justify-end mb-2">
         <Link href="products/create">
           <Button type="submit" className="" size="sm">Adicionar</Button>
         </Link>
       </div>
-      <CompanyTable />
+      <ProductTable />
     </div>
   );
 }

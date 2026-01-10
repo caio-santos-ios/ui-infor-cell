@@ -1,10 +1,10 @@
-export type TBrand = {
+export type TProduct = {
     id?: string;
     code: string;
     name: string;
     description: string;
 }
-export const ResetBrand: TBrand = {
+export const ResetProduct: TProduct = {
     id: "",
     code: "",
     name: "",

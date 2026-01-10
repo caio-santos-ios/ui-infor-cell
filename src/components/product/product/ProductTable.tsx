@@ -16,20 +16,20 @@ import { IconDelete } from "@/components/iconDelete/IconDelete";
 import { useModal } from "@/hooks/useModal";
 import { ModalDelete } from "@/components/modalDelete/ModalDelete";
 import { NotData } from "@/components/not-data/NotData";
-import { ResetSupplier, TSupplier } from "@/types/master-data/supplier/supplier.type";
+import { ResetProduct, TProduct } from "@/types/product/product/product.type";
 
 
-export default function CategoryTable() {
+export default function ProductTable() {
   const [_, setLoading] = useAtom(loadingAtom);
   const [pagination, setPagination] = useAtom(paginationAtom); 
   const { isOpen, openModal, closeModal } = useModal();
-  const [company, setStore] = useState<TSupplier>(ResetSupplier);
+  const [company, setStore] = useState<TProduct>(ResetProduct);
   const router = useRouter();
 
   const getAll = async (page: number) => {
     try {
       setLoading(true);
-      const {data} = await api.get(`/categories?deleted=false&orderBy=createdAt&sort=desc&pageSize=10&pageNumber=${page}`, configApi());
+      const {data} = await api.get(`/products?deleted=false&orderBy=createdAt&sort=desc&pageSize=10&pageNumber=${page}`, configApi());
       const result = data.result;
 
       setPagination({
@@ -49,7 +49,7 @@ export default function CategoryTable() {
   const destroy = async () => {
     try {
       setLoading(true);
-      await api.delete(`/categories/${company.id}`, configApi());
+      await api.delete(`/products/${company.id}`, configApi());
       resolveResponse({status: 204, message: "Excluído com sucesso"});
       closeModal();
       await getAll(pagination.currentPage);
@@ -64,7 +64,7 @@ export default function CategoryTable() {
     setStore(obj);
 
     if(action == "edit") {
-      router.push(`/product/categories/${obj.id}`);
+      router.push(`/product/products/${obj.id}`);
     };
 
     if(action == "delete") {

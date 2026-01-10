@@ -16,7 +16,7 @@ type TProp = {
   id?: string;
 };
 
-export default function CategoryForm({id}: TProp) {
+export default function ProductForm({id}: TProp) {
   const [_, setIsLoading] = useAtom(loadingAtom);
   const router = useRouter();  
 

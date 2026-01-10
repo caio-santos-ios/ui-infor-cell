@@ -10,21 +10,21 @@ import ComponentCard from "@/components/common/ComponentCard";
 import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
 import { useRouter } from "next/navigation";
-import { ResetCategorie, TCategorie } from "@/types/product/categorie/categorie.type";
+import { ResetBrand, TBrand } from "@/types/product/brand/brand.type";
 
 type TProp = {
   id?: string;
 };
 
-export default function CategoryForm({id}: TProp) {
+export default function BrandForm({id}: TProp) {
   const [_, setIsLoading] = useAtom(loadingAtom);
   const router = useRouter();  
 
-  const { getValues, reset, register } = useForm<TCategorie>({
-    defaultValues: ResetCategorie
+  const { getValues, reset, register } = useForm<TBrand>({
+    defaultValues: ResetBrand
   });
 
-  const save = async (body: TCategorie) => {
+  const save = async (body: TBrand) => {
     if(!body.id) {
       await create(body);
     } else {
@@ -32,13 +32,13 @@ export default function CategoryForm({id}: TProp) {
     };
   };
       
-  const create: SubmitHandler<TCategorie> = async (body: TCategorie) => {
+  const create: SubmitHandler<TBrand> = async (body: TBrand) => {
     try {
       setIsLoading(true);
-      const {data} = await api.post(`/categories`, body, configApi());
+      const {data} = await api.post(`/brands`, body, configApi());
       const result = data.result;
       resolveResponse({status: 201, message: result.message});
-      router.push(`/product/categories/${result.data.id}`)
+      router.push(`/product/brands/${result.data.id}`)
     } catch (error) {
       resolveResponse(error);
     } finally {
@@ -46,10 +46,10 @@ export default function CategoryForm({id}: TProp) {
     }
   };
     
-  const update: SubmitHandler<TCategorie> = async (body: TCategorie) => {
+  const update: SubmitHandler<TBrand> = async (body: TBrand) => {
     try {
       setIsLoading(true);
-      const {data} = await api.put(`/categories`, body, configApi());
+      const {data} = await api.put(`/brands`, body, configApi());
       const result = data.result;
       resolveResponse({status: 200, message: result.message});
     } catch (error) {
@@ -62,7 +62,7 @@ export default function CategoryForm({id}: TProp) {
   const getById = async (id: string) => {
     try {
       setIsLoading(true);
-      const {data} = await api.get(`/categories/${id}`, configApi());
+      const {data} = await api.get(`/brands/${id}`, configApi());
       const result = data.result.data;
       reset(result);
     } catch (error) {

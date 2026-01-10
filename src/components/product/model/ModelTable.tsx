@@ -19,7 +19,7 @@ import { NotData } from "@/components/not-data/NotData";
 import { ResetSupplier, TSupplier } from "@/types/master-data/supplier/supplier.type";
 
 
-export default function CategoryTable() {
+export default function ModelTable() {
   const [_, setLoading] = useAtom(loadingAtom);
   const [pagination, setPagination] = useAtom(paginationAtom); 
   const { isOpen, openModal, closeModal } = useModal();
@@ -29,7 +29,7 @@ export default function CategoryTable() {
   const getAll = async (page: number) => {
     try {
       setLoading(true);
-      const {data} = await api.get(`/categories?deleted=false&orderBy=createdAt&sort=desc&pageSize=10&pageNumber=${page}`, configApi());
+      const {data} = await api.get(`/models?deleted=false&orderBy=createdAt&sort=desc&pageSize=10&pageNumber=${page}`, configApi());
       const result = data.result;
 
       setPagination({
@@ -49,7 +49,7 @@ export default function CategoryTable() {
   const destroy = async () => {
     try {
       setLoading(true);
-      await api.delete(`/categories/${company.id}`, configApi());
+      await api.delete(`/models/${company.id}`, configApi());
       resolveResponse({status: 204, message: "Excluído com sucesso"});
       closeModal();
       await getAll(pagination.currentPage);
@@ -64,7 +64,7 @@ export default function CategoryTable() {
     setStore(obj);
 
     if(action == "edit") {
-      router.push(`/product/categories/${obj.id}`);
+      router.push(`/product/models/${obj.id}`);
     };
 
     if(action == "delete") {
@@ -98,6 +98,7 @@ export default function CategoryTable() {
                 <TableRow>
                   <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Código</TableCell>
                   <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Nome</TableCell>
+                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Marca</TableCell>
                   <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Descrição</TableCell>
                   <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Data de Criação</TableCell>
                   <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Ações</TableCell>
@@ -109,6 +110,7 @@ export default function CategoryTable() {
                   <TableRow key={x.id}>
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.code}</TableCell>
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.name}</TableCell>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.brandName}</TableCell>
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.description}</TableCell>
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{maskDate(x.createdAt)}</TableCell>
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">

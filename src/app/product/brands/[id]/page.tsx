@@ -1,5 +1,5 @@
-import CompanyForm from "@/components/master-data/company/CompanyForm";
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
+import BrandForm from "@/components/product/brand/BrandForm";
 import Button from "@/components/ui/button/Button";
 import { Metadata } from "next";
 import Link from "next/link";
@@ -21,7 +21,7 @@ export default async function BrandDetail({ params }: { params: Promise<{ id: st
           <Button type="submit" variant="outline" size="sm">Voltar</Button>
         </Link>
       </div>
-      <CompanyForm id={id} />
+      <BrandForm id={id} />
     </div>
   );
 }

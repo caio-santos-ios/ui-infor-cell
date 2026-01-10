@@ -19,7 +19,7 @@ import { NotData } from "@/components/not-data/NotData";
 import { ResetSupplier, TSupplier } from "@/types/master-data/supplier/supplier.type";
 
 
-export default function CategoryTable() {
+export default function BrandTable() {
   const [_, setLoading] = useAtom(loadingAtom);
   const [pagination, setPagination] = useAtom(paginationAtom); 
   const { isOpen, openModal, closeModal } = useModal();
@@ -29,7 +29,7 @@ export default function CategoryTable() {
   const getAll = async (page: number) => {
     try {
       setLoading(true);
-      const {data} = await api.get(`/categories?deleted=false&orderBy=createdAt&sort=desc&pageSize=10&pageNumber=${page}`, configApi());
+      const {data} = await api.get(`/brands?deleted=false&orderBy=createdAt&sort=desc&pageSize=10&pageNumber=${page}`, configApi());
       const result = data.result;
 
       setPagination({
@@ -49,7 +49,7 @@ export default function CategoryTable() {
   const destroy = async () => {
     try {
       setLoading(true);
-      await api.delete(`/categories/${company.id}`, configApi());
+      await api.delete(`/brands/${company.id}`, configApi());
       resolveResponse({status: 204, message: "Excluído com sucesso"});
       closeModal();
       await getAll(pagination.currentPage);
@@ -64,7 +64,7 @@ export default function CategoryTable() {
     setStore(obj);
 
     if(action == "edit") {
-      router.push(`/product/categories/${obj.id}`);
+      router.push(`/product/brands/${obj.id}`);
     };
 
     if(action == "delete") {

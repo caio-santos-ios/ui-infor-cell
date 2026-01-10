@@ -1,5 +1,5 @@
-import CompanyForm from "@/components/master-data/company/CompanyForm";
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
+import ProductForm from "@/components/product/product/ProductForm";
 import Button from "@/components/ui/button/Button";
 import { Metadata } from "next";
 import Link from "next/link";
@@ -15,13 +15,13 @@ export default async function ProductsDetail({ params }: { params: Promise<{ id:
 
   return (
     <div>
-      <PageBreadcrumb pageIcon="MdOutlineInventory" pageTitle="Produtos" pageSubTitle="Gestão de Produtos" />
+      <PageBreadcrumb pageIcon="BsBoxSeam" pageTitle="Produtos" pageSubTitle="Gestão de Produtos" />
       <div className="flex justify-end mb-2">
         <Link href="/product/products">
           <Button type="submit" variant="outline" size="sm">Voltar</Button>
         </Link>
       </div>
-      <CompanyForm id={id} />
+      <ProductForm id={id} />
     </div>
   );
 }
