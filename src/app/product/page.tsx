@@ -8,7 +8,7 @@ import RecentOrders from "@/components/ecommerce/RecentOrders";
 import DemographicCard from "@/components/ecommerce/DemographicCard";
 
 export const metadata: Metadata = {
-  title:"Telemovvi | Categorias",
+  title:"Telemovvi | Gestão de Produtos",
   description: "This is Next.js Home for TailAdmin Dashboard Template",
 };
 

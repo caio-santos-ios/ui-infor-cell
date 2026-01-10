@@ -6,7 +6,7 @@ import AppSidebar from "@/layout/AppSidebar";
 import Backdrop from "@/layout/Backdrop";
 import React from "react";
 
-export default function MasterDataLayout({
+export default function CommercialsLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -25,7 +25,7 @@ export default function MasterDataLayout({
         <div className="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">{children}</div>
       </div>
     </div> 
-    
+
   );
 }
 
