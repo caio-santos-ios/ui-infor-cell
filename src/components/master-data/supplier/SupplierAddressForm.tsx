@@ -18,7 +18,7 @@ type TProp = {
   parentId?: string;
 };
 
-export default function SupplierAddressForm({address, parentId}: TProp) {
+export default function CategoryAddressForm({address, parentId}: TProp) {
   const [_, setIsLoading] = useAtom(loadingAtom);
 
   const { register, reset, watch, getValues, formState: { errors }} = useForm<TAddress>({
