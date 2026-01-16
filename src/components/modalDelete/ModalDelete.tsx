@@ -27,7 +27,7 @@ export const ModalDelete = ({isOpen, closeModal, confirm, title}: TProp) => {
                             <div className="grid grid-cols-1 gap-x-6 gap-y-5">
                                 <div className="h-full flex col-span-1 justify-center items-center flex-col">
                                     <GoAlert className="text-red-600" size={80} />
-                                    <h1 className="font-semibold text-lg text-gray-800 dark:text-white/90">Deseja exluir esse registro?</h1>
+                                    <h1 className="font-semibold text-lg text-gray-800 dark:text-white/90">Deseja excluir esse registro?</h1>
                                 </div>
                             </div>
                         </div>

@@ -7,31 +7,31 @@ import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { ResetEmployee, TEmployee } from "@/types/master-data/employee/employee.type";
-import ProductDataForm from "./ProductDataForm";
-import ProductImageForm from "./ProductImageForm";
-import ProductVariationForm from "./ProductVariationForm";
+import ProductDataForm from "./PurchaseOrderDataForm";
+import PurchaseOrderDataForm from "./PurchaseOrderDataForm";
+import PurchaseOrderIemsForm from "./PurchaseOrderItemsForm";
+import { TPurchaseOrder } from "@/types/purchase/purchase-order/purchase-order.type";
 
 type TProp = {
   id?: string;
 };
 
-export default function ProductForm({id}: TProp) {
+export default function PurchaseOrderForm({id}: TProp) {
   const [_, setIsLoading] = useAtom(loadingAtom);
   const [tabs] = useState<{key: string; title: string;}[]>([
     {key: 'data', title: 'Dados Gerais'},
-    {key: 'variations', title: 'Variações'},
-    {key: 'images', title: 'Fotos'}
+    {key: 'items', title: 'Itens'},
   ]);
   const [currentTab, setCurrentTab] = useState<any>({key: 'data', title: 'Dados Gerais'});
 
-  const { reset } = useForm<TEmployee>({
+  const { reset } = useForm<TPurchaseOrder>({
     defaultValues: ResetEmployee
   });
 
   const getById = async (id: string) => {
     try {
       setIsLoading(true);
-      const {data} = await api.get(`/products/${id}`, configApi());
+      const {data} = await api.get(`/purchase-orders/${id}`, configApi());
       const result = data.result.data;
       reset(result);
     } catch (error) {
@@ -43,7 +43,7 @@ export default function ProductForm({id}: TProp) {
 
   useEffect(() => {
     if(id != "create") {
-      getById(id!);
+      // getById(id!);
     };
   }, []);
 
@@ -58,9 +58,8 @@ export default function ProductForm({id}: TProp) {
       </div>
 
       <div className="mb-2">
-        {currentTab.key == "data" && <ProductDataForm id={id} />}
-        {currentTab.key == "variations" && <ProductVariationForm id={id} />}
-        {currentTab.key == "images" && <ProductImageForm id={id} />}
+        {currentTab.key == "data" && <PurchaseOrderDataForm id={id} />}
+        {currentTab.key == "items" && <PurchaseOrderIemsForm id={id} />}
       </div>     
     </>
   );

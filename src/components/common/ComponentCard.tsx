@@ -16,7 +16,7 @@ const ComponentCard: React.FC<ComponentCardProps> = ({
   hasHeader = true
 }) => {
   return (
-    <div className={`rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/3 container-card ${className}`}>
+    <div className={`rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/3 ${className}`}>
       {
         hasHeader && (
           <div className="px-6 py-5">

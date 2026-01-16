@@ -1,8 +1,8 @@
-import CompanyForm from "@/components/master-data/company/CompanyForm";
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
 import Button from "@/components/ui/button/Button";
 import { Metadata } from "next";
 import Link from "next/link";
+import PurchaseOrderForm from "@/components/purchase/purchase-order/PurchaseOrderForm";
 
 export const metadata: Metadata = {
   title: "Telemovvi | Pedidos de Compra",
@@ -21,7 +21,7 @@ export default async function PurchaseOrderDetail({ params }: { params: Promise<
           <Button type="submit" variant="outline" size="sm">Voltar</Button>
         </Link>
       </div>
-      <CompanyForm id={id} />
+      <PurchaseOrderForm id={id} />
     </div>
   );
 }

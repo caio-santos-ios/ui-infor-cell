@@ -12,6 +12,7 @@ import Button from "@/components/ui/button/Button";
 import { useRouter } from "next/navigation";
 import { ResetModel, TModel } from "@/types/product/model/model.type";
 import { TBrand } from "@/types/product/brand/brand.type";
+import { TCategorie } from "@/types/product/categorie/categorie.type";
 
 type TProp = {
   id?: string;
@@ -20,6 +21,7 @@ type TProp = {
 export default function ModelForm({id}: TProp) {
   const [_, setIsLoading] = useAtom(loadingAtom);
   const [brands, setBrand] = useState<TBrand[]>([]);
+  const [categories, setCategory] = useState<TCategorie[]>([]);
   const router = useRouter();  
 
   const { getValues, reset, register } = useForm<TModel>({
@@ -86,9 +88,23 @@ export default function ModelForm({id}: TProp) {
       setIsLoading(false);
     }
   };
+  
+  const getSelectCategory = async () => {
+    try {
+      setIsLoading(true);
+      const {data} = await api.get(`/categories?deleted=false`, configApi());
+      const result = data.result.data;
+      setCategory(result)
+    } catch (error) {
+      resolveResponse(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     getSelectBrand();
+    getSelectCategory();
 
     if(id != "create") {
       getById(id!);
@@ -98,12 +114,12 @@ export default function ModelForm({id}: TProp) {
   return (
     <>
       <ComponentCard title="Dados Gerais">
-        <div className="grid grid-cols-8 gap-2 container-form">  
-          <div className="col-span-6 xl:col-span-2">
+        <div className="grid grid-cols-12 gap-2 container-form">  
+          <div className="col-span-12 xl:col-span-3">
             <Label title="Nome" />
             <input placeholder="Nome" {...register("name")} type="text" className="input-erp-primary input-erp-default"/>
           </div>
-          <div className="col-span-6 xl:col-span-2">
+          <div className="col-span-12 xl:col-span-2">
             <Label title="Marca"/>
             <select {...register("brandId")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
               <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Selecione</option>
@@ -114,7 +130,18 @@ export default function ModelForm({id}: TProp) {
               }
             </select>
           </div>  
-          <div className="col-span-6 xl:col-span-4">
+          <div className="col-span-12 xl:col-span-2">
+            <Label title="Categoria"/>
+            <select {...register("categoryId")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
+              <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Selecione</option>
+              {
+                categories.map((x: TBrand) => {
+                  return <option key={x.id} value={x.id} className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">{x.code} - {x.name}</option>
+                })
+              }
+            </select>
+          </div>  
+          <div className="col-span-12 xl:col-span-5">
             <Label title="Descrição" required={false} />
             <input placeholder="Descrição" {...register("description")} type="text" className="input-erp-primary input-erp-default"/>
           </div>

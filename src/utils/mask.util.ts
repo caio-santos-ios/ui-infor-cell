@@ -114,15 +114,16 @@ export const maskAccount = (
 
 // FORMATED //
 export const formattedMoney = (value: string) => {
-  if (!value) return "0,00";
-  
-  value = value.slice(0, 15);
-  console.log(parseFloat(value))
-  const cents = (parseInt(value, 10) / 100).toFixed(2);
+  const amount = typeof value === "string" ? parseFloat(value) : value;
 
-  return cents
-    .replace(".", ",")                
-    .replace(/\B(?=(\d{3})+(?!\d))/g, "."); 
+  if (isNaN(amount)) {
+    return "R$ 0,00";
+  }
+
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(amount);
 };
 
 export const formattedCPF = (value: string): string => {

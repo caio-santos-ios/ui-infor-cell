@@ -1,5 +1,5 @@
-import CompanyTable from "@/components/master-data/company/CompanyTable";
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
+import PurchaseOrderTable from "@/components/purchase/purchase-order/PurchaseOrderTable";
 import Button from "@/components/ui/button/Button";
 import { Metadata } from "next";
 import Link from "next/link";
@@ -19,7 +19,7 @@ export default function PurchaseOrder() {
           <Button type="submit" className="" size="sm">Adicionar</Button>
         </Link>
       </div>
-      <CompanyTable />
+      <PurchaseOrderTable />
     </div>
   );
 }

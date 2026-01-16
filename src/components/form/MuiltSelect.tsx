@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 
 interface Option {
+  key: string;
   value: string;
   text: string;
   selected: boolean;
@@ -10,7 +11,7 @@ interface Option {
 
 interface MultiSelectProps {
   options: Option[];
-  selectedValues?: string[]; // Estado controlado pelo pai
+  selectedValues?: string[]; 
   onChange?: (selected: string[]) => void;
   disabled?: boolean;
   placeholder?: string;
@@ -50,24 +51,22 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
 
   const handleSelect = (optionValue: string) => {
     const newSelectedOptions = selectedOptions.includes(optionValue)
-      ? selectedOptions.filter((value) => value !== optionValue)
-      : [...selectedOptions, optionValue];
-
+    ? selectedOptions.filter((value) => value !== optionValue)
+    : [...selectedOptions, optionValue];
     setSelectedOptions(newSelectedOptions);
     if (onChange) onChange(newSelectedOptions);
   };
 
   const removeOption = (e: React.MouseEvent, value: string) => {
-    e.stopPropagation(); // Evita que o dropdown abra/feche ao clicar no 'x'
+    e.stopPropagation(); 
     const newSelectedOptions = selectedOptions.filter((opt) => opt !== value);
     setSelectedOptions(newSelectedOptions);
     if (onChange) onChange(newSelectedOptions);
   };
 
   return (
-    /* AJUSTE DE LAYOUT: O z-index aumenta quando aberto para ficar sobre os outros campos */
     <div 
-      className={`relative inline-block w-full ${isOpen ? "z-[100]" : "z-10"}`} 
+      className={`relative inline-block w-full ${isOpen ? "z-10" : "z-1"}`} 
       ref={containerRef}
     >
       <div className="relative flex flex-col items-center">
@@ -75,16 +74,22 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
           <div className="flex min-h-11 h-auto rounded-lg border border-gray-300 py-1.5 pl-3 pr-3 shadow-sm outline-none transition focus-within:border-brand-500 dark:border-gray-700 dark:bg-gray-900">
             <div className="flex flex-wrap flex-auto gap-2">
               {selectedOptions.length > 0 ? (
-                selectedOptions.map((value) => {
-                  const option = options.find((o) => o.value === value);
+                selectedOptions.map((op: any, i) => {
+                  let option;
+                  if(typeof(op) == "number") {
+                    option = options.find((o) => o.key == op.toString());
+                  } else {
+                    option = options.find((o) => o.key === op.key);
+                  }
+
                   return (
                     <div
-                      key={value}
+                      key={i}
                       className="group flex items-center justify-center rounded-full border border-transparent bg-gray-100 py-1 pl-2.5 pr-2 text-sm text-gray-800 dark:bg-gray-800 dark:text-white/90"
                     >
                       <span className="flex-initial max-w-full">{option?.text}</span>
                       <div
-                        onClick={(e) => removeOption(e, value)}
+                        onClick={(e) => removeOption(e, op)}
                         className="pl-2 text-gray-500 cursor-pointer hover:text-red-500 dark:text-gray-400"
                       >
                         <svg className="fill-current" width="14" height="14" viewBox="0 0 14 14">
@@ -109,18 +114,17 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
           </div>
         </div>
 
-        {/* LISTAGEM FLUTUANTE: O uso de absolute e z-[1000] garante que fique por cima de tudo */}
         {isOpen && (
-          <div className="absolute top-full left-0 w-full z-[1000] mt-1 bg-white dark:bg-gray-900 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 max-h-60 overflow-y-auto overflow-x-hidden animate-in fade-in zoom-in-95 duration-100">
+          <div className="absolute top-full left-0 w-full z-100 mt-1 bg-white dark:bg-gray-900 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 max-h-60 overflow-y-auto overflow-x-hidden animate-in fade-in zoom-in-95 duration-100">
             <div className="flex flex-col">
               {options.length > 0 ? (
                 options.map((option) => {
-                  const isSelected = selectedOptions.includes(option.value);
+                  const isSelected = selectedOptions.includes(option.key);
                   return (
                     <div
-                      key={option.value}
+                      key={option.key}
                       className={`flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-100 dark:border-gray-800 last:border-0 ${isSelected ? "bg-brand-50/30 dark:bg-brand-900/20" : ""}`}
-                      onClick={() => handleSelect(option.value)}
+                      onClick={() => handleSelect(option.key)}
                     >
                       <span className="text-sm text-gray-800 dark:text-white/90">{option.text}</span>
                       {isSelected && (
