@@ -64,7 +64,7 @@ const staticNavItems: NavItem[] = [
     code: "F",
     subItems: [
       {name: "Posição de Estoque", path: "/stock/stock-position", code: "F1", pro: false, authorized: false },
-      {name: "Transferências", path: "/stock/panel", code: "F2", pro: false, authorized: false },
+      {name: "Transferências", path: "/stock/transfer", code: "F2", pro: false, authorized: false },
       {name: "Trocas e Devoluções", path: "/stock/exchanges", code: "F3", pro: false, authorized: false },
     ]
   },

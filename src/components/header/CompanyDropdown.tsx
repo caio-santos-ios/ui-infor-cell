@@ -8,10 +8,12 @@ import { api } from "@/service/api.service";
 import { configApi, resolveResponse, saveLocalStorage } from "@/service/config.service";
 import { loadingAtom } from "@/jotai/global/loading.jotai";
 import { TStore } from "@/types/master-data/store/store.type";
+import { storeLoggedAtom } from "@/jotai/global/store.jotai";
 
 export default function CompanyDropdown() {
   const [_, setIsLoading] = useAtom(loadingAtom);
   const [userLogger, setUserLogger] = useAtom(userLoggerAtom);
+  const [storeLogged, setStoreLogged] = useAtom(storeLoggedAtom);
   const [isOpen, setIsOpen] = useState(false);
   const [stores, setStore] = useState<TStore[]>([]);
 
@@ -31,6 +33,7 @@ export default function CompanyDropdown() {
 
       await api.put(`/users/alter-store`, {store: id}, configApi());
       await handlerSync();
+      await refreshToken();
     } catch (error) {
       resolveResponse(error);
     } finally {
@@ -58,6 +61,17 @@ export default function CompanyDropdown() {
       resolveResponse(error);
     } finally {
       setIsLoading(false);
+    }
+  };
+  
+  const refreshToken = async () => {
+    const refreshToken = localStorage.getItem("refreshToken");
+    if(refreshToken) {
+      const {data} = await api.post(`/auth/refresh-token`, {}, { headers: { Authorization: `Bearer ${refreshToken}`, 'Content-Type': 'application/json'}});
+      const result = data.result.data;
+      localStorage.setItem("token", result.token);
+      localStorage.setItem("refreshToken", result.refreshToken);
+      setStoreLogged(!storeLogged);
     }
   };
 

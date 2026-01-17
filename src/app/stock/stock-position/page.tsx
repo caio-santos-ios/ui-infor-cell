@@ -1,5 +1,5 @@
-import CompanyTable from "@/components/master-data/company/CompanyTable";
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
+import StockPositionTable from "@/components/stock/stock-position/StockPositionTable";
 import Button from "@/components/ui/button/Button";
 import { Metadata } from "next";
 import Link from "next/link";
@@ -19,7 +19,7 @@ export default function StockPosition() {
           <Button type="submit" className="" size="sm">Adicionar</Button>
         </Link>
       </div>
-      <CompanyTable />
+      <StockPositionTable />
     </div>
   );
 }

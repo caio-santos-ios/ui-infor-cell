@@ -1,8 +1,6 @@
-import CompanyTable from "@/components/master-data/company/CompanyTable";
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
-import Button from "@/components/ui/button/Button";
+import TransferTable from "@/components/stock/transfer/TransferTable";
 import { Metadata } from "next";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Telemovvi | Transferências",
@@ -14,12 +12,7 @@ export default function Panel() {
   return (
     <div>
       <PageBreadcrumb pageIcon="FaExchangeAlt" pageTitle="Transferências" pageSubTitle="Estoque" />
-      <div className="flex justify-end mb-2">
-        <Link href="panel/create">
-          <Button type="submit" className="" size="sm">Adicionar</Button>
-        </Link>
-      </div>
-      <CompanyTable />
+      <TransferTable />
     </div>
   );
 }

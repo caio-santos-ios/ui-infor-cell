@@ -17,11 +17,13 @@ import { useModal } from "@/hooks/useModal";
 import { ModalDelete } from "@/components/modalDelete/ModalDelete";
 import { NotData } from "@/components/not-data/NotData";
 import { ResetSupplier, TSupplier } from "@/types/master-data/supplier/supplier.type";
+import { storeLoggedAtom } from "@/jotai/global/store.jotai";
 
 
 export default function ModelTable() {
   const [_, setLoading] = useAtom(loadingAtom);
   const [pagination, setPagination] = useAtom(paginationAtom); 
+  const [storeLogged] = useAtom(storeLoggedAtom);
   const { isOpen, openModal, closeModal } = useModal();
   const [company, setStore] = useState<TSupplier>(ResetSupplier);
   const router = useRouter();
@@ -85,7 +87,7 @@ export default function ModelTable() {
     if(permissionRead("A", "A5")) {
       getAll(1);
     };
-  }, []);
+  }, [storeLogged]);
 
   return (
     pagination.data.length > 0 ?

@@ -81,6 +81,7 @@ const handleApiErrors = (error: any) => {
 export const saveLocalStorage = (data: TDataLocal, hasToken: boolean = false) => {
   if(hasToken) {
     localStorage.setItem("token", data.token);
+    localStorage.setItem("refreshToken", data.refreshToken);
   };
 
   localStorage.setItem("typeUser", data.typeUser);
@@ -97,6 +98,7 @@ export const saveLocalStorage = (data: TDataLocal, hasToken: boolean = false) =>
 export const removeLocalStorage = () => { 
   localStorage.removeItem("typeUser");
   localStorage.removeItem("token");
+  localStorage.removeItem("refreshToken");
   localStorage.removeItem("name");
   localStorage.removeItem("email");
   localStorage.removeItem("admin");

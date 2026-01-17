@@ -1,5 +1,6 @@
 export type TDataLocal = {
     token: string;
+    refreshToken: string;
     name: string;
     email: string;
     admin: string;
@@ -13,6 +14,7 @@ export type TDataLocal = {
 
 export const ResetDataLocal: TDataLocal = {
     token: "",
+    refreshToken: "",
     name: "",
     email: "",
     admin: "",

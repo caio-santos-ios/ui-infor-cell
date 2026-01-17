@@ -6,6 +6,8 @@ export type TPurchaseOrderItem = {
     costDiscount: number;
     price: number;
     priceDiscount: number;
+    margin: number;
+    netProfit: number;
     quantity: number;
     supplierId: string;
     moveStock: string;
@@ -19,6 +21,8 @@ export const ResetPurchaseOrderItem: TPurchaseOrderItem = {
     costDiscount: 0,
     price: 0,
     priceDiscount: 0,
+    margin: 0,
+    netProfit: 0,
     quantity: 0,
     supplierId: "",
     moveStock: "yes",
@@ -28,16 +32,26 @@ export const ResetPurchaseOrderItem: TPurchaseOrderItem = {
 export type TPurchaseOrder = {
     id: string;
     code: string;
+    store: string;
+    status: string;
     date: any;
+    updatedAt: any;
     total: number;
     discount: number;
+    quantity: number;
     notes: string;
+    userApproval: string;
 }
 export const ResetPurchaseOrder: TPurchaseOrder = {
     id: "",
     code: "",
+    store: "",
+    status: "",
     date: new Date().toISOString().split('T')[0],
+    updatedAt: "",
     total: 0,
     discount: 0,
-    notes: ""
+    quantity: 0,
+    notes: "",
+    userApproval: "",
 }

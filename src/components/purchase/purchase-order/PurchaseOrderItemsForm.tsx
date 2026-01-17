@@ -22,6 +22,7 @@ import { IconEdit } from "@/components/iconEdit/IconEdit";
 import { IconDelete } from "@/components/iconDelete/IconDelete";
 import { ModalDelete } from "@/components/modalDelete/ModalDelete";
 import { useModal } from "@/hooks/useModal";
+import { toast } from "react-toastify";
 
 type TProp = {
   id?: string;
@@ -34,6 +35,7 @@ export default function PurchaseOrderIemsForm({id}: TProp) {
   const [variations, setVariation] = useState<any[]>([]);
   const [selectedValues, setSelectedValues] = useState<any[]>([]);
   const [items, setItem] = useState<TPurchaseOrderItem[]>([]);
+  const [status, setStatus] = useState<string>("Rascunho");
   const { isOpen, openModal, closeModal } = useModal();
   const router = useRouter();  
 
@@ -41,7 +43,13 @@ export default function PurchaseOrderIemsForm({id}: TProp) {
     defaultValues: ResetPurchaseOrderItem
   });
 
+  const costPrice = watch("cost");
+  const salePrice = watch("price");
+  const priceDiscount = watch("priceDiscount");
+
   const save = async (body: TPurchaseOrderItem) => {
+    if(id == "create") return toast.warn("É obrigatório salvar o Pedido na aba Dados Gerais.", {theme: 'colored'});
+    
     body.purchaseOrderId = id!;
     const newVariations: any[] = [];
     body.variations.forEach(x => {
@@ -121,6 +129,20 @@ export default function PurchaseOrderIemsForm({id}: TProp) {
     }
   };
 
+  const getByPurchaseId = async (id: string) => {
+    try {
+      setIsLoading(true);
+      const {data} = await api.get(`/purchase-orders/${id}`, configApi());
+      const result = data.result.data;
+      setStatus(result.status)
+      console.log(result.status)
+    } catch (error) {
+      resolveResponse(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const destroy = async () => {
     try {
       setIsLoading(true);
@@ -136,7 +158,6 @@ export default function PurchaseOrderIemsForm({id}: TProp) {
   };
 
   const getObj = async (obj: any, action: string) => {
-    // setStore(obj);
     setValue("id", obj.id);
 
     if(action == "edit") {
@@ -175,6 +196,27 @@ export default function PurchaseOrderIemsForm({id}: TProp) {
   };
 
   useEffect(() => {
+    const finalSaleValue = salePrice - priceDiscount;
+    const profit = finalSaleValue - costPrice;
+
+    setValue("netProfit", profit);
+
+    if (finalSaleValue > 0) {
+      const calculatedMargin = (profit / finalSaleValue) * 100;
+      setValue("margin", calculatedMargin);
+    } else {
+      setValue("margin", 0);
+    }
+  }, [costPrice, salePrice, priceDiscount, setValue]);
+
+  const handleMarginChange = (newMargin: number) => {
+    if (costPrice > 0 && newMargin < 100) {
+      const newSalePrice = costPrice / (1 - newMargin / 100) + priceDiscount;
+      // setValue("price", newSalePrice);
+    }
+  };
+
+  useEffect(() => {
     if(watch("productId")) {
       const product = products.find(x => x.id == watch("productId"));
       const list: any = product?.variations.filter(v => v.key).map(v => ({sequence: v.sequence, text: `${v.key}: ${v.value}`, value: v, selected: false, key: v.sequence}));
@@ -188,135 +230,190 @@ export default function PurchaseOrderIemsForm({id}: TProp) {
 
     if(id != "create") {
       getByPurchaseOrderId(id!);
+      getByPurchaseId(id!);
     };
   }, []);
 
   return (
     <>
-      <ComponentCard className="mb-3" title="Dados Gerais" hasHeader={false}>
-        <div className="grid grid-cols-6 gap-2">  
-          <div className="col-span-6 xl:col-span-2">
-            <Label title="Produto"/>
-            <select {...register("productId")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
-              <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Selecione</option>
+      {
+        status == "Rascunho" &&
+        <ComponentCard className="mb-3" title="Dados Gerais" hasHeader={false}>
+          <div className="grid grid-cols-6 gap-2">  
+            <div className="col-span-6 xl:col-span-2">
+              <Label title="Produto"/>
+              <select {...register("productId")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
+                <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Selecione</option>
+                {
+                  products.map((x: TProduct) => {
+                    return <option key={x.id} value={x.id} className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">{x.code} - {x.name}</option>
+                  })
+                }
+              </select>
+            </div>  
+            <div className="col-span-6 xl:col-span-2">
+              <Label title="Fornecedor"/>
+              <select {...register("supplierId")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
+                <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Selecione</option>
+                {
+                  suppliers.map((x: TSupplier) => {
+                    return <option key={x.id} value={x.id} className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">{x.tradeName}</option>
+                  })
+                }
+              </select>
+            </div>
+            <div className="col-span-6 xl:col-span-1">
+              <Label title="Valor Unitário"/>
+              <Controller
+                name="cost"
+                control={control}
+                defaultValue={0}
+                render={({ field: { onChange, value } }) => (
+                  <NumericFormat
+                    className="input-erp-primary input-erp-default" 
+                    value={value}
+                    onValueChange={(values) => {
+                      setValue("cost", values.floatValue ? values.floatValue : 0);
+                    }}
+                    thousandSeparator="."
+                    decimalSeparator=","
+                    prefix="R$ "
+                    decimalScale={2}
+                    fixedDecimalScale
+                    allowNegative={false}
+                    placeholder="Valor Unitário"
+                  />
+                )}
+              />
+            </div>
+            <div className="col-span-6 xl:col-span-1">
+              <Label title="Quantidade" />
+              <input placeholder="Quantidade" {...register("quantity")} type="number" className="input-erp-primary input-erp-default"/>
+            </div>
+            <div className="col-span-6 xl:col-span-1">
+              <Label title="Movimenta Estoque"/>
+              <select {...register("moveStock")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
+                <option value="yes" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Sim</option>
+                <option value="no" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Não</option>
+              </select>
+            </div>  
+            <div className="col-span-6 xl:col-span-1">
+              <Label title="Preço de Venda" required={false}/>
+              <Controller
+                name="price"
+                control={control}
+                defaultValue={0}
+                render={({ field: { onChange, value } }) => (
+                  <NumericFormat
+                    className="input-erp-primary input-erp-default" 
+                    value={value}
+                    onValueChange={(values) => {
+                      setValue("price", values.floatValue ? values.floatValue : 0);
+                    }}
+                    thousandSeparator="."
+                    decimalSeparator=","
+                    prefix="R$ "
+                    decimalScale={2}
+                    fixedDecimalScale
+                    allowNegative={false}
+                    placeholder="Preço de Venda"
+                  />
+                )}
+              />
+            </div>          
+            <div className="col-span-6 xl:col-span-1">
+              <Label title="Desconto de Venda" required={false}/>
+              <Controller
+                name="priceDiscount"
+                control={control}
+                defaultValue={0}
+                render={({ field: { onChange, value } }) => (
+                  <NumericFormat
+                    className="input-erp-primary input-erp-default" 
+                    value={value}
+                    onValueChange={(values) => {
+                      setValue("priceDiscount", values.floatValue ? values.floatValue : 0);
+                    }}
+                    thousandSeparator="."
+                    decimalSeparator=","
+                    prefix="R$ "
+                    decimalScale={2}
+                    fixedDecimalScale
+                    allowNegative={false}
+                    placeholder="Desconto de Venda"
+                  />
+                )}
+              />
+            </div>     
+            <div className="col-span-6 xl:col-span-1">
+              <Label title="Margem (%)" required={false}/>
+              <Controller
+                name="margin"
+                control={control}
+                defaultValue={0}
+                render={({ field: { onChange, value } }) => (
+                  <NumericFormat
+                    className="input-erp-primary input-erp-default" 
+                    value={value}
+                    onValueChange={(values) => {
+                      const val = values.floatValue ?? 0;
+                      onChange(val);
+                      handleMarginChange(val);
+                    }}
+                    thousandSeparator="."
+                    decimalSeparator=","
+                    suffix=" %" 
+                    decimalScale={2}
+                    fixedDecimalScale
+                    allowNegative={false}
+                    isAllowed={(values) => {
+                      const { floatValue } = values;
+                      return floatValue === undefined || floatValue <= 100;
+                    }}
+                    placeholder="0,00 %"
+                  />
+                )}
+              />
+            </div>     
+            <div>
+            <Label title="Lucro Líquido" required={false} />
+            <Controller
+              name="netProfit"
+              control={control}
+              render={({ field: { value } }) => (
+                <NumericFormat
+                  className={`input-erp-primary input-erp-default cursor-not-allowed font-bold ${
+                    (value ?? 0) >= 0 ? "text-green-500" : "text-red-500"
+                  }`}
+                  value={value}
+                  readOnly
+                  prefix="R$ "
+                  thousandSeparator="."
+                  decimalSeparator=","
+                  decimalScale={2}
+                  fixedDecimalScale
+                />
+              )}
+            />
+          </div>         
+            <div className="col-span-6 xl:col-span-6">
+              <Label title="Variações" required={false}/>
+              <MultiSelect options={variations} selectedValues={selectedValues} onChange={(e: any) => {setValue("variations", e)}} />
+            </div>          
+            <div className="col-span-6 xl:col-span-2 self-end">
+              <Button onClick={() => save({...getValues()})} type="submit" className="w-full xl:max-w-20 mt-2 mr-2" size="sm">Salvar</Button>
               {
-                products.map((x: TProduct) => {
-                  return <option key={x.id} value={x.id} className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">{x.code} - {x.name}</option>
-                })
+                watch("id") &&
+                <Button onClick={() => {
+                  reset(ResetPurchaseOrderItem);
+                  setSelectedValues([]);
+                  setVariation([]);
+                }} type="button" variant="outline" size="sm">Cancelar</Button>
               }
-            </select>
-          </div>  
-          <div className="col-span-6 xl:col-span-2">
-            <Label title="Fornecedor"/>
-            <select {...register("supplierId")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
-              <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Selecione</option>
-              {
-                suppliers.map((x: TSupplier) => {
-                  return <option key={x.id} value={x.id} className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">{x.tradeName}</option>
-                })
-              }
-            </select>
+            </div>          
           </div>
-          <div className="col-span-6 xl:col-span-1">
-            <Label title="Valor Unitário"/>
-            <Controller
-              name="cost"
-              control={control}
-              defaultValue={0}
-              render={({ field: { onChange, value } }) => (
-                <NumericFormat
-                  className="input-erp-primary input-erp-default" 
-                  value={value}
-                  onValueChange={(values) => {
-                    setValue("cost", values.floatValue ? values.floatValue : 0);
-                  }}
-                  thousandSeparator="."
-                  decimalSeparator=","
-                  prefix="R$ "
-                  decimalScale={2}
-                  fixedDecimalScale
-                  allowNegative={false}
-                  placeholder="Valor Unitário"
-                />
-              )}
-            />
-          </div>
-          <div className="col-span-6 xl:col-span-1">
-            <Label title="Quantidade" />
-            <input placeholder="Quantidade" {...register("quantity")} type="number" className="input-erp-primary input-erp-default"/>
-          </div>
-          <div className="col-span-6 xl:col-span-1">
-            <Label title="Movimenta Estoque"/>
-            <select {...register("moveStock")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
-              <option value="yes" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Sim</option>
-              <option value="no" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Não</option>
-            </select>
-          </div>  
-          <div className="col-span-6 xl:col-span-1">
-            <Label title="Preço de Venda" required={false}/>
-            <Controller
-              name="price"
-              control={control}
-              defaultValue={0}
-              render={({ field: { onChange, value } }) => (
-                <NumericFormat
-                  className="input-erp-primary input-erp-default" 
-                  value={value}
-                  onValueChange={(values) => {
-                    setValue("price", values.floatValue ? values.floatValue : 0);
-                  }}
-                  thousandSeparator="."
-                  decimalSeparator=","
-                  prefix="R$ "
-                  decimalScale={2}
-                  fixedDecimalScale
-                  allowNegative={false}
-                  placeholder="Preço de Venda"
-                />
-              )}
-            />
-          </div>          
-          <div className="col-span-6 xl:col-span-1">
-            <Label title="Desconto de Venda" required={false}/>
-            <Controller
-              name="priceDiscount"
-              control={control}
-              defaultValue={0}
-              render={({ field: { onChange, value } }) => (
-                <NumericFormat
-                  className="input-erp-primary input-erp-default" 
-                  value={value}
-                  onValueChange={(values) => {
-                    setValue("priceDiscount", values.floatValue ? values.floatValue : 0);
-                  }}
-                  thousandSeparator="."
-                  decimalSeparator=","
-                  prefix="R$ "
-                  decimalScale={2}
-                  fixedDecimalScale
-                  allowNegative={false}
-                  placeholder="Desconto de Venda"
-                />
-              )}
-            />
-          </div>          
-          <div className="col-span-6 xl:col-span-3">
-            <Label title="Variações" required={false}/>
-            <MultiSelect options={variations} selectedValues={selectedValues} onChange={(e: any) => {setValue("variations", e)}} />
-          </div>          
-          <div className="col-span-6 xl:col-span-2 self-end">
-            <Button onClick={() => save({...getValues()})} type="submit" className="w-full xl:max-w-20 mt-2 mr-2" size="sm">Salvar</Button>
-            {
-              watch("id") &&
-              <Button onClick={() => {
-                reset(ResetPurchaseOrderItem);
-                setSelectedValues([]);
-                setVariation([]);
-              }} type="button" variant="outline" size="sm">Cancelar</Button>
-            }
-          </div>          
-        </div>
-      </ComponentCard>
+        </ComponentCard>
+      }
       
       {
         items.length > 0 &&
@@ -325,44 +422,49 @@ export default function PurchaseOrderIemsForm({id}: TProp) {
             {
               items.map((x: any) => {
                 return (
-                  <div key={x.id} className="flex justify-between gap-6 col-span-6 p-5 mb-4 bg-white border border-gray-200 rounded-xl shadow-theme-sm dark:border-gray-800 dark:bg-white/5">
-                    <div>
-                      <p className="mb-1.5 block text-sm font-medium text-gray-900 dark:text-gray-100">Produto</p>
-                      <p className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">{x.productName}</p>
-                    </div>
-                    <div>
-                      <p className="mb-1.5 block text-sm font-medium text-gray-900 dark:text-gray-100">Fornecedor</p>
-                      <p className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">{x.supplierName}</p>
-                    </div>
-                    <div>
-                      <p className="mb-1.5 block text-sm font-medium text-gray-900 dark:text-gray-100">Valor Unitário</p>
-                      <p className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">{formattedMoney(x.cost)}</p>
-                    </div>
-                    <div>
-                      <p className="mb-1.5 block text-sm font-medium text-gray-900 dark:text-gray-100">Quantidade</p>
-                      <p className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">{x.quantity}</p>
-                    </div>
-                    <div>
-                      <p className="mb-1.5 block text-sm font-medium text-gray-900 dark:text-gray-100">Movimenta Estoque</p>
-                      <p className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">{x.moveStock == 'yes' ? 'Sim' : 'Não'}</p>
-                    </div>
-                    <div>
-                      <p className="mb-1.5 block text-sm font-medium text-gray-900 dark:text-gray-100">Preço de Venda</p>
-                      <p className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">{formattedMoney(x.price)}</p>
-                    </div>
-                    <div>
-                      <p className="mb-1.5 block text-sm font-medium text-gray-900 dark:text-gray-100">Desconto de Venda</p>
-                      <p className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">{formattedMoney(x.priceDiscount)}</p>
-                    </div>
-                    <div className="flex self-center gap-3">
+                  <div key={x.id} className="gap-6 col-span-6 p-5 mb-4 bg-white border border-gray-200 rounded-xl shadow-theme-sm dark:border-gray-800 dark:bg-white/5">
+                    <div className="grid grid-cols-12">
+                      <div className="col-span-12 lg:col-span-3">
+                        <p className="mb-1.5 block text-sm font-medium text-gray-900 dark:text-gray-100">Produto</p>
+                        <p className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">{x.productName}</p>
+                      </div>
+                      <div className="col-span-12 lg:col-span-2">
+                        <p className="mb-1.5 block text-sm font-medium text-gray-900 dark:text-gray-100">Fornecedor</p>
+                        <p className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">{x.supplierName}</p>
+                      </div>
+                      <div className="col-span-6 lg:col-span-1">
+                        <p className="mb-1.5 block text-sm font-medium text-gray-900 dark:text-gray-100">Valor Unitário</p>
+                        <p className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">{formattedMoney(x.cost)}</p>
+                      </div>
+                      <div className="col-span-6 lg:col-span-1">
+                        <p className="mb-1.5 block text-sm font-medium text-gray-900 dark:text-gray-100">Quantidade</p>
+                        <p className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">{x.quantity}</p>
+                      </div>
+                      <div className="col-span-6 lg:col-span-2">
+                        <p className="mb-1.5 block text-sm font-medium text-gray-900 dark:text-gray-100">Movimenta Estoque</p>
+                        <p className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">{x.moveStock == 'yes' ? 'Sim' : 'Não'}</p>
+                      </div>
+                      <div className="col-span-6 lg:col-span-1">
+                        <p className="mb-1.5 block text-sm font-medium text-gray-900 dark:text-gray-100">Preço de Venda</p>
+                        <p className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">{formattedMoney(x.price)}</p>
+                      </div>
+                      <div className="col-span-6 lg:col-span-1">
+                        <p className="mb-1.5 block text-sm font-medium text-gray-900 dark:text-gray-100">Desconto Venda</p>
+                        <p className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">{formattedMoney(x.priceDiscount)}</p>
+                      </div>
                       {
-                        permissionUpdate("A", "A2") &&
-                        <IconEdit action="edit" obj={x} getObj={getObj}/>
-                      }   
-                      {
-                        permissionDelete("A", "A2") &&
-                        <IconDelete action="delete" obj={x} getObj={getObj}/>                                                   
-                      }      
+                        status == "Rascunho" &&
+                        <div className="flex self-center gap-3">
+                          {
+                            permissionUpdate("A", "A2") &&
+                            <IconEdit action="edit" obj={x} getObj={getObj}/>
+                          }   
+                          {
+                            permissionDelete("A", "A2") &&
+                            <IconDelete action="delete" obj={x} getObj={getObj}/>                                                   
+                          }      
+                        </div>
+                      }
                     </div>
                   </div>
                 )

@@ -1,11 +1,11 @@
-export type TExchange = {
+export type TTransfer = {
     purchaseOrderItemId: string;
     storeOriginId: string;
     storeDestinationId: string;
     stockId: string;
     quantity: number;
 }
-export const ResetExchange: TExchange = {
+export const ResetTransfer: TTransfer = {
     purchaseOrderItemId: "",
     storeOriginId: "",
     storeDestinationId: "",

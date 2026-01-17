@@ -17,14 +17,16 @@ import { useModal } from "@/hooks/useModal";
 import { ModalDelete } from "@/components/modalDelete/ModalDelete";
 import { NotData } from "@/components/not-data/NotData";
 import { ResetPurchaseOrder, TPurchaseOrder } from "@/types/purchase/purchase-order/purchase-order.type";
-import { FaCheck } from "react-icons/fa";
+import { FaCheck, FaEye } from "react-icons/fa";
 import { Modal } from "@/components/ui/modal";
 import Button from "@/components/ui/button/Button";
 import { GoAlert } from "react-icons/go";
+import { storeLoggedAtom } from "@/jotai/global/store.jotai";
 
 export default function PurchaseOrderTable() {
   const [_, setLoading] = useAtom(loadingAtom);
   const [pagination, setPagination] = useAtom(paginationAtom); 
+  const [storeLogged] = useAtom(storeLoggedAtom);
   const { isOpen, openModal, closeModal } = useModal();
   const [purchaseOrder, setPurchaseOrder] = useState<TPurchaseOrder>(ResetPurchaseOrder);
   const [modalApproval, setModalApproval] = useState<boolean>(false);
@@ -81,7 +83,7 @@ export default function PurchaseOrderTable() {
   const getObj = (obj: any, action: string) => {
     setPurchaseOrder(obj);
 
-    if(action == "edit") {
+    if(action == "edit" || action == "view") {
       router.push(`/purchase/purchase-order/${obj.id}`);
     };
 
@@ -105,7 +107,6 @@ export default function PurchaseOrderTable() {
 
   const normalize = (item: any) => {
     if(item["items"]) {
-      console.log(item.items)
       return item.items.length > 0;
     };
     return false;
@@ -115,7 +116,7 @@ export default function PurchaseOrderTable() {
     if(permissionRead("G", "G1")) {
       getAll(1);
     };
-  }, []);
+  }, [storeLogged]);
 
   return (
     pagination.data.length > 0 ?
@@ -130,7 +131,7 @@ export default function PurchaseOrderTable() {
                   <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Data da Compra</TableCell>
                   <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Status</TableCell>
                   <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Total</TableCell>
-                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Desconto</TableCell>
+                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Quantidade</TableCell>
                   <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Data de Criação</TableCell>
                   <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Ações</TableCell>
                 </TableRow>
@@ -143,22 +144,28 @@ export default function PurchaseOrderTable() {
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{maskDate(x.date)}</TableCell>
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.status}</TableCell>
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{formattedMoney(x.total)}</TableCell>
-                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{formattedMoney(x.discount)}</TableCell>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.quantity}</TableCell>
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{maskDate(x.createdAt)}</TableCell>
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
                       <div className="flex gap-3">       
                         {
-                          permissionUpdate("G", "G1") &&
+                          permissionUpdate("G", "G1") && x.status == 'Rascunho' &&
                           <IconEdit action="edit" obj={x} getObj={getObj}/>
                         }   
                         {
-                          permissionUpdate("G", "G1") && normalize(x) &&
+                          permissionUpdate("G", "G1") && normalize(x) && x.status == 'Rascunho' &&
                           <div onClick={() => getObj(x, "approval")} className="cursor-pointer text-green-400 hover:text-green-500" >
                             <FaCheck />
                           </div>
                         }   
                         {
-                          permissionDelete("G", "G1") &&
+                          permissionUpdate("G", "G1") && x.status == 'Finalizado' &&
+                          <div onClick={() => getObj(x, "view")} className="cursor-pointer text-blue-400 hover:text-blue-500" >
+                            <FaEye />
+                          </div>
+                        }   
+                        {
+                          permissionDelete("G", "G1") && x.status == 'Rascunho' &&
                           <IconDelete action="delete" obj={x} getObj={getObj}/>                                                   
                         }                                          
                       </div>
