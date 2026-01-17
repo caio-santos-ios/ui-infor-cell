@@ -23,7 +23,7 @@ export default function ExchangeTable() {
       setLoading(true);
       const {data} = await api.get(`/exchanges?deleted=false&orderBy=createdAt&sort=desc&pageSize=10&pageNumber=${page}`, configApi());
       const result = data.result;
-      console.log(result.data)
+
       setPagination({
         currentPage: result.currentPage,
         data: result.data ?? [],
