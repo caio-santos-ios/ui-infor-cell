@@ -19,7 +19,7 @@ export default function SignUpForm() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
- 
+
   const { register, handleSubmit, reset, setValue, formState: { errors }} = useForm<TSignUp>({
     defaultValues: ResetSignUp
   });
@@ -47,8 +47,8 @@ export default function SignUpForm() {
   }, [isChecked]);
 
   return (
-    <div className="flex flex-col flex-1 lg:w-1/2 w-full max-w-[90dvw] overflow-y-auto no-scrollbar">
-      <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
+    <div className="flex flex-col flex-1 lg:w-1/2 w-full max-w-[90dvw] h-dvh overflow-y-auto no-scrollbar">
+      <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto py-4">
         <div>
           <form onSubmit={handleSubmit(create)}>
             <div className="space-y-5">

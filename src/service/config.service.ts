@@ -84,7 +84,10 @@ export const saveLocalStorage = (data: TDataLocal, hasToken: boolean = false) =>
     localStorage.setItem("refreshToken", data.refreshToken);
   };
 
-  localStorage.setItem("typeUser", data.typeUser);
+  // localStorage.setItem("typeUser", data.typeUser);
+  localStorage.setItem("expirationDate", data.expirationDate);
+  localStorage.setItem("typePlan", data.typePlan);
+  localStorage.setItem("subscriberPlan", data.subscriberPlan);
   localStorage.setItem("name", data.name);
   localStorage.setItem("email", data.email);
   localStorage.setItem("admin", data.admin);
@@ -96,7 +99,10 @@ export const saveLocalStorage = (data: TDataLocal, hasToken: boolean = false) =>
 };
 
 export const removeLocalStorage = () => { 
-  localStorage.removeItem("typeUser");
+  // localStorage.removeItem("typeUser");
+  localStorage.removeItem("expirationDate");
+  localStorage.removeItem("typePlan");
+  localStorage.removeItem("subscriberPlan");
   localStorage.removeItem("token");
   localStorage.removeItem("refreshToken");
   localStorage.removeItem("name");

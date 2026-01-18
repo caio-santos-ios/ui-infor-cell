@@ -10,6 +10,9 @@ export type TDataLocal = {
     nameStore: string;
     modules: any[];
     typeUser: string;
+    typePlan: string;
+    subscriberPlan: string;
+    expirationDate: string;
 }
 
 export const ResetDataLocal: TDataLocal = {
@@ -24,4 +27,7 @@ export const ResetDataLocal: TDataLocal = {
     nameStore: "",
     modules: [],
     typeUser: "",
+    typePlan: "",
+    subscriberPlan: "",
+    expirationDate: ""
 } 

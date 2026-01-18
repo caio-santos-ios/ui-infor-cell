@@ -7,6 +7,7 @@ import UserDropdown from "@/components/header/UserDropdown";
 import { CompanyLogo } from "@/components/logoCompany/LogoCompany";
 import { useSidebar } from "@/context/SidebarContext";
 import { syncAtom, userAdmin } from "@/jotai/auth/auth.jotai";
+import { calculateTimeLeft, TimeRemaining } from "@/utils/mask.util";
 import { useAtom } from "jotai";
 import Link from "next/link";
 import React, { useState ,useEffect,useRef} from "react";
@@ -15,6 +16,9 @@ const AppHeader: React.FC = () => {
   const [sync] = useAtom(syncAtom);
   const [isAdmin] = useAtom(userAdmin);  
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
+  const [typePlan, setTypePlan] = useState<string>("");
+  const [timePlan, setTimePlan] = useState<string>("");
+  const [timeLeft, setTimeLeft] = useState<TimeRemaining | null>(null);
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
 
   const handleToggle = () => {
@@ -31,6 +35,21 @@ const AppHeader: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    const storedDate = localStorage.getItem("expirationDate");
+
+    if (!storedDate) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft(calculateTimeLeft(storedDate));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const typePlan = localStorage.getItem("typePlan");
+    if(typePlan) setTypePlan(typePlan);
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key === "k") {
         event.preventDefault();
@@ -60,10 +79,24 @@ const AppHeader: React.FC = () => {
               </svg>
             )}
           </button>
+          
+          {
+            typePlan == "free" && 
+            <>
+              <Link href="/plans" className="flex bg-brand-500 text-brand-200 px-4 h-10 font-bold justify-center items-center rounded-lg">
+                <span>Assinar Plano</span>
+              </Link>
+    
+              <h1 className="text-brand-500 font-bold hidden lg:flex">Teste termina: {timeLeft?.days} dias, {timeLeft?.hours}:{timeLeft?.minutes}:{timeLeft?.seconds}</h1>
+            </>
+          }
 
-          <Link href={`${isAdmin ? '/dashboard' : '/master-data/profile'}`} className="lg:hidden">
-            <CompanyLogo height={100} width={100}/>
-          </Link>
+          {
+            typePlan != "free" && 
+            <Link href={`${isAdmin ? '/dashboard' : '/master-data/profile'}`} className="lg:hidden">
+              <CompanyLogo height={100} width={100}/>
+            </Link>
+          }
 
           <button onClick={toggleApplicationMenu} className="flex items-center justify-center w-10 h-10 text-gray-700 rounded-lg z-1 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 lg:hidden" >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
