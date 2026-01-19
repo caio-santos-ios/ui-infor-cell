@@ -5,6 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Autorization } from '@/components/autorization/Autorization';
 import { Loading } from '@/components/loading/Loading';
 import { Providers } from "./providers"; 
+import { Modal403 } from '@/components/modal-403/Modal403';
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -21,6 +22,7 @@ export default function RootLayout({
         <Providers>
           <Loading />
           <Autorization /> 
+          <Modal403 />
           {children}
         </Providers>
       </body>

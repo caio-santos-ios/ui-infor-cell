@@ -1,5 +1,9 @@
+import { modal403Atom } from "@/jotai/auth/auth.jotai";
 import { TDataLocal } from "@/types/auth/dataLocal.type";
+import { getDefaultStore } from "jotai";
 import { toast } from "react-toastify";
+
+const store = getDefaultStore();
 
 export const configApi = (contentTypeJson: boolean = true) => {
   const localToken = localStorage.getItem("token");
@@ -34,7 +38,7 @@ export const resolveResponse = (response: any) => {
     });
     return;
   };
-
+  
   const result = response.response.data.result;
 
   if(response.status >= 400 && response.status < 500) {
@@ -48,7 +52,12 @@ export const resolveResponse = (response: any) => {
         removeLocalStorage();
       }, 1000);
       return;
-    }
+    };
+
+    if(response.status == 403) {
+      store.set(modal403Atom, true);
+      return;
+    };
 
     toast.warn(result.message, {
       theme: 'colored'
