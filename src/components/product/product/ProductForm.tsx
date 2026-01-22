@@ -10,6 +10,10 @@ import { ResetEmployee, TEmployee } from "@/types/master-data/employee/employee.
 import ProductDataForm from "./ProductDataForm";
 import ProductImageForm from "./ProductImageForm";
 import ProductVariationForm from "./ProductVariationForm";
+import ProductStockForm from "./ProductStockForm";
+import ProductPriceCostForm from "./ProductPriceCostForm";
+import ProductTaxForm from "./ProductTaxForm";
+import ProductSerialControlForm from "./ProductSerialControlForm";
 
 type TProp = {
   id?: string;
@@ -18,11 +22,15 @@ type TProp = {
 export default function ProductForm({id}: TProp) {
   const [_, setIsLoading] = useAtom(loadingAtom);
   const [tabs] = useState<{key: string; title: string;}[]>([
-    {key: 'data', title: 'Dados Gerais'},
+    {key: 'data', title: 'Identificação do Produto'},
+    {key: 'stock', title: 'Controle de Estoque'},
+    {key: 'priceCost', title: 'Preços e Custos'},
+    {key: 'tax', title: 'Fiscal (NF-e / NFC-e)'},
     {key: 'variations', title: 'Variações'},
-    {key: 'images', title: 'Fotos'}
+    {key: 'serialControl', title: 'Controle de Seriais'},
+    {key: 'images', title: 'Galeria'}
   ]);
-  const [currentTab, setCurrentTab] = useState<any>({key: 'data', title: 'Dados Gerais'});
+  const [currentTab, setCurrentTab] = useState<any>({key: 'data', title: 'Identificação do Produto'});
 
   const { reset } = useForm<TEmployee>({
     defaultValues: ResetEmployee
@@ -49,7 +57,7 @@ export default function ProductForm({id}: TProp) {
 
   return (
     <>    
-      <div className="flex items-center font-medium gap-2 rounded-lg transition  px-2 py-2 text-sm bg-white text-gray-700 ring-1 ring-inset ring-gray-300 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 w-full mb-3">
+      <div className="flex flex-wrap items-center font-medium gap-2 rounded-lg transition  px-2 py-2 text-sm bg-white text-gray-700 ring-1 ring-inset ring-gray-300 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 w-full mb-3">
         {
           tabs.map((x: any) => {
             return <button onClick={() => setCurrentTab(x)} className={`${currentTab.key == x.key ? 'bg-brand-500 text-white' : ''} px-3 py-1 rounded-md`} key={x.key}>{x.title}</button>
@@ -59,7 +67,11 @@ export default function ProductForm({id}: TProp) {
 
       <div className="mb-2">
         {currentTab.key == "data" && <ProductDataForm id={id} />}
+        {currentTab.key == "stock" && <ProductStockForm id={id} />}
+        {currentTab.key == "priceCost" && <ProductPriceCostForm id={id} />}
+        {currentTab.key == "tax" && <ProductTaxForm id={id} />}
         {currentTab.key == "variations" && <ProductVariationForm id={id} />}
+        {currentTab.key == "serialControl" && <ProductSerialControlForm id={id} />}
         {currentTab.key == "images" && <ProductImageForm id={id} />}
       </div>     
     </>

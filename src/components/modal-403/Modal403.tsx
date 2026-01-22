@@ -10,11 +10,6 @@ import { useEffect } from "react";
 export const Modal403 = () => {
     const [modal, setModal] = useAtom(modal403Atom);
     const pathname = usePathname();
-
-    useEffect(() => {
-        const expirationDate = localStorage.getItem("expirationDate");
-        console.log(expirationDate)
-    }, []);
     
     return (
         <Modal isOpen={modal && pathname != '/plans'} onClose={() => setModal(false)} showCloseButton={false} className="max-w-[700px] m-4">

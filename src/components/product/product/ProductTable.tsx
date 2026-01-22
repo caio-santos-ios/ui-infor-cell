@@ -84,7 +84,7 @@ export default function ProductTable() {
   };
 
   useEffect(() => {
-    if(permissionRead("A", "A5")) {
+    if(permissionRead("B", "B1")) {
       getAll(1);
     };
   }, [storeLogged]);
@@ -118,11 +118,11 @@ export default function ProductTable() {
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
                       <div className="flex gap-3">       
                         {
-                          permissionUpdate("A", "A2") &&
+                          permissionUpdate("B", "B1") &&
                           <IconEdit action="edit" obj={x} getObj={getObj}/>
                         }   
                         {
-                          permissionDelete("A", "A2") &&
+                          permissionDelete("B", "B1") &&
                           <IconDelete action="delete" obj={x} getObj={getObj}/>                                                   
                         }                                          
                     </div>

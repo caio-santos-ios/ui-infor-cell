@@ -9,6 +9,7 @@ import ComponentCard from "@/components/common/ComponentCard";
 import { useRouter } from "next/navigation";
 import DropzoneComponent from "@/components/form/form-elements/DropZone";
 import Carousel from "@/components/ui/carousel/Carousel";
+import Label from "@/components/form/Label";
 
 type TProp = {
   id?: string;
@@ -62,7 +63,6 @@ export default function ProductImageForm({id}: TProp) {
       const {data} = await api.get(`/attachments?deleted=false`, configApi());
       const result = data.result.data;
       const list = result.map((x: any) => ({id: x.id, image: `${uriBase}/${x.uri}`, title: "", description: ""}))
-      console.log(list)
       setImage(list)
     } catch (error) {
       resolveResponse(error);
@@ -103,8 +103,10 @@ export default function ProductImageForm({id}: TProp) {
     <>
       <ComponentCard title="Dados Gerais" hasHeader={false}>
         <div className="grid grid-cols-6 gap-2 container-form">  
-          <div className="col-span-6 lg:col-span-3">
-            <DropzoneComponent sendFile={uploadFile} title="" />
+          <div className="col-span-6 lg:col-span-2">
+            <Label title="Arquivo" required={false}/>
+            <input type="file" className="input-erp-primary input-erp-default" id="" />
+            {/* <DropzoneComponent sendFile={uploadFile} title="" /> */}
           </div>          
           <div className="col-span-6 lg:col-span-3">
             <Carousel slides={images} />
