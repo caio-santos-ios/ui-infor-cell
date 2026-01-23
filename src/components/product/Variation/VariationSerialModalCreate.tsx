@@ -14,6 +14,7 @@ import { MdClose, MdPlusOne } from "react-icons/md";
 import React, { useEffect, useState } from "react";
 import { IoMdAdd } from "react-icons/io";
 import { FaCheck } from "react-icons/fa6";
+import { toast } from "react-toastify";
 
 type TProps = {
   id?: string;
@@ -50,37 +51,46 @@ export default function VariationSerialModalCreate({id, index, send}: TProps) {
     }
   };
   
-  const update = async (showToastfy: boolean = true) => {
-    const body = getValues(); 
-    variation.items[index] = body;
-    
+  const update = async (indexSerial: number, action: string, showToastfy: boolean = true) => {
     try {
       setIsLoading(true);
+      const body = getValues(); 
+      variation.items[index] = body;
+      variation.serial = body.serial[indexSerial].value;
+      variation.serialAction = action;
       await api.put(`/variations`, variation, configApi());
       if(showToastfy) {
         resolveResponse({ status: 200, message: "Serial atualizado!" });
       };
-      await getById(id!);
+      
+      return true;
     } catch (error) {
       resolveResponse(error);
+      return false;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const updateVariation = (isUpdate: boolean = false) => {
-    if(!isUpdate) {
-      append({
-        value: ''
-      });
-    }
+  const updateVariation = async (indexSerial: number, action: string, isUpdate: boolean = false) => {
+    const body = getValues(); 
 
-    update(); 
+    if(!body.serial[indexSerial].value) return toast.warn("Número de série é obrigatório", {theme: 'colored'});
+    const success = await update(indexSerial, action);
+  
+    if (success) {
+      await getById(id!);
+      
+      if (action === "create") {
+        append({ value: "" }); 
+        setTotalSerial(prev => prev + 1);
+      }
+    };    
   };
 
   const removeVariation = (index: number) => {
     remove(index);
-    update(false);
+    update(index, "delete", false);
   };
 
   useEffect(() => {
@@ -98,7 +108,7 @@ export default function VariationSerialModalCreate({id, index, send}: TProps) {
         </div>
 
         <form className="flex flex-col">
-          <div className="custom-scrollbar max-[80dvh] overflow-y-auto px-2 pb-3">
+          <div className="custom-scrollbar max-h-[70dvh] overflow-y-auto px-2 pb-3">
             <div className="mt-7">
               <div className="grid grid-cols-3 gap-4">
                 {fields.map((field, i) => (
@@ -115,11 +125,11 @@ export default function VariationSerialModalCreate({id, index, send}: TProps) {
                     <div className="col-span-6 xl:col-span-1 self-end flex gap-2">
                       {
                         (totalSerial - 1) == i &&
-                        <div title="Adicionar" onClick={() => updateVariation()} className="cursor-pointer text-black dark:text-white bg-green-400 hover:bg-green-600 rounded-lg flex justify-center items-center w-12 h-8">
+                        <div title="Adicionar" onClick={() => updateVariation(i, "create")} className="cursor-pointer text-black dark:text-white bg-green-400 hover:bg-green-600 rounded-lg flex justify-center items-center w-12 h-8">
                           <IoMdAdd />
                         </div>
                       }
-                      <div title="Salvar" onClick={() => updateVariation(true)} className="cursor-pointer text-black dark:text-white bg-blue-400 hover:bg-blue-600 rounded-lg flex justify-center items-center w-12 h-8">
+                      <div title="Salvar" onClick={() => updateVariation(i, "update", true)} className="cursor-pointer text-black dark:text-white bg-blue-400 hover:bg-blue-600 rounded-lg flex justify-center items-center w-12 h-8">
                         <FaCheck />
                       </div>
                       <div title="Excluír" onClick={() => removeVariation(i)} className="cursor-pointer text-black dark:text-white bg-red-400 hover:bg-red-600 rounded-lg flex justify-center items-center w-12 h-8">

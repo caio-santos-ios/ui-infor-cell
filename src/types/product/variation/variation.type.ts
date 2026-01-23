@@ -16,10 +16,14 @@ export const ResetVariationItem: TVariationItem = {
 
 export type TVariation = {
     name: string;
+    serial: string;
+    serialAction: string;
     items: TVariationItem[]
 }
 
 export const ResetVariation: TVariation = {
     name: "",
+    serial: "",
+    serialAction: "",
     items: [{key: '', value: '', active: true, sequence: 1, serial: [{value: ''}]}]
 }
