@@ -13,9 +13,7 @@ import { FaPlus, FaCheck } from "react-icons/fa6";
 import { MdClose, MdQrCode } from "react-icons/md";
 import Switch from "@/components/form/Switch";
 import { TVariation } from "@/types/product/variation/variation.type";
-import VariationSerialModalCreate from "./VariationSerialModalCreate";
 import { variationSerialModalAtom } from "@/jotai/product/variation/variation.jotai";
-import { Modal } from "@/components/ui/modal";
 
 type TProp = { id?: string; };
 
@@ -67,10 +65,11 @@ export default function VariationForm({ id }: TProp) {
 
   const addNewVariation = () => {
     append({
-      sequence: fields.length + 1,
+      code: (fields.length + 1).toString().padStart(6, '0'),
       key: "",
       value: "",
       active: true,
+      deleted: false,
       serial: [{value: ''}]
     });
 
@@ -78,7 +77,17 @@ export default function VariationForm({ id }: TProp) {
   };
 
   const removeVariation = (index: number) => {
-    remove(index);
+    let itemsNew = getValues().items;
+    const newItem: any = {...itemsNew[index]};
+    newItem.deleted = true;
+    itemsNew[index] = newItem;
+
+    reset({
+      ...getValues(),
+      items: itemsNew,
+    });
+    console.log(itemsNew)
+    // remove(index);
     update();
   };
 
@@ -95,6 +104,7 @@ export default function VariationForm({ id }: TProp) {
     <ComponentCard title={`Variação: ${watch('name')}`} hasHeader={true}>
       <div className="grid grid-cols-6 gap-4 container-form">
         {fields.map((field, index) => (
+          !field.deleted &&
           <React.Fragment key={field.id}>
             <div className="col-span-6 xl:col-span-2">
               <Label title="Nome (Atributo)" required={false}/>
@@ -129,9 +139,9 @@ export default function VariationForm({ id }: TProp) {
               <div title="Excluír" onClick={() => removeVariation(index)} className="cursor-pointer text-black dark:text-white bg-red-400 hover:bg-red-600 p-1 rounded-lg">
                 <MdClose size={20}/>
               </div>
-              <div title="Adicionar serial" onClick={() => openModalSerial(index)} className="cursor-pointer text-black dark:text-white bg-blue-400 hover:bg-blue-600 p-1 rounded-lg">
+              {/* <div title="Adicionar serial" onClick={() => openModalSerial(index)} className="cursor-pointer text-black dark:text-white bg-blue-400 hover:bg-blue-600 p-1 rounded-lg">
                 <MdQrCode size={20}/>
-              </div>
+              </div> */}
             </div>
           </React.Fragment>
         ))}
@@ -150,7 +160,7 @@ export default function VariationForm({ id }: TProp) {
         </div>
       </div>
 
-      <VariationSerialModalCreate id={id} send={closeModalSerial} index={variationIndex} />
+      {/* <VariationSerialModalCreate id={id} send={closeModalSerial} index={variationIndex} /> */}
     </ComponentCard>
   );
 }

@@ -1,21 +1,17 @@
 export type TVariationProduct = {
-    sequence: number; 
-    key: string; 
-    value: string;
-    cost: number;
-    price: number;
-    sku: string;
-    status: boolean;
+    code: string;
+    barcode: string;
+    variationId: string;
+    variationItemId: string;
+    stock: number;
 }
 
-export const ResetVariationProduct = {
-    sequence: 0, 
-    key: "", 
-    value: "",
-    cost: 0,
-    price: 0,
-    sku: "",
-    status: true
+export const ResetVariationProduct: TVariationProduct = {
+    code: "",
+    barcode: "",
+    variationId: "",
+    variationItemId: "",
+    stock: 0,
 }
 
 export type TProductSerial = {
@@ -84,7 +80,7 @@ export type TProduct = {
     margin: number;
     hasDiscount: string;
     
-    ncm: number;
+    ncm: string;
     cest: number;
     cfopIn: number;
     cfopOut: number;
@@ -143,7 +139,7 @@ export const ResetProduct: TProduct = {
     margin: 0,
     hasDiscount: "yes",
 
-    ncm: 0,
+    ncm: "",
     cest: 0,
     cfopIn: 0,
     cfopOut: 0,

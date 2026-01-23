@@ -16,6 +16,7 @@ import { TCategorie } from "@/types/product/categorie/categorie.type";
 import { TModel } from "@/types/product/model/model.type";
 import Switch from "@/components/form/Switch";
 import TextArea from "@/components/form/input/TextArea";
+import { hasMoveStockProductAtom, hasVariationProductAtom } from "@/jotai/product/product.jotai";
 
 type TProp = {
   id?: string;
@@ -23,6 +24,8 @@ type TProp = {
 
 export default function ProductDataForm({id}: TProp) {
   const [_, setIsLoading] = useAtom(loadingAtom);
+  const [__, setHasMoveStock] = useAtom(hasMoveStockProductAtom);
+  const [___, setHasVariation] = useAtom(hasVariationProductAtom);
   const [categories, setCategory] = useState<TCategorie[]>([]);
   const [models, setModel] = useState<TModel[]>([]);
   const [unitOfMeasure] = useState<any[]>([
@@ -128,6 +131,14 @@ export default function ProductDataForm({id}: TProp) {
   };
 
   useEffect(() => {
+    const hasMoveStock: string = watch("moveStock");
+    const hasVariations: string = watch("hasVariations");
+
+    setHasMoveStock(hasMoveStock);
+    setHasVariation(hasVariations);
+  }, [watch("moveStock"), watch("hasVariations")]);
+
+  useEffect(() => {
     setModel([]);
 
     if(watch("categoryId")) {
@@ -170,17 +181,6 @@ export default function ProductDataForm({id}: TProp) {
             </select>
           </div>  
           <div className="col-span-6 xl:col-span-2">
-            <Label title="Subcategoria" required={false}/>
-            <select {...register("subCategory")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
-              <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Selecione</option>
-              {
-                categories.map((x: TCategorie) => {
-                  return <option key={x.id} value={x.id} className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">{x.code} - {x.name}</option>
-                })
-              }
-            </select>
-          </div>  
-          <div className="col-span-6 xl:col-span-2">
             <Label title="Modelo"/>
             <select {...register("modelId")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
               <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Selecione</option>
@@ -211,9 +211,23 @@ export default function ProductDataForm({id}: TProp) {
             </select>
           </div>  
           <div className="col-span-6 xl:col-span-1">
-            <Label title={`Status ${active ? 'Ativo' : 'Inativo'}`} required={false}/>
+            <Label title="Movimenta Estoque?" required={false}/>
+            <select {...register("moveStock")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
+              <option value="yes" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Sim</option>
+              <option value="no" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Não</option>
+            </select>
+          </div>    
+          <div className="col-span-6 xl:col-span-1">
+            <Label title="Possui Variações?" required={false}/>
+            <select {...register("hasVariations")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
+              <option value="yes" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Sim</option>
+              <option value="no" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Não</option>
+            </select>
+          </div>    
+          <div className="col-span-6 xl:col-span-1">
+            <Label title={`${active ? 'Ativo' : 'Inativo'}`} required={false}/>
             <Switch defaultChecked={active} onChange={(e) => {setValue("active", e)}} />
-          </div>  
+          </div> 
           <div className="col-span-6">
             <Label title="Descrição Curta" required={false} />
             <input maxLength={60} placeholder="Descrição Curta" {...register("description")} type="text" className="input-erp-primary input-erp-default"/>

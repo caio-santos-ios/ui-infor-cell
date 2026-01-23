@@ -1,9 +1,7 @@
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
-import { VariationButtonCreate } from "@/components/product/Variation/VariationButtonCreate";
-import VariationTable from "@/components/product/Variation/VariationTable";
-import Button from "@/components/ui/button/Button";
+import { VariationButtonCreate } from "@/components/product/variation/VariationButtonCreate";
+import VariationTable from "@/components/product/variation/VariationTable";
 import { Metadata } from "next";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Telemovvi | Variações",

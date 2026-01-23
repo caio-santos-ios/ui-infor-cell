@@ -154,10 +154,10 @@ export default function ProductTaxForm({id}: TProp) {
             />
           </div>
           
-          <div className="col-span-6 xl:col-span-2">
+          {/* <div className="col-span-6 xl:col-span-2">
             <Label title="CST PIS" required={false}/>
             <input {...register("cstPis")} placeholder="CST PIS" className="input-erp-primary input-erp-default w-full" />
-          </div>
+          </div> */}
 
           <div className="col-span-6 xl:col-span-2">
             <Label title="Alíquota PIS" required={false}/>
@@ -177,10 +177,10 @@ export default function ProductTaxForm({id}: TProp) {
             />
           </div>
 
-          <div className="col-span-6 xl:col-span-2">
+          {/* <div className="col-span-6 xl:col-span-2">
             <Label title="CST COFINS" required={false}/>
             <input {...register("cstCofins")} placeholder="CST COFINS" className="input-erp-primary input-erp-default w-full" />
-          </div>
+          </div> */}
 
           <div className="col-span-6 xl:col-span-2">
             <Label title="Alíquota COFINS" required={false}/>
@@ -200,10 +200,10 @@ export default function ProductTaxForm({id}: TProp) {
             />
           </div>
 
-          <div className="col-span-6 xl:col-span-2">
+          {/* <div className="col-span-6 xl:col-span-2">
             <Label title="CST IPI" required={false}/>
             <input {...register("cstIpi")} placeholder="CST IPI" className="input-erp-primary input-erp-default w-full" />
-          </div>
+          </div> */}
 
           <div className="col-span-6 xl:col-span-2">
             <Label title="Alíquota IPI" required={false}/>
