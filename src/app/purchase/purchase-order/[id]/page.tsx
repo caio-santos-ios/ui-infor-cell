@@ -3,6 +3,7 @@ import Button from "@/components/ui/button/Button";
 import { Metadata } from "next";
 import Link from "next/link";
 import PurchaseOrderForm from "@/components/purchase/purchase-order/PurchaseOrderForm";
+import { PurchaseOrderButtonApprove } from "@/components/purchase/purchase-order/PurchaseOrderButtonApprove";
 
 export const metadata: Metadata = {
   title: "Telemovvi | Pedidos de Compra",
@@ -16,10 +17,11 @@ export default async function PurchaseOrderDetail({ params }: { params: Promise<
   return (
     <div>
       <PageBreadcrumb pageIcon="MdOutlineShoppingCart" pageTitle="Pedidos de Compra" pageSubTitle="Compras" />
-      <div className="flex justify-end mb-2">
+      <div className="flex justify-end mb-2 gap-4">
         <Link href="/purchase/purchase-order">
           <Button type="submit" variant="outline" size="sm">Voltar</Button>
         </Link>
+        <PurchaseOrderButtonApprove />
       </div>
       <PurchaseOrderForm id={id} />
     </div>

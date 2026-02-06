@@ -18,7 +18,7 @@ type TProp = {
 
 export default function StoreForm({id}: TProp) {
   const [_, setIsLoading] = useAtom(loadingAtom);
-  const [logoStore, setLogoStore] = useState<any>("");
+  const [__, setLogoStore] = useState<any>("");
   const [tabs] = useState<any[]>([
     {key: 'data', title: 'Dados Gerais'},
     {key: 'address', title: 'Endereço'},
@@ -52,13 +52,18 @@ export default function StoreForm({id}: TProp) {
 
   return (
     <>
-      <div className="flex gap-4 mb-2">
-        {
-          tabs.map((x: any) => {
-            return <button onClick={() => setCurrentTab(x)} className={`${currentTab.key == x.key ? 'bg-blue-400 text-white' : ''} px-3 py-1 rounded-xl`} key={x.key}>{x.title}</button>
-          })
-        }
+      <div className="flex flex-wrap items-center font-medium gap-2 rounded-lg transition px-2 py-2 text-sm bg-white text-gray-700 ring-1 ring-inset ring-gray-300 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 w-full mb-3">
+        {tabs.map((x) => (
+          <button 
+            key={x.key}
+            onClick={() => setCurrentTab(x)} 
+            className={`${currentTab.key === x.key ? 'bg-brand-500 text-white' : ''} px-3 py-1 rounded-md transition-all`}
+          >
+            {x.title}
+          </button>
+        ))}
       </div>
+      
       <div className="mb-2">
         {currentTab.key == "data" && <StoreDataForm id={id} />}
         {currentTab.key == "address" && <StoreAddressForm parentId={id} address={watch("address")} />}

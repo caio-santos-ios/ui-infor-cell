@@ -142,7 +142,7 @@ export const calculateTimeLeft = (targetDate: string): TimeRemaining => {
 };
 
 // FORMATED //
-export const formattedMoney = (value: string) => {
+export const formattedMoney = (value: any) => {
   const amount = typeof value === "string" ? parseFloat(value) : value;
 
   if (isNaN(amount)) {

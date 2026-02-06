@@ -1,8 +1,7 @@
-import CompanyTable from "@/components/master-data/company/CompanyTable";
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
-import Button from "@/components/ui/button/Button";
+import { SalesOrderButtonCreate } from "@/components/pages/commercial/sales-order/SalesOrderButtonCreate";
+import SalesOrderTable from "@/components/pages/commercial/sales-order/SalesOrderTable";
 import { Metadata } from "next";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Telemovvi | Pedidos de Venda",
@@ -15,11 +14,9 @@ export default function SalesOrders() {
     <div>
       <PageBreadcrumb pageIcon="FaFileInvoice" pageTitle="Pedidos de Venda" pageSubTitle="Comercial" />
       <div className="flex justify-end mb-2">
-        <Link href="sales-orders/create">
-          <Button type="submit" className="" size="sm">Adicionar</Button>
-        </Link>
+        <SalesOrderButtonCreate />
       </div>
-      <CompanyTable />
+      <SalesOrderTable />
     </div>
   );
 }

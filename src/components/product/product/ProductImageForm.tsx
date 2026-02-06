@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import DropzoneComponent from "@/components/form/form-elements/DropZone";
 import Carousel from "@/components/ui/carousel/Carousel";
 import Label from "@/components/form/Label";
+import { FaTrash } from "react-icons/fa";
 
 type TProp = {
   id?: string;
@@ -18,45 +19,7 @@ type TProp = {
 export default function ProductImageForm({id}: TProp) {
   const [_, setIsLoading] = useAtom(loadingAtom);
   const [images, setImage] = useState<{id: string; image: string; title: string; description: string}[]>([]);
-  const router = useRouter();  
-
-  // const { control, getValues, reset, register, setValue, watch } = useForm<TProduct>({defaultValues: ResetProduct});
-
-  // const save = async (body: TProduct) => {
-  //   if(!body.id) {
-  //     await create(body);
-  //   } else {
-  //     await update(body);
-  //   };
-  // };
-      
-  // const create: SubmitHandler<TProduct> = async (body: TProduct) => {
-  //   try {
-  //     setIsLoading(true);
-  //     const {data} = await api.post(`/products`, body, configApi());
-  //     const result = data.result;
-  //     resolveResponse({status: 201, message: result.message});
-  //     router.push(`/product/products/${result.data.id}`)
-  //   } catch (error) {
-  //     resolveResponse(error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-    
-  // const update: SubmitHandler<TProduct> = async (body: TProduct) => {
-  //   try {
-  //     setIsLoading(true);
-  //     const {data} = await api.put(`/products`, body, configApi());
-  //     const result = data.result;
-  //     resolveResponse({status: 200, message: result.message});
-  //   } catch (error) {
-  //     resolveResponse(error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
+  
   const getImages = async () => {
     try {
       setIsLoading(true);
@@ -73,7 +36,7 @@ export default function ProductImageForm({id}: TProp) {
   
   const uploadFile = async (file: File[]) => {
     const formBody = new FormData();
-
+    
     const fileToUpload = file[0];
     formBody.append('file', fileToUpload);
     formBody.append('parent', 'product');
@@ -92,6 +55,15 @@ export default function ProductImageForm({id}: TProp) {
       resolveResponse(error);
     }
   };
+
+  const deleteImage = async (imageId: string) => {
+    try {
+      await api.delete(`/attachments/${imageId}`, configApi(false));
+      await getImages();
+    } catch (error) {
+      resolveResponse(error);
+    }
+  };
   
   useEffect(() => {
     if(id != "create") {
@@ -102,14 +74,34 @@ export default function ProductImageForm({id}: TProp) {
   return (
     <>
       <ComponentCard title="Dados Gerais" hasHeader={false}>
-        <div className="grid grid-cols-6 gap-2 container-form">  
-          <div className="col-span-6 lg:col-span-2">
-            <Label title="Arquivo" required={false}/>
-            <input type="file" className="input-erp-primary input-erp-default" id="" />
-            {/* <DropzoneComponent sendFile={uploadFile} title="" /> */}
+        <div className="grid grid-cols-12 gap-2">  
+          <div className="col-span-6 lg:col-span-4">
+            <DropzoneComponent sendFile={uploadFile} title="" />
           </div>          
-          <div className="col-span-6 lg:col-span-3">
+          <div className="col-span-6 lg:col-span-6">
             <Carousel slides={images} />
+          </div>          
+          <div className="col-span-6 lg:col-span-2">
+            <ul className="flex flex-col gap-4 max-h-[calc(100dvh-21rem)] overflow-y-auto">
+              {
+                images.map((image: any) => {
+                  return (
+                    <li key={image.id} className="flex flex-wrap items-center font-medium gap-2 rounded-lg transition px-2 py-2 text-sm bg-white text-gray-700 ring-1 ring-inset ring-gray-300 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 w-full mb-3">
+                      <div className="w-36 rounded-lg">
+                        <img
+                          src={image.image}
+                          alt={'Foto do produto'}
+                          className="object-cover rounded-lg"
+                          />
+                      </div>
+                      <div onClick={() => deleteImage(image.id)} className="cursor-pointer text-red-400 hover:text-red-500">
+                        <FaTrash />
+                      </div>
+                    </li>
+                  )
+                })
+              }
+            </ul>
           </div>          
         </div>
       </ComponentCard>

@@ -4,6 +4,7 @@ export type TVariationProduct = {
     variationId: string;
     variationItemId: string;
     stock: number;
+    value: string;
 }
 
 export const ResetVariationProduct: TVariationProduct = {
@@ -12,6 +13,7 @@ export const ResetVariationProduct: TVariationProduct = {
     variationId: "",
     variationItemId: "",
     stock: 0,
+    value: ""
 }
 
 export type TProductSerial = {
@@ -109,7 +111,7 @@ export const ResetProduct: TProduct = {
     modelId: "",
     imei: "",
     moveStock: "yes",
-    quantityStock: 0,
+    quantityStock: 1,
     price: 0,
     priceDiscount: 0,
     priceTotal: 0,

@@ -125,7 +125,7 @@ export default function EmployeeTable() {
                           permissionDelete("A", "A3") &&
                           <IconDelete action="delete" obj={x} getObj={getObj}/>                                                   
                         }                                          
-                    </div>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

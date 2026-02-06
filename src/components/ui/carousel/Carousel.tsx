@@ -14,26 +14,6 @@ type TProps = {
 }
 
 const Carousel = ({slides}: TProps) => {
-//   const slides = [
-//     {
-//       id: 1,
-//       image: "/assets/images/cards/card-01.png",
-//       title: "Facilidade no Agendamento",
-//       description: "Gerencie seus atendimentos de forma rápida e intuitiva.",
-//     },
-//     {
-//       id: 2,
-//       image: "/assets/images/cards/card-02.png",
-//       title: "Rede Credenciada",
-//       description: "Acesse as melhores clínicas e profissionais da região.",
-//     },
-//     {
-//       id: 3,
-//       image: "/assets/images/cards/card-03.png",
-//       title: "Controle Total",
-//       description: "Histórico de procedimentos e guias na palma da mão.",
-//     },
-//   ];
 
   return (
     <div className="">
@@ -48,12 +28,14 @@ const Carousel = ({slides}: TProps) => {
       >
         {slides.map((slide) => (
           <SwiperSlide key={slide.id}>
-            <div className="relative h-[300px] w-full md:h-[400px]">
-              <img
-                src={slide.image}
-                alt={slide.title}
-                className="object-cover"
-              />
+            <div className="relative h-[300px] w-full md:h-full">
+              <div className="h-full flex justify-center items-center">
+                <img
+                  src={slide.image}
+                  alt={slide.title}
+                  className="object-cover"
+                  />
+              </div>
 
               <div className="absolute inset-0 bg-black/40 flex flex-col justify-end p-8 text-white">
                 <h3 className="text-2xl font-bold mb-2">{slide.title}</h3>

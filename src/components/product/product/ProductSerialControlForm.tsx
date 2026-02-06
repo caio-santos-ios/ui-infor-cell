@@ -188,7 +188,7 @@ export default function ProductSerialForm({ id }: TProp) {
       </ComponentCard>
 
       <div className="flex gap-2">
-        <Button onClick={() => save({ ...getValues() })} type="button" className="w-full xl:max-w-20 mt-2" size="sm">
+        <Button onClick={() => save({ ...getValues() })} type="button" className="w-full md:max-w-20 mt-2" size="sm">
           Salvar
         </Button>
       </div>

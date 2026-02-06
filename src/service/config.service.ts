@@ -93,6 +93,10 @@ export const saveLocalStorage = (data: TDataLocal, hasToken: boolean = false) =>
     localStorage.setItem("refreshToken", data.refreshToken);
   };
 
+  if(data.master) {
+    localStorage.setItem("master", data.master);
+  };
+
   // localStorage.setItem("typeUser", data.typeUser);
   localStorage.setItem("expirationDate", data.expirationDate);
   localStorage.setItem("typePlan", data.typePlan);
@@ -109,6 +113,7 @@ export const saveLocalStorage = (data: TDataLocal, hasToken: boolean = false) =>
 
 export const removeLocalStorage = () => { 
   // localStorage.removeItem("typeUser");
+  localStorage.removeItem("master");
   localStorage.removeItem("expirationDate");
   localStorage.removeItem("typePlan");
   localStorage.removeItem("subscriberPlan");

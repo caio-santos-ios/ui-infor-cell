@@ -7,19 +7,12 @@ import { useEffect, useState } from "react";
 import { api } from "@/service/api.service";
 import { configApi, resolveResponse } from "@/service/config.service";
 import { paginationAtom } from "@/jotai/global/pagination.jotai";
-import { formattedMoney, maskDate } from "@/utils/mask.util";
-import { permissionDelete, permissionRead, permissionUpdate } from "@/utils/permission.util";
-import { useRouter } from "next/navigation";
+import { maskDate } from "@/utils/mask.util";
+import { permissionRead, permissionUpdate } from "@/utils/permission.util";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
-import { IconEdit } from "@/components/iconEdit/IconEdit";
-import { IconDelete } from "@/components/iconDelete/IconDelete";
-import { useModal } from "@/hooks/useModal";
-import { ModalDelete } from "@/components/modalDelete/ModalDelete";
 import { NotData } from "@/components/not-data/NotData";
-import { FaCheck, FaEye } from "react-icons/fa";
 import { Modal } from "@/components/ui/modal";
 import Button from "@/components/ui/button/Button";
-import { GoAlert } from "react-icons/go";
 import { storeLoggedAtom } from "@/jotai/global/store.jotai";
 import { MdSwapHoriz } from "react-icons/md";
 import { TStore } from "@/types/master-data/store/store.type";
@@ -27,6 +20,9 @@ import Label from "@/components/form/Label";
 import { useForm } from "react-hook-form";
 import { ResetExchange, TExchange } from "@/types/stock/exchange/exchange.type";
 import { ResetStockPosition, TStockPosition } from "@/types/stock/stock-position/stock-position.type";
+import { TVariation } from "@/types/product/variation/variation.type";
+import { TSerial } from "@/types/product/serial/serial.type";
+import { TTransfer } from "@/types/stock/transfer/transfer.type";
 
 export default function StockPositionTable() {
   const [_, setLoading] = useAtom(loadingAtom);
@@ -35,15 +31,18 @@ export default function StockPositionTable() {
   const [stock, setStock] = useState<TStockPosition>(ResetStockPosition);
   const [modalApproval, setModalApproval] = useState<boolean>(false);
   const [stores, setStore] = useState<TStore[]>([]);
+  const [variations, setVariation] = useState<TVariation[]>([]);
+  const [serials, setSerial] = useState<TSerial[]>([]);
+  const [quantity, setQuantity] = useState<number>(0);
 
-  const { register, setValue, getValues, reset } = useForm<TExchange>({
+  const { register, setValue, getValues, reset, watch } = useForm<TTransfer>({
     defaultValues: ResetExchange
   });
 
   const getAll = async (page: number) => {
     try {
       setLoading(true);
-      const {data} = await api.get(`/stocks?deleted=false&orderBy=createdAt&sort=desc&pageSize=10&pageNumber=${page}`, configApi());
+      const {data} = await api.get(`/stocks?deleted=false&gt$quantity=0&orderBy=createdAt&sort=desc&pageSize=10&pageNumber=${page}`, configApi());
       const result = data.result;
 
       setPagination({
@@ -62,8 +61,9 @@ export default function StockPositionTable() {
   
   const approval = async () => {
     try {
+      const form = {...getValues(), purchaseOrderItemId: stock.purchaseOrderItemId, productId: stock.productId};
       setLoading(true);
-      await api.post(`/transfers`, {...getValues(), purchaseOrderItemId: stock.purchaseOrderItemId}, configApi());
+      await api.post(`/transfers`, form, configApi());
       resolveResponse({status: 200, message: "Tranferência feita com sucesso"});
       setModalApproval(false);
       reset(ResetExchange);
@@ -78,8 +78,10 @@ export default function StockPositionTable() {
   const getObj = async (obj: any, _: string) => {
     await getSelectStore();
     setValue("storeOriginId", obj.store);
+    setValue("productHasSerial", obj.productHasSerial);
     setStock(obj);
     setModalApproval(true);
+    setVariation(obj.variations);
   };
 
   const changePage = async (page: number) => {
@@ -104,6 +106,20 @@ export default function StockPositionTable() {
     }
   };
 
+  const normalizeValueSelect = (variation: any) => {
+    const variationStr = variation.attributes.map((a: any) => (a.value));
+    return variationStr.join(" / ");
+  };
+
+  useEffect(() => {
+    const item: any = variations.find(v => v.barcode == watch("barcode"));
+    if(item) {
+      setSerial(item.serials);
+      setValue("variationId", item.variationId);
+      setQuantity(parseFloat(item.stock.toString()));
+    };
+  }, [watch("barcode")]);
+
   useEffect(() => {
     if(permissionRead("F", "F1")) {
       getAll(1);
@@ -120,9 +136,10 @@ export default function StockPositionTable() {
               <TableHeader className="border-b border-gray-100 dark:border-white/5 tele-table-thead">
                 <TableRow>
                   <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Produto</TableCell>
-                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Fornecedor</TableCell>
-                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Data da Compra</TableCell>
+                  {/* <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Fornecedor</TableCell> */}
                   <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Quantidade</TableCell>
+                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Data da Entrada</TableCell>
+                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Origem</TableCell>
                   <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Ações</TableCell>
                 </TableRow>
               </TableHeader>
@@ -131,9 +148,10 @@ export default function StockPositionTable() {
                 {pagination.data.map((x: any) => (
                   <TableRow key={x.id}>
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.productName}</TableCell>
-                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.supplierName}</TableCell>
-                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{maskDate(x.purchaseOrderDate)}</TableCell>
+                    {/* <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.supplierName}</TableCell> */}
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.quantity}</TableCell>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{maskDate(x.createdAt)}</TableCell>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.origin}</TableCell>
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
                       <div className="flex gap-3">    
                         {
@@ -153,17 +171,17 @@ export default function StockPositionTable() {
       </div>
       <Pagination currentPage={pagination.currentPage} totalCount={pagination.totalCount} totalData={pagination.data.length} totalPages={pagination.totalPages} onPageChange={changePage} />
 
-      <Modal isOpen={modalApproval} onClose={() => setModalApproval(false)} className="max-w-[700] m-4">
-        <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
+      <Modal isOpen={modalApproval} onClose={() => setModalApproval(false)} className="max-w-[900px] m-4">
+        <div className="no-scrollbar relative w-full max-w-[900px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
             <div className="px-2 pr-14">
               <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">Transferência de Estoque</h4>
             </div>
 
             <form className="flex flex-col">
-              <div className="custom-scrollbar h-[200px] overflow-y-auto px-2 pb-3">
+              <div className="custom-scrollbar max-h-[80vh] overflow-y-auto px-2 pb-3">
                 <div className="mt-7">
-                  <div className="grid grid-cols-8 gap-x-6 gap-y-5">
-                    <div className="col-span-6 xl:col-span-4">
+                  <div className="grid grid-cols-12 gap-x-6 gap-y-5">
+                    <div className="col-span-12 md:col-span-6">
                       <Label title="Loja de Origem"/>
                       <select disabled {...register("storeOriginId")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
                         <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Selecione</option>
@@ -173,8 +191,9 @@ export default function StockPositionTable() {
                           })
                         }
                       </select>
-                    </div>  
-                    <div className="col-span-6 xl:col-span-4">
+                    </div> 
+                    
+                    <div className="col-span-12 md:col-span-6">
                       <Label title="Loja de Destino"/>
                       <select {...register("storeDestinationId")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
                         <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Selecione</option>
@@ -188,26 +207,52 @@ export default function StockPositionTable() {
                         }
                       </select>
                     </div>  
-                    <div className="col-span-6 xl:col-span-4">
-                      <Label title="Quantidade"/>
-                      <select {...register("quantity")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
-                        <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Selecione</option>
-                        {
-                          // stores.map((x: TStore) => {
-                          //   return (
-                            //   ) 
-                            // })
-                            Array.from({length: stock.quantity}, (_, index) => {
-                              return <option key={index + 1} value={index + 1} className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">{index + 1}</option>
-                          })
-                        }
+                    <div className="col-span-12 md:col-span-6">
+                      <Label title="Produto"/>
+                      <input disabled value={stock.productName} maxLength={40} placeholder="Código de barras"className="input-erp-primary input-erp-default w-full"/>
+                    </div>
+                    <div className="col-span-12 md:col-span-6">
+                      <Label title="Variação"/>
+                      <select {...register("barcode")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
+                        <option value="">Selecione</option>
+                        {variations.map((item: any, j: number) => (
+                          <option key={j} value={item.barcode}>{normalizeValueSelect(item)}</option>
+                        ))}
                       </select>
                     </div>  
+                    {
+                      watch("barcode") && watch("productHasSerial") == "no" &&
+                      <div className="col-span-12 md:col-span-6 xl:col-span-3">
+                        <Label title="Quantidade"/>
+                        <select {...register("quantity")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
+                          {
+                            Array.from({length: quantity}, (_, index) => {
+                              return <option key={index + 1} value={index + 1} className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">{index + 1}</option>
+                            })
+                          }
+                        </select>
+                      </div>  
+                    }
+                    {
+                      watch("productHasSerial") == "yes" &&
+                      <div className="col-span-12 md:col-span-6">
+                        <Label title="Serial"/>
+                        <select {...register("serial")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
+                          <option value="">Selecione</option>
+                          {serials.map((item: any, j: number) => (
+                            <option key={j} value={item.code}>{item.code}</option>
+                          ))}
+                        </select>
+                      </div> 
+                    }
                   </div>
                 </div>
               </div>
               <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
-                  <Button size="sm" variant="outline" onClick={() => setModalApproval(false)}>Cancelar</Button>
+                  <Button size="sm" variant="outline" onClick={() => {
+                    setModalApproval(false);
+                    reset(ResetExchange);
+                  }}>Cancelar</Button>
                   <Button size="sm" variant="primary" onClick={approval}>Confirmar</Button>
               </div>
             </form>

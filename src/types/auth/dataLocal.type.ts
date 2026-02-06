@@ -4,6 +4,7 @@ export type TDataLocal = {
     name: string;
     email: string;
     admin: string;
+    master: string;
     photo: string;
     logoCompany: string;
     nameCompany: string;
@@ -21,6 +22,7 @@ export const ResetDataLocal: TDataLocal = {
     name: "",
     email: "",
     admin: "",
+    master: "",
     photo: "",
     logoCompany: "",
     nameCompany: "",

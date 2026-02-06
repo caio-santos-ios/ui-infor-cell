@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { ResetPurchaseOrder, TPurchaseOrder } from "@/types/purchase/purchase-order/purchase-order.type";
 import Label from "@/components/form/Label";
 import { NumericFormat } from "react-number-format";
+import { purchaseOrderStatusAtom } from "@/jotai/purchaseOrder/purchaseOrder.jotai";
 
 type TProp = {
   id?: string;
@@ -19,13 +20,14 @@ type TProp = {
 
 export default function PurchaseOrderDataForm({id}: TProp) {
   const [_, setIsLoading] = useAtom(loadingAtom);
+  const [status, setStatus] = useAtom(purchaseOrderStatusAtom);
   const router = useRouter();  
 
   const { control, getValues, reset, register, setValue, watch } = useForm<TPurchaseOrder>({
     defaultValues: ResetPurchaseOrder
   });
 
-  const status = watch("status");
+  // const status = watch("status");
 
   const save = async (body: TPurchaseOrder) => {
     if(!body.id) {
@@ -67,6 +69,7 @@ export default function PurchaseOrderDataForm({id}: TProp) {
       setIsLoading(true);
       const {data} = await api.get(`/purchase-orders/${id}`, configApi());
       const result = data.result.data;
+      setStatus(result.status);
       reset(result);
       setValue("date", result.date.split("T")[0]);
       setValue("updatedAt", result.updatedAt.split("T")[0]);

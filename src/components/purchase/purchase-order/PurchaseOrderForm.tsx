@@ -11,6 +11,8 @@ import ProductDataForm from "./PurchaseOrderDataForm";
 import PurchaseOrderDataForm from "./PurchaseOrderDataForm";
 import PurchaseOrderIemsForm from "./PurchaseOrderItemsForm";
 import { TPurchaseOrder } from "@/types/purchase/purchase-order/purchase-order.type";
+import { PurchaseOrderModalApprove } from "./PurchaseOrderModalApprove";
+import { purchaseOrderIdAtom, purchaseOrderModalAtom } from "@/jotai/purchaseOrder/purchaseOrder.jotai";
 
 type TProp = {
   id?: string;
@@ -18,6 +20,8 @@ type TProp = {
 
 export default function PurchaseOrderForm({id}: TProp) {
   const [_, setIsLoading] = useAtom(loadingAtom);
+  const [modalApproval] = useAtom(purchaseOrderModalAtom);
+  const [__, setApprovalId] = useAtom(purchaseOrderIdAtom);
   const [tabs] = useState<{key: string; title: string;}[]>([
     {key: 'data', title: 'Dados Gerais'},
     {key: 'items', title: 'Itens'},
@@ -28,22 +32,9 @@ export default function PurchaseOrderForm({id}: TProp) {
     defaultValues: ResetEmployee
   });
 
-  const getById = async (id: string) => {
-    try {
-      setIsLoading(true);
-      const {data} = await api.get(`/purchase-orders/${id}`, configApi());
-      const result = data.result.data;
-      reset(result);
-    } catch (error) {
-      resolveResponse(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    if(id != "create") {
-      // getById(id!);
+    if(id && id != "create") {
+      setApprovalId(id)
     };
   }, []);
 
@@ -58,6 +49,10 @@ export default function PurchaseOrderForm({id}: TProp) {
       </div>
 
       <div className="mb-2">
+        {
+          modalApproval &&
+          <PurchaseOrderModalApprove />
+        }
         {currentTab.key == "data" && <PurchaseOrderDataForm id={id} />}
         {currentTab.key == "items" && <PurchaseOrderIemsForm id={id} />}
       </div>     

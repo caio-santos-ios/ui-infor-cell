@@ -242,7 +242,7 @@ export default function ProductTaxForm({id}: TProp) {
           </div>
         </div>
       </ComponentCard>
-      <Button onClick={() => save({...getValues()})} type="submit" className="w-full xl:max-w-20 mt-2" size="sm">Salvar</Button>
+      <Button onClick={() => save({...getValues()})} type="submit" className="w-full md:max-w-20 mt-2" size="sm">Salvar</Button>
     </>
   );
 }

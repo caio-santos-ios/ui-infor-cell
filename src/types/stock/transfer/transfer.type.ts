@@ -4,11 +4,19 @@ export type TTransfer = {
     storeDestinationId: string;
     stockId: string;
     quantity: number;
+    variationId: string;
+    barcode: string;
+    productHasSerial: string;
+    serial: string;
 }
 export const ResetTransfer: TTransfer = {
     purchaseOrderItemId: "",
     storeOriginId: "",
     storeDestinationId: "",
     stockId: "",
-    quantity: 1
+    quantity: 1,
+    variationId: "",
+    barcode: "",
+    productHasSerial: "no",
+    serial: ""
 }

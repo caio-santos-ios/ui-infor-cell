@@ -247,7 +247,6 @@ export default function EmployeeModulesForm({id, modules}: TProp) {
           </ul>
         </div>
       </ComponentCard>
-      {/* <Button onClick={() => save({...getValues()})} type="submit" className="w-full xl:max-w-20 mt-2" size="sm">Salvar</Button> */}
     </>
   );
 }

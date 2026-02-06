@@ -125,7 +125,7 @@ export default function ProductTable() {
                           permissionDelete("B", "B1") &&
                           <IconDelete action="delete" obj={x} getObj={getObj}/>                                                   
                         }                                          
-                    </div>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

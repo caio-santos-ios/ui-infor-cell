@@ -74,13 +74,13 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
           <div className="flex min-h-11 h-auto rounded-lg border border-gray-300 py-1.5 pl-3 pr-3 shadow-sm outline-none transition focus-within:border-brand-500 dark:border-gray-700 dark:bg-gray-900">
             <div className="flex flex-wrap flex-auto gap-2">
               {selectedOptions.length > 0 ? (
-                selectedOptions.map((op: any, i) => {
+                selectedOptions.map((op: any, i: number) => {
                   let option;
                   if(typeof(op) == "number") {
                     option = options.find((o) => o.key == op.toString());
                   } else {
-                    option = options.find((o) => o.key === op.key);
-                  }
+                    option = options.find((o) => o.key === op);
+                  };
 
                   return (
                     <div
@@ -118,11 +118,12 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
           <div className="absolute top-full left-0 w-full z-100 mt-1 bg-white dark:bg-gray-900 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 max-h-60 overflow-y-auto overflow-x-hidden animate-in fade-in zoom-in-95 duration-100">
             <div className="flex flex-col">
               {options.length > 0 ? (
-                options.map((option) => {
+                options.map((option, index) => {
                   const isSelected = selectedOptions.includes(option.key);
+
                   return (
                     <div
-                      key={option.key}
+                      key={index}
                       className={`flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-100 dark:border-gray-800 last:border-0 ${isSelected ? "bg-brand-50/30 dark:bg-brand-900/20" : ""}`}
                       onClick={() => handleSelect(option.key)}
                     >

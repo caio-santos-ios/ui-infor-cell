@@ -14,11 +14,11 @@ export default function StockPosition() {
   return (
     <div>
       <PageBreadcrumb pageIcon="FaBoxes" pageTitle="Posição de Estoque" pageSubTitle="Estoque" />
-      <div className="flex justify-end mb-2">
+      {/* <div className="flex justify-end mb-2">
         <Link href="stock-position/create">
           <Button type="submit" className="" size="sm">Adicionar</Button>
         </Link>
-      </div>
+      </div> */}
       <StockPositionTable />
     </div>
   );

@@ -80,10 +80,10 @@ export default function StoreTable() {
   return (
     pagination.data.length > 0 ?
     <>
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3 mb-3">
-        <div className="max-w-full overflow-x-auto">
-          <div className="min-w-[1102px]">
-            <Table>
+      <div className="erp-container-table rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3 mb-3">
+        <div className="max-w-full overflow-x-auto tele-container-table">
+          <div className="min-w-[1102px] divide-y">
+            <Table className="divide-y">
               <TableHeader className="border-b border-gray-100 dark:border-white/5">
                 <TableRow>
                   <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Razão Social</TableCell>
@@ -97,11 +97,11 @@ export default function StoreTable() {
               <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
                 {pagination.data.map((x: TStore) => (
                   <TableRow key={x.id}>
-                    <TableCell className="px-5 py-4 sm:px-6 text-start">{x.corporateName}</TableCell>
-                    <TableCell className="px-5 py-4 sm:px-6 text-start">{x.tradeName}</TableCell>
-                    <TableCell className="px-5 py-4 sm:px-6 text-start">{x.document}</TableCell>
-                    <TableCell className="px-5 py-4 sm:px-6 text-start">{maskDate(x.createdAt)}</TableCell>
-                    <TableCell className="px-5 py-4 sm:px-6 text-start">
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.corporateName}</TableCell>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.tradeName}</TableCell>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.document}</TableCell>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{maskDate(x.createdAt)}</TableCell>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
                       <div className="flex gap-3">       
                         {
                           permissionUpdate("A", "A2") &&

@@ -23,6 +23,7 @@ const staticNavItems: NavItem[] = [
       {name: "Profissionais", path: "/master-data/employees", code: "A3", pro: false, authorized: false },
       {name: "Clientes", path: "/master-data/customers", code: "A4", pro: false, authorized: false },
       {name: "Fornecedores", path: "/master-data/suppliers", code: "A5", pro: false, authorized: false },
+      {name: "Permissões de Usuário", path: "/master-data/profile-permission", code: "F1", pro: false, authorized: false },
     ]
   },
   {
@@ -77,6 +78,15 @@ const staticNavItems: NavItem[] = [
     subItems: [
       {name: "Pedidos de Compras", path: "/purchase/purchase-order", code: "G1", pro: false, authorized: false }
     ]
+  },
+  {
+    icon: "MdAttachMoney",
+    name: "Financeiro",
+    authorized: false,
+    code: "F",
+    subItems: [
+      {name: "Formas de Pagamentos", path: "/financial/payment-methods", code: "F1", pro: false, authorized: false }
+    ]
   }
 ];
 
@@ -101,20 +111,32 @@ const AppSidebar: React.FC = () => {
     if (typeof window === "undefined") return [];
 
     const modulesStr = localStorage.getItem("modules");
+    const masterStr = localStorage.getItem("master");
+    const isMaster = masterStr ? masterStr == "true" : false;
+
     if (!modulesStr) return staticNavItems;
 
     const modules: any[] = JSON.parse(modulesStr);
 
     return staticNavItems.map((item) => {
       const newItem = { ...item };
-      const foundModule = modules.find((m: any) => m.code === newItem.code);
 
-      if (foundModule && foundModule.routines.length > 0) {
+      if(isMaster) {
         newItem.authorized = true;
         newItem.subItems = newItem.subItems?.map((sub) => ({
           ...sub,
-          authorized: foundModule.routines.some((r: any) => r.code === sub.code)
+          authorized: true
         }));
+      } else {
+        const foundModule = modules.find((m: any) => m.code === newItem.code);
+  
+        if (foundModule && foundModule.routines.length > 0) {
+          newItem.authorized = true;
+          newItem.subItems = newItem.subItems?.map((sub) => ({
+            ...sub,
+            authorized: foundModule.routines.some((r: any) => r.code === sub.code)
+          }));
+        }
       }
 
       return newItem;

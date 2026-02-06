@@ -203,11 +203,10 @@ export default function ProductDataForm({id}: TProp) {
             </select>
           </div>  
           <div className="col-span-6 xl:col-span-1">
-            <Label title="Tipo" required={false}/>
-            <select {...register("type")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
-              <option value="Mercadoria" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Mercadoria</option>
-              <option value="Serviço" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Serviço</option>
-              <option value="Use e Consumo" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Use e Consumo</option>
+            <Label title="Controlado Por Serial?" required={false}/>
+            <select {...register("hasSerial")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
+              <option value="yes" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Sim</option>
+              <option value="no" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Não</option>
             </select>
           </div>  
           <div className="col-span-6 xl:col-span-1">
@@ -238,7 +237,7 @@ export default function ProductDataForm({id}: TProp) {
           </div>
         </div>
       </ComponentCard>
-      <Button onClick={() => save({...getValues()})} type="submit" className="w-full xl:max-w-20 mt-2" size="sm">Salvar</Button>
+      <Button onClick={() => save({...getValues()})} type="submit" className="w-full md:max-w-20 mt-2" size="sm">Salvar</Button>
     </>
   );
 }

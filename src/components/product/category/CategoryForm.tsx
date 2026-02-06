@@ -90,6 +90,10 @@ export default function CategoryForm({id}: TProp) {
             <Label title="Descrição" required={false} />
             <input placeholder="Descrição" {...register("description")} type="text" className="input-erp-primary input-erp-default"/>
           </div>
+          <div className="col-span-6 xl:col-span-4">
+            <Label title="Subcategorias" required={false} />
+            {/* <input placeholder="Descrição" {...register("description")} type="text" className="input-erp-primary input-erp-default"/> */}
+          </div>
         </div>
       </ComponentCard>
       <Button onClick={() => save({...getValues()})} type="submit" className="w-full xl:max-w-20 mt-2" size="sm">Salvar</Button>
