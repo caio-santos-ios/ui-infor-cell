@@ -7,116 +7,148 @@ import { useAtom } from "jotai";
 import Button from "@/components/ui/button/Button";
 import { Modal } from "@/components/ui/modal";
 import { useForm } from "react-hook-form";
-import { useEffect } from "react";
-import { paymentMethodIdAtom, paymentMethodModalAtom } from "@/jotai/financial/payment-methods/paymentMethod.jotai";
+import { useEffect, useState } from "react";
+import { paymentMethodIdAtom } from "@/jotai/financial/payment-methods/paymentMethod.jotai";
 import { ResetSerial, TSerial } from "@/types/product/serial/serial.type";
-import { serialModalViewStockAtom } from "@/jotai/product/serial.jotai";
+import { serialIdModalViewStockAtom, serialModalViewStockAtom } from "@/jotai/product/serial.jotai";
+import { productAtom } from "@/jotai/product/product.jotai";
+import { ResetProduct } from "@/types/product/product/product.type";
+import { NotData } from "@/components/not-data/NotData";
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
+import { maskDate } from "@/utils/mask.util";
+import { variationCurrentAtom } from "@/jotai/product/variation/variation.jotai";
 
 export default function SerialModalViewStock() {
   const [_, setIsLoading] = useAtom(loadingAtom);
   const [modal, setModal] = useAtom(serialModalViewStockAtom);
-  const [paymentMethodId, setSerialId] = useAtom(paymentMethodIdAtom);
-
-  const { getValues, setValue, register, reset, control } = useForm<TSerial>({
-    defaultValues: ResetSerial
-  });
-  
-  const create = async () => {
-    try {
-      setIsLoading(true);
-      const {data} = await api.post(`/payment-methods`, {...getValues()}, configApi());
-      const result = data.result;
-      resolveResponse({status: 201, message: result.message});
-      close();
-    } catch (error) {
-      resolveResponse(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const update = async () => {
-    try {
-      setIsLoading(true);
-      const {data} = await api.put(`/payment-methods`, {...getValues()}, configApi());
-      const result = data.result;
-      resolveResponse({status: 200, message: result.message});
-      close();
-    } catch (error) {
-      resolveResponse(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [currentVariation, setCurrentVariation] = useAtom(variationCurrentAtom);
+  const [product, setProduct] = useAtom(productAtom);
+  const [stocks, setStock] = useState<any[]>([]);
+  const [hasSerial, setHasSerial] = useState<boolean>(false);
+  const [hasVariation, setHasVariation] = useState<boolean>(false);
   
   const getById = async (id: string) => {
-    try {
-      setIsLoading(true);
-      const {data} = await api.get(`/payment-methods/${id}`, configApi());
-      const result = data.result.data;
-      reset(result);
-    } catch (error) {
-      resolveResponse(error);
-    } finally {
-      setIsLoading(false);
+  try {
+    setIsLoading(true);
+    const { data } = await api.get(`stocks/product/${id}`, configApi());
+    const result = data.result.data;
+
+    if (result.length > 0) {
+      const apiHasSerial = result[0].productHasSerial === "yes";
+      const apiHasVariation = result[0].productHasVariations === "yes";
+      
+      setHasSerial(apiHasSerial);
+      setHasVariation(apiHasVariation);
+
+      if (apiHasVariation) {
+        const listStock: any[] = [];
+        
+        result.forEach((item: any) => {
+          if (item && item.variations) {
+            const idx = parseInt(currentVariation) || 0;
+            const variation = item.variations[idx];
+            
+            if (variation && apiHasSerial) {
+              variation.serials.forEach((serial: TSerial) => {
+                listStock.push({
+                  storeName: item.storeName,
+                  productName: item.productName,
+                  serial: serial.code,
+                  quantity: 1,
+                  createdAt: item.createdAt
+                });
+              });
+            } else if (variation) {
+              listStock.push(item);
+            }
+          }
+        });
+
+        setStock(listStock);
+      } else {
+        setStock(result);
+      }
+    } else {
+      setStock([]);
     }
-  };
+  } catch (error) {
+    resolveResponse(error);
+    setStock([]);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const close = () => {
+    setCurrentVariation("");
+    setStock([]);
+    setProduct(ResetProduct);
     setModal(false);
-    setSerialId("");
-    reset(ResetSerial);
   };
   
   useEffect(() => {
-    const intial = async () => {
-      if(paymentMethodId) {
-        await getById(paymentMethodId);
-      };
-    };
-    intial();
-  }, [modal]);
+    if (modal && product.id) {
+      getById(product.id);
+    }
+  }, [modal, product.id]);
 
   return (
-    <Modal isOpen={modal} onClose={() => setModal(false)} className={`m-4 w-[80dvw] max-w-160 bg-red-400`}>
+    <Modal isOpen={modal} onClose={() => close()} className={`m-4 w-[80dvw] max-w-260 bg-red-400`}>
       <div className={`no-scrollbar relative overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11`}>
         <div className="px-2 pr-14">
           <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">Estoque do Produto</h4>
         </div>
 
-        <form className="flex flex-col">
+        <form className="flex flex-col mt-8">
           <div className={`max-h-[70dvh] custom-scrollbar overflow-y-auto px-2 pb-3`}>
             <div className="grid grid-cols-6 gap-4">
-
-              {/* <div className="col-span-6">
-                <Label title="Nome" />
-                <input maxLength={50} placeholder="Nome" {...register("name")} type="text" className="input-erp-primary input-erp-default"/>
-              </div>
-
-              <div className="col-span-6 lg:col-span-3">
-                <Label title="Tipo"/>
-                <select {...register("type")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
-                  <option value="all" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Contas a Pagar e Receber</option>
-                  <option value="payable" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Contas a Pagar</option>
-                  <option value="receivable" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Contas a Receber</option>
-                </select>
-              </div>
-              
-              <div className="col-span-6 lg:col-span-3">
-                <Label title="Nº máximo de parcelas" />
-                <input maxLength={50} placeholder="Nº máximo de parcelas" {...register("numberOfInstallments")} type="number" className="input-erp-primary input-erp-default no-spinner"/>
-              </div> */}
+              {
+                stocks.length > 0 ?
+                <div className="col-span-6 erp-container-table rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3 mb-3">
+                  <div className="max-w-full overflow-x-auto tele-container-table">
+                    <div className="divide-y">
+                      <Table className="divide-y">
+                        <TableHeader className="border-b border-gray-100 dark:border-white/5 tele-table-thead">
+                          <TableRow>
+                            <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Loja</TableCell>
+                            <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Produto</TableCell>
+                            {
+                              hasSerial &&
+                              <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Serial</TableCell>
+                            }
+                            <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Quantidade</TableCell>
+                            <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Data de Entrada</TableCell>
+                          </TableRow>
+                        </TableHeader>
+          
+                        <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
+                          {stocks.map((x: any, index: number) => (
+                            <TableRow key={index}>
+                              <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.storeName}</TableCell>
+                              <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.productName}</TableCell>
+                              {
+                                hasSerial &&
+                                <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.serial}</TableCell>
+                              }
+                              <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.quantity}</TableCell>
+                              <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{maskDate(x.createdAt)}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+                </div>
+                :
+                <div className="col-span-6 flex justify-center items-center">
+                  <NotData />
+                </div>
+              }
             </div>
           </div>
           
           <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
             <Button size="sm" variant="outline" onClick={() => close()}>Cancelar</Button>
-            {
-              paymentMethodId ? 
-              <Button size="sm" variant="primary" onClick={() => update()}>Salvar</Button>
-              :
-              <Button size="sm" variant="primary" onClick={() => create()}>Adicionar</Button>
-            }
           </div>
         </form>
       </div>

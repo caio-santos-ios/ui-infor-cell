@@ -4,7 +4,7 @@ import { loadingAtom } from "@/jotai/global/loading.jotai";
 import { api } from "@/service/api.service";
 import { configApi, resolveResponse } from "@/service/config.service";
 import { useAtom } from "jotai";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import ComponentCard from "@/components/common/ComponentCard";
 import Label from "@/components/form/Label";
@@ -17,7 +17,7 @@ type TProp = {
 
 export default function ProductStockForm({id}: TProp) {
   const [_, setIsLoading] = useAtom(loadingAtom);
-
+  const [stock, setStock] = useState<number>(0);
   const { control, getValues, reset, register, setValue, watch } = useForm<TProduct>({
     defaultValues: ResetProduct
   });
@@ -31,13 +31,13 @@ export default function ProductStockForm({id}: TProp) {
   const update: SubmitHandler<TProduct> = async (body: TProduct) => {
     try {
       setIsLoading(true);
-      const {data} = await api.put(`/products/stock`, body, configApi());
+      const {data} = await api.put(`/products`, body, configApi());
       const result = data.result;
       resolveResponse({status: 200, message: result.message});
     } catch (error) {
       resolveResponse(error);
     } finally {
-      setIsLoading(false);
+      setIsLoading(false);  
     }
   };
 
@@ -46,7 +46,13 @@ export default function ProductStockForm({id}: TProp) {
       setIsLoading(true);
       const {data} = await api.get(`/products/${id}`, configApi());
       const result = data.result.data;
+      console.log(result)
+      const totalQuantity = result.stock.reduce((acc: number, item: any) => {
+        return acc + Number(item.quantity || 0);
+      }, 0);
+
       reset(result);
+      setStock(totalQuantity);
     } catch (error) {
       resolveResponse(error);
     } finally {
@@ -74,7 +80,7 @@ export default function ProductStockForm({id}: TProp) {
           </div>
           <div className="col-span-6 xl:col-span-1">
             <Label title="Estoque Atual" required={false}/>
-            <input maxLength={30} placeholder="Estoque Atual" {...register("quantityStock")} type="number" className="input-erp-primary input-erp-default no-spinner"/>
+            <input disabled maxLength={30} placeholder="Estoque Atual" value={stock} type="number" className="input-erp-primary input-erp-default no-spinner"/>
           </div>
           <div className="col-span-6 xl:col-span-1">
             <Label title="Venda Sem Estoque" required={false}/>

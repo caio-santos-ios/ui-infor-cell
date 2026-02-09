@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import { ResetPurchaseOrderItem, TPurchaseOrderItem, TVariationPurchaseOrderItem } from "@/types/purchase/purchase-order/purchase-order.type";
 import Label from "@/components/form/Label";
 import { NumericFormat } from "react-number-format";
-import { TProduct } from "@/types/product/product/product.type";
+import { ResetProduct, TProduct } from "@/types/product/product/product.type";
 import { TSupplier } from "@/types/master-data/supplier/supplier.type";
 import MultiSelect from "@/components/form/MuiltSelect";
 import { MultSelectCustom } from "@/components/form/MultSelectCustom";
@@ -31,6 +31,10 @@ import { IconView } from "@/components/iconView/IconView";
 import { serialModalViewStockAtom } from "@/jotai/product/serial.jotai";
 import SerialModalViewStock from "@/components/product/serial/SerialModalViewStock";
 import { IconViewStock } from "@/components/iconViewStock/IconViewStock";
+import Autocomplete from "@/components/form/Autocomplete";
+import VariationsForm from "@/components/product/product/VariationsForm";
+import { MdOutlineQrCodeScanner } from "react-icons/md";
+import { productAtom } from "@/jotai/product/product.jotai";
 
 type TProp = {
   id?: string;
@@ -38,7 +42,7 @@ type TProp = {
 
 export default function PurchaseOrderIemsForm({id}: TProp) {
   const [_, setIsLoading] = useAtom(loadingAtom);
-  const [products, setProduct] = useState<TProduct[]>([]);
+  const [products, setProducts] = useState<TProduct[]>([]);
   const [suppliers, setSupplier] = useState<TSupplier[]>([]);
   const [variations, setVariation] = useState<any[]>([]);
   const [selectedValues, setSelectedValues] = useState<any[]>([]);
@@ -46,6 +50,7 @@ export default function PurchaseOrderIemsForm({id}: TProp) {
   const [status, setStatus] = useAtom(purchaseOrderStatusAtom);
   const { isOpen, openModal, closeModal } = useModal();
   const [__, setModalViewStock] = useAtom(serialModalViewStockAtom);
+  const [___, setProduct] = useAtom(productAtom);
 
   const { control, getValues, reset, register, setValue, watch } = useForm<TPurchaseOrderItem>({
     defaultValues: ResetPurchaseOrderItem
@@ -59,21 +64,37 @@ export default function PurchaseOrderIemsForm({id}: TProp) {
     if(id == "create") return toast.warn("É obrigatório salvar o Pedido na aba Dados Gerais.", {theme: 'colored'});
     
     body.purchaseOrderId = id!;
-    
-    if(body.hasProductSerial == "yes") {
-      let cost: any = 0;
-      let price: any = 0;
-      let quantity: number = 0;
 
-      body.variations.map((v: TVariationPurchaseOrderItem) => {
-        cost += v.serials.reduce((total, item: any) => total + parseFloat(item.cost), 0);
-        price += v.serials.reduce((total, item: any) => total + parseFloat(item.price), 0);
-        quantity += parseFloat(v.stock.toString());
-      });
-
-      body.cost = cost / quantity;
-      body.price = price / quantity;
-      body.quantity = quantity;
+    if(body.hasProductVariations == "yes") {
+      if(body.hasProductSerial == "yes") {
+        let cost: any = 0;
+        let price: any = 0;
+        let quantity: number = 0;
+  
+        body.variations.map((v: TVariationPurchaseOrderItem) => {
+          cost += v.serials.reduce((total, item: any) => total + parseFloat(item.cost), 0);
+          price += v.serials.reduce((total, item: any) => total + parseFloat(item.price), 0);
+          quantity += parseFloat(v.stock.toString());
+        });
+  
+        body.cost = cost / quantity;
+        body.price = price / quantity;
+        body.quantity = quantity;
+      } else {
+        let cost: any = 0;
+        let price: any = 0;
+        let quantity: number = 0;
+  
+        body.variations.map((v: TVariationPurchaseOrderItem) => {
+          cost += v.serials.reduce((total, item: any) => total + parseFloat(item.cost), 0);
+          price += v.serials.reduce((total, item: any) => total + parseFloat(item.price), 0);
+          quantity += parseFloat(v.stock.toString());
+        });
+  
+        // body.cost = cost / quantity;
+        // body.price = price / quantity;
+        body.quantity = quantity;
+      };
     };
 
     if(!body.id) {
@@ -182,22 +203,23 @@ export default function PurchaseOrderIemsForm({id}: TProp) {
     };
 
     if(action == "viewSerial") {
+      setProduct({...ResetProduct, id: obj.productId});
       setModalViewStock(true);
     };
   };
   
-  const getSelectProduct = async () => {
-    try {
-      setIsLoading(true);
-      const {data} = await api.get(`/products/select?deleted=false`, configApi());
-      const result = data.result.data;
-      setProduct(result);
-    } catch (error) {
-      resolveResponse(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // const getSelectProduct = async () => {
+  //   try {
+  //     setIsLoading(true);
+  //     const {data} = await api.get(`/products/select?deleted=false`, configApi());
+  //     const result = data.result.data;
+  //     setProducts(result);
+  //   } catch (error) {
+  //     resolveResponse(error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
   
   const getSelectSupplier = async () => {
     try {
@@ -209,6 +231,18 @@ export default function PurchaseOrderIemsForm({id}: TProp) {
       resolveResponse(error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const getAutocompleProduct = async (value: string) => {
+    try {
+      if(!value) return setProducts([]);
+      
+      const {data} = await api.get(`/products/autocomplete?deleted=false&orderBy=name&sort=desc&pageSize=10&pageNumber=1&regex$or$name=${value}&regex$or$code=${value}`, configApi());
+      const result = data.result;
+      setProducts(result.data);
+    } catch (error) {
+      resolveResponse(error);
     }
   };
 
@@ -236,13 +270,15 @@ export default function PurchaseOrderIemsForm({id}: TProp) {
   }, [watch("productId")]);
 
   useEffect(() => {
-    getSelectProduct();
-    getSelectSupplier();
-
-    if(id != "create") {
-      getByPurchaseOrderId(id!);
-      getByPurchaseId(id!);
+    const initial = async () => {
+      await getSelectSupplier();
+  
+      if(id != "create") {
+        await getByPurchaseOrderId(id!);
+        await getByPurchaseId(id!);
+      };
     };
+    initial();
   }, []);
 
   return (
@@ -253,14 +289,22 @@ export default function PurchaseOrderIemsForm({id}: TProp) {
           <div className="grid grid-cols-6 gap-2">  
             <div className="col-span-6 xl:col-span-2">
               <Label title="Produto"/>
-              <select {...register("productId")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
+              {/* <select {...register("productId")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
                 <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Selecione</option>
                 {
                   products.map((x: TProduct) => {
                     return <option key={x.id} value={x.id} className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">{x.code} - {x.name}</option>
                   })
                 }
-              </select>
+              </select> */}
+              <Autocomplete defaultValue={watch("productName")} objKey="id" objValue="productName" onSearch={(value: string) => getAutocompleProduct(value)} onSelect={(opt) => {
+                console.log(opt)
+                setValue("hasProductVariations", opt.hasVariations);
+                setValue("variationsCode", opt.variationsCode);
+                setValue("hasProductSerial", opt.hasSerial);
+                setValue("variations", opt.variations);
+                setValue("productId", opt.id);
+              }} options={products}/>
             </div>  
             <div className="col-span-6 xl:col-span-2">
               <Label title="Fornecedor"/>
@@ -303,10 +347,13 @@ export default function PurchaseOrderIemsForm({id}: TProp) {
             {
               watch("hasProductSerial") == "no" &&
               <>
-                <div className="col-span-6 xl:col-span-1">
-                  <Label title="Quantidade" />
-                  <input placeholder="Quantidade" {...register("quantity")} type="number" className="input-erp-primary input-erp-default no-spinner"/>
-                </div>              
+                {
+                  watch("hasProductVariations") == "no" &&
+                  <div className="col-span-6 xl:col-span-1">
+                    <Label title="Quantidade" />
+                    <input placeholder="Quantidade" {...register("quantity")} type="number" className="input-erp-primary input-erp-default no-spinner"/>
+                  </div>              
+                }
                 <div className="col-span-6 xl:col-span-1">
                   <Label title="Preço de Venda" required={false}/>
                   <Controller
@@ -358,26 +405,39 @@ export default function PurchaseOrderIemsForm({id}: TProp) {
               </>
             }
             {
-              watch("productId") &&
+              watch("productId") && watch("hasProductVariations") == "yes" &&
               <div className="col-span-6 xl:col-span-6">
-                <PurchaseOrderItemVariationForm sendVariations={(body) => {
+                <VariationsForm btnAddSerial={watch("hasProductSerial") == "yes"} sendBody={(body) => {
+                  setValue("variations", body.variations);
+                  setValue("variationsCode", body.variationsCode);
+
+                  save({...getValues()});
+                }} sendCancel={() => {
+                  reset(ResetPurchaseOrderItem);
+                  setSelectedValues([]);
+                  setVariation([]);
+                }} variations={watch("variations")} variationsCode={watch("variationsCode")} />
+                {/* <PurchaseOrderItemVariationForm sendVariations={(body) => {
                   console.log(body)
                   setValue("variations", body.variations);
                   setValue("variationsCode", body.variationsCode);
-                }} id={watch("id")} productId={watch("productId")} supplierId={watch("supplierId")}/>
+                }} id={watch("id")} productId={watch("productId")} supplierId={watch("supplierId")}/> */}
               </div>  
             }
 
             <div className="col-span-6 xl:col-span-2 self-end">
-              <Button onClick={() => save({...getValues()})} type="submit" className="w-full xl:max-w-20 mt-2 mr-2" size="sm">{watch("id") ? 'Salvar' : 'Adicionar'}</Button>
               {
+                watch("hasProductVariations") == "no" &&
+                <Button onClick={() => save({...getValues()})} type="submit" className="w-full md:max-w-20 mt-2 mr-2" size="sm">{watch("id") ? 'Salvar' : 'Adicionar'}</Button>
+              }
+              {/* {
                 watch("id") &&
                 <Button onClick={() => {
                   reset(ResetPurchaseOrderItem);
                   setSelectedValues([]);
                   setVariation([]);
                 }} type="button" variant="outline" size="sm">Cancelar</Button>
-              }
+              } */}
             </div>          
           </div>
         </ComponentCard>

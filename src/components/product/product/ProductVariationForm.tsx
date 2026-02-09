@@ -7,13 +7,19 @@ import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import ComponentCard from "@/components/common/ComponentCard";
-import { TProduct, TVariationProduct } from "@/types/product/product/product.type";
+import { ResetProduct, TProduct, TVariationProduct } from "@/types/product/product/product.type";
 import { FaPlus, FaTrash } from "react-icons/fa";
 import { TVariation } from "@/types/product/variation/variation.type";
 import Label from "@/components/form/Label";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import Button from "@/components/ui/button/Button";
 import { MdCheck, MdOutlineQrCodeScanner } from "react-icons/md";
+import { permissionRead } from "@/utils/permission.util";
+import { IconViewStock } from "@/components/iconViewStock/IconViewStock";
+import { serialModalViewStockAtom } from "@/jotai/product/serial.jotai";
+import { productAtom } from "@/jotai/product/product.jotai";
+import SerialModalViewStock from "../serial/SerialModalViewStock";
+import { variationCurrentAtom } from "@/jotai/product/variation/variation.jotai";
 
 type TProp = { id?: string; };
 
@@ -21,7 +27,11 @@ export default function ProductVariationForm({ id }: TProp) {
   const [_, setIsLoading] = useAtom(loadingAtom);
   const [variationTypes, setVariationTypes] = useState<TVariation[]>([]);
   const [selectedGrades, setSelectedGrades] = useState<string[]>([]);
-  
+  const [__, setModalViewStock] = useAtom(serialModalViewStockAtom);
+  const [___, setProduct] = useAtom(productAtom);
+  const [variations, setVariation] = useState<TVariation[]>([]);
+  const [____, setCurrentVariation] = useAtom(variationCurrentAtom);
+
   const { register, control, reset, getValues, setValue, watch } = useForm<TProduct>({
     defaultValues: { variations: [] }
   });
@@ -64,6 +74,10 @@ export default function ProductVariationForm({ id }: TProp) {
       setIsLoading(true);
       const { data } = await api.get(`/products/${id}`, configApi());
       const result = data.result.data;
+      // console.log(result.stock)
+      // const quantity = result.stock.reduce((acc: number, item: any) => acc + Number(item.quantity), 0);
+
+      // console.log(result.stock)
 
       if (result.variations) {
         result.variations = result.variations.map((v: any) => {
@@ -80,10 +94,19 @@ export default function ProductVariationForm({ id }: TProp) {
           });
           return rowData;
         });
-      }
+      };
 
       setSelectedGrades(result.variationsCode || []);
       reset(result);
+      if(result["stock"]) {
+
+        if(result.stock.length > 0) {
+          console.log(result.stock)
+          if(result.stock[0]["variations"]) {
+            setVariation(result.stock[0].variations);
+          };
+        };
+      };
     } catch (error) {
       resolveResponse(error);
     } finally {
@@ -167,6 +190,16 @@ export default function ProductVariationForm({ id }: TProp) {
     await update();
   };
 
+  const normalizeQuantity = (index: number) => {
+    if(variations.length > 0) {
+      if(variations[index]) {
+        return variations[index].stock;
+      };
+    };
+    
+    return 0;
+  };
+
   useEffect(() => {
     const initial = async () => {
       const { data } = await api.get(`/variations/select?deleted=false`, configApi());
@@ -240,17 +273,24 @@ export default function ProductVariationForm({ id }: TProp) {
                       })}
 
                       <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
-                        <input {...register(`variations.${index}.stock`)} type="number" maxLength={40} placeholder="Estoque Atual" className="input-erp-primary input-erp-default w-full"/>
+                        <input disabled value={normalizeQuantity(index)} type="number" placeholder="Estoque Atual" className="input-erp-primary input-erp-default w-full"/>
                       </TableCell>
                       <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
                         <div key={index} className="flex gap-3"> 
-                            
+                          {
+                            watch("hasSerial") == "yes" && permissionRead("A", "A2") &&
+                            <IconViewStock action="viewSerial" obj={{}} getObj={() => {
+                              setCurrentVariation(index.toString());
+                              setProduct({...ResetProduct, id});
+                              setModalViewStock(true);
+                            }}/>
+                          }
                           <div onClick={updateLine} className="cursor-pointer text-green-400 hover:text-green-500 text-lg">
                             <MdCheck />
                           </div>      
                           <div onClick={() => removeVariation(index)} className="cursor-pointer text-red-400 hover:text-red-500">
                             <FaTrash />
-                          </div>      
+                          </div>    
                         </div>
                       </TableCell>
                     </TableRow>
@@ -268,6 +308,7 @@ export default function ProductVariationForm({ id }: TProp) {
         </div>
       </ComponentCard>
       <Button onClick={() => updateProductStock()} type="submit" className="w-full md:max-w-20 mt-2" size="sm">Salvar</Button>
+      <SerialModalViewStock />
     </>
   );
 }

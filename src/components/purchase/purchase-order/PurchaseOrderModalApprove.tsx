@@ -22,7 +22,7 @@ export const PurchaseOrderModalApprove = () => {
             resolveResponse({status: 200, message: "Aprovado com sucesso"});
             setModal(false);
             setId("");
-            setStatus("Finalizado")
+            setStatus("Finalizado");
         } catch (error) {
             resolveResponse(error);
         } finally {

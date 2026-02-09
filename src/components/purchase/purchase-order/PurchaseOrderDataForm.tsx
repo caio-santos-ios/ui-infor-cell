@@ -81,9 +81,15 @@ export default function PurchaseOrderDataForm({id}: TProp) {
   };
 
   useEffect(() => {
-    if(id != "create") {
-      getById(id!);
+    const initial = async () => {
+      setStatus("Rascunho");
+
+      if(id != "create") {
+        await getById(id!);
+      };
     };
+    initial();
+
   }, []);
 
   return (

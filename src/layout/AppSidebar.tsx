@@ -35,7 +35,7 @@ const staticNavItems: NavItem[] = [
       {name: "Produtos", path: "/product/products", code: "B1", pro: false, authorized: false },
       {name: "Categorias", path: "/product/categories", code: "B2", pro: false, authorized: false },
       {name: "Marcas", path: "/product/brands", code: "B4", pro: false, authorized: false },
-      {name: "Modelo", path: "/product/models", code: "B3", pro: false, authorized: false },
+      {name: "Grupos de Produtos", path: "/product/models", code: "B3", pro: false, authorized: false },
       {name: "Variações", path: "/product/variations", code: "B5", pro: false, authorized: false }
     ]
   },

@@ -50,8 +50,9 @@ export type TProduct = {
     name: string;
     description: string;
     categoryId: string;
+    subcategory: string;
     imei: string;
-    modelId: string;
+    brandId: string;
     moveStock: string;
     quantityStock: number;
     price: number;
@@ -65,7 +66,6 @@ export type TProduct = {
     barcode: string;
     unitOfMeasure: string;
     descriptionComplet: string;
-    subCategory: string;
     active: boolean;
     type: string;
     
@@ -108,7 +108,8 @@ export const ResetProduct: TProduct = {
     name: "",
     description: "",
     categoryId: "",
-    modelId: "",
+    subcategory: "",
+    brandId: "",
     imei: "",
     moveStock: "yes",
     quantityStock: 1,
@@ -124,7 +125,6 @@ export const ResetProduct: TProduct = {
     barcode: "",
     unitOfMeasure: "",
     descriptionComplet: "",
-    subCategory: "",
     active: true,
     type: "Mercadoria",
     

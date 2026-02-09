@@ -21,7 +21,7 @@ type TProp = {
 export default function ModelForm({id}: TProp) {
   const [_, setIsLoading] = useAtom(loadingAtom);
   const [brands, setBrand] = useState<TBrand[]>([]);
-  const [categories, setCategory] = useState<TCategorie[]>([]);
+  const [groups, setGroup] = useState<TCategorie[]>([]);
   const router = useRouter();  
 
   const { getValues, reset, register } = useForm<TModel>({
@@ -89,12 +89,18 @@ export default function ModelForm({id}: TProp) {
     }
   };
   
-  const getSelectCategory = async () => {
+  const getSelectGroup= async (id?: string) => {
     try {
       setIsLoading(true);
-      const {data} = await api.get(`/categories?deleted=false`, configApi());
+      const {data} = await api.get(`/models?deleted=false&groupFather=nenhum`, configApi());
       const result = data.result.data;
-      setCategory(result)
+      if(id) {
+        const list = result.filter((x: any) => x.id != id);
+        setGroup(list)
+      } else {
+        setGroup(result)
+      };
+
     } catch (error) {
       resolveResponse(error);
     } finally {
@@ -103,8 +109,8 @@ export default function ModelForm({id}: TProp) {
   };
 
   useEffect(() => {
-    getSelectBrand();
-    getSelectCategory();
+    // getSelectBrand();
+    getSelectGroup(id);
 
     if(id != "create") {
       getById(id!);
@@ -119,7 +125,7 @@ export default function ModelForm({id}: TProp) {
             <Label title="Nome" />
             <input placeholder="Nome" {...register("name")} type="text" className="input-erp-primary input-erp-default"/>
           </div>
-          <div className="col-span-12 xl:col-span-2">
+          {/* <div className="col-span-12 xl:col-span-2">
             <Label title="Marca"/>
             <select {...register("brandId")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
               <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Selecione</option>
@@ -129,19 +135,19 @@ export default function ModelForm({id}: TProp) {
                 })
               }
             </select>
-          </div>  
-          <div className="col-span-12 xl:col-span-2">
-            <Label title="Categoria"/>
-            <select {...register("categoryId")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
-              <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Selecione</option>
+          </div>   */}
+          <div className="col-span-12 xl:col-span-3">
+            <Label title="Grupo Pai" required={false}/>
+            <select {...register("groupFather")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
+              <option value="nenhum" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Nenhum</option>
               {
-                categories.map((x: TBrand) => {
+                groups.map((x: TBrand) => {
                   return <option key={x.id} value={x.id} className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">{x.code} - {x.name}</option>
                 })
               }
             </select>
           </div>  
-          <div className="col-span-12 xl:col-span-5">
+          <div className="col-span-12 xl:col-span-6">
             <Label title="Descrição" required={false} />
             <input placeholder="Descrição" {...register("description")} type="text" className="input-erp-primary input-erp-default"/>
           </div>

@@ -7,6 +7,7 @@ export type TTransfer = {
     variationId: string;
     barcode: string;
     productHasSerial: string;
+    productHasVariations: string;
     serial: string;
 }
 export const ResetTransfer: TTransfer = {
@@ -18,5 +19,6 @@ export const ResetTransfer: TTransfer = {
     variationId: "",
     barcode: "",
     productHasSerial: "no",
+    productHasVariations: "no",
     serial: ""
 }

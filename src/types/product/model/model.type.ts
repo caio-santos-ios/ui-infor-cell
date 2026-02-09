@@ -1,5 +1,6 @@
 export type TModel = {
     id?: string;
+    groupFather: string;
     brandId: string;
     categoryId: string;
     code: string;
@@ -12,5 +13,6 @@ export const ResetModel: TModel = {
     categoryId: "",
     code: "",
     name: "",
-    description: ""
+    description: "",
+    groupFather: "nenhum"
 }

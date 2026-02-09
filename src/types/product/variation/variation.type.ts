@@ -1,3 +1,5 @@
+import { TSerial } from "../serial/serial.type";
+
 export type TVariationItem = {
     code: string; 
     key: string; 
@@ -26,6 +28,7 @@ export type TVariation = {
     variationId: string;
     stock: number;
     items: TVariationItem[]
+    serials: TSerial[]
 }
 
 export const ResetVariation: TVariation = {
@@ -37,5 +40,6 @@ export const ResetVariation: TVariation = {
     serialAction: "",
     variationId: "",
     stock: 0,
-    items: [{key: '', value: '', active: true, deleted: false, code: "000001", serial: [{value: ''}]}]
+    items: [{key: '', value: '', active: true, deleted: false, code: "000001", serial: [{value: ''}]}],
+    serials: []
 }

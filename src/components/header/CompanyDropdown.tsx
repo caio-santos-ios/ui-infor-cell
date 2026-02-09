@@ -93,7 +93,7 @@ export default function CompanyDropdown() {
   }, []);
 
   return (
-    <div className="relative">
+    <div className="relative min-w-36">
       <button onClick={toggleDropdown} className="flex items-center text-gray-700 dark:text-gray-400 dropdown-toggle">
         <div className="flex flex-col">
           <p className="block mr-1 font-medium text-theme-sm text-start">{userLogger.nameCompany}</p>

@@ -23,6 +23,11 @@ import { ResetStockPosition, TStockPosition } from "@/types/stock/stock-position
 import { TVariation } from "@/types/product/variation/variation.type";
 import { TSerial } from "@/types/product/serial/serial.type";
 import { TTransfer } from "@/types/stock/transfer/transfer.type";
+import { IconViewStock } from "@/components/iconViewStock/IconViewStock";
+import { ResetProduct } from "@/types/product/product/product.type";
+import { productAtom } from "@/jotai/product/product.jotai";
+import { serialModalViewStockAtom } from "@/jotai/product/serial.jotai";
+import SerialModalViewStock from "@/components/product/serial/SerialModalViewStock";
 
 export default function StockPositionTable() {
   const [_, setLoading] = useAtom(loadingAtom);
@@ -34,6 +39,8 @@ export default function StockPositionTable() {
   const [variations, setVariation] = useState<TVariation[]>([]);
   const [serials, setSerial] = useState<TSerial[]>([]);
   const [quantity, setQuantity] = useState<number>(0);
+  const [__, setModalViewStock] = useAtom(serialModalViewStockAtom);
+  const [___, setProduct] = useAtom(productAtom);
 
   const { register, setValue, getValues, reset, watch } = useForm<TTransfer>({
     defaultValues: ResetExchange
@@ -75,13 +82,23 @@ export default function StockPositionTable() {
     }
   };
 
-  const getObj = async (obj: any, _: string) => {
-    await getSelectStore();
-    setValue("storeOriginId", obj.store);
-    setValue("productHasSerial", obj.productHasSerial);
-    setStock(obj);
-    setModalApproval(true);
-    setVariation(obj.variations);
+  const getObj = async (obj: any, action: string) => {
+    if(action == "edit") {
+      await getSelectStore();
+      setValue("storeOriginId", obj.store);
+      setValue("productHasSerial", obj.productHasSerial);
+      setValue("productHasVariations", obj.productHasVariations);
+      
+      setStock(obj);
+      setModalApproval(true);
+      setQuantity(obj.quantity)
+      setVariation(obj.variations);
+    };
+
+    if(action == "viewSerial") {
+      setProduct({...ResetProduct, id: obj.productId});
+      setModalViewStock(true);
+    };    
   };
 
   const changePage = async (page: number) => {
@@ -149,9 +166,15 @@ export default function StockPositionTable() {
                   <TableRow key={x.id}>
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.productName}</TableCell>
                     {/* <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.supplierName}</TableCell> */}
-                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.quantity}</TableCell>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
+                      {x.quantity}
+                      {/* {
+                        permissionRead("A", "A2") &&
+                        <IconViewStock action="viewSerial" obj={x} getObj={getObj}/>
+                      }   */}
+                    </TableCell>
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{maskDate(x.createdAt)}</TableCell>
-                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.origin}</TableCell>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.originDescription}</TableCell>
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
                       <div className="flex gap-3">    
                         {
@@ -159,6 +182,10 @@ export default function StockPositionTable() {
                           <div onClick={() => getObj(x, "edit")} className="cursor-pointer text-blue-400 hover:text-blue-500" >
                             <MdSwapHoriz size={20} />
                           </div>
+                        } 
+                        {
+                          permissionRead("F", "F1") &&
+                          <IconViewStock action="viewSerial" obj={x} getObj={getObj}/>
                         }  
                       </div>
                     </TableCell>
@@ -211,17 +238,33 @@ export default function StockPositionTable() {
                       <Label title="Produto"/>
                       <input disabled value={stock.productName} maxLength={40} placeholder="Código de barras"className="input-erp-primary input-erp-default w-full"/>
                     </div>
-                    <div className="col-span-12 md:col-span-6">
-                      <Label title="Variação"/>
-                      <select {...register("barcode")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
-                        <option value="">Selecione</option>
-                        {variations.map((item: any, j: number) => (
-                          <option key={j} value={item.barcode}>{normalizeValueSelect(item)}</option>
-                        ))}
-                      </select>
-                    </div>  
+                    {
+                      watch("productHasVariations") == "yes" &&
+                      <div className="col-span-12 md:col-span-6">
+                        <Label title="Variação"/>
+                        <select {...register("barcode")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
+                          <option value="">Selecione</option>
+                          {variations.map((item: any, j: number) => (
+                            <option key={j} value={item.barcode}>{normalizeValueSelect(item)}</option>
+                          ))}
+                        </select>
+                      </div>  
+                    }
                     {
                       watch("barcode") && watch("productHasSerial") == "no" &&
+                      <div className="col-span-12 md:col-span-6 xl:col-span-3">
+                        <Label title="Quantidade"/>
+                        <select {...register("quantity")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
+                          {
+                            Array.from({length: quantity}, (_, index) => {
+                              return <option key={index + 1} value={index + 1} className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">{index + 1}</option>
+                            })
+                          }
+                        </select>
+                      </div>  
+                    }
+                    {
+                      watch("productHasSerial") == "no" && watch("productHasSerial") == "no" &&
                       <div className="col-span-12 md:col-span-6 xl:col-span-3">
                         <Label title="Quantidade"/>
                         <select {...register("quantity")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
@@ -257,7 +300,9 @@ export default function StockPositionTable() {
               </div>
             </form>
         </div>
-      </Modal>          
+      </Modal> 
+
+      <SerialModalViewStock />
     </>
     :
     <NotData />

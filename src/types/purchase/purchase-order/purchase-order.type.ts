@@ -24,6 +24,7 @@ export type TPurchaseOrderItem = {
     id: string;
     purchaseOrderId: string;
     productId: string;
+    productName: string;
     cost: number;
     costDiscount: number;
     price: number;
@@ -34,13 +35,16 @@ export type TPurchaseOrderItem = {
     supplierId: string;
     moveStock: string;
     hasProductSerial: string;
+    hasProductVariations: string;
     variations: TVariationPurchaseOrderItem[]
     variationsCode: string[];
+    serials: TSerial[];
 }
 
 export const ResetPurchaseOrderItem: TPurchaseOrderItem = {
     id: "",
     productId: "",
+    productName: "",
     purchaseOrderId: "",
     cost: 0,
     costDiscount: 0,
@@ -53,7 +57,9 @@ export const ResetPurchaseOrderItem: TPurchaseOrderItem = {
     moveStock: "yes",
     variations: [],
     variationsCode: [],
-    hasProductSerial: "yes"
+    hasProductSerial: "yes",
+    hasProductVariations: "yes",
+    serials: []
 }
 
 export type TPurchaseOrder = {
@@ -69,6 +75,7 @@ export type TPurchaseOrder = {
     notes: string;
     userApproval: string;
 }
+
 export const ResetPurchaseOrder: TPurchaseOrder = {
     id: "",
     code: "",

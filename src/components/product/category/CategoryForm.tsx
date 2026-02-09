@@ -5,12 +5,14 @@ import { api } from "@/service/api.service";
 import { configApi, resolveResponse } from "@/service/config.service";
 import { useAtom } from "jotai";
 import { useEffect } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
 import ComponentCard from "@/components/common/ComponentCard";
 import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
 import { useRouter } from "next/navigation";
 import { ResetCategorie, TCategorie } from "@/types/product/categorie/categorie.type";
+import { MdAdd } from "react-icons/md";
+import { IconDelete } from "@/components/iconDelete/IconDelete";
 
 type TProp = {
   id?: string;
@@ -20,8 +22,13 @@ export default function CategoryForm({id}: TProp) {
   const [_, setIsLoading] = useAtom(loadingAtom);
   const router = useRouter();  
 
-  const { getValues, reset, register } = useForm<TCategorie>({
+  const { getValues, reset, register, control } = useForm<TCategorie>({
     defaultValues: ResetCategorie
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "subCategories"
   });
 
   const save = async (body: TCategorie) => {
@@ -72,6 +79,10 @@ export default function CategoryForm({id}: TProp) {
     }
   };
 
+  const nextCode = () => {
+    return `${fields.length + 1}`.padStart(4, '0');
+  };
+
   useEffect(() => {
     if(id != "create") {
       getById(id!);
@@ -81,18 +92,44 @@ export default function CategoryForm({id}: TProp) {
   return (
     <>
       <ComponentCard title="Dados Gerais">
-        <div className="grid grid-cols-6 gap-2 container-form">  
-          <div className="col-span-6 xl:col-span-2">
+        <div className="grid grid-cols-12 gap-2">  
+          
+          <div className="col-span-12 md:col-span-6 lg:col-span-4">
             <Label title="Nome" />
             <input placeholder="Nome" {...register("name")} type="text" className="input-erp-primary input-erp-default"/>
           </div>
-          <div className="col-span-6 xl:col-span-4">
+
+          <div className="col-span-12 md:col-span-6 lg:col-span-8">
             <Label title="Descrição" required={false} />
             <input placeholder="Descrição" {...register("description")} type="text" className="input-erp-primary input-erp-default"/>
           </div>
-          <div className="col-span-6 xl:col-span-4">
-            <Label title="Subcategorias" required={false} />
-            {/* <input placeholder="Descrição" {...register("description")} type="text" className="input-erp-primary input-erp-default"/> */}
+
+          <div className="col-span-12 border-t pt-4 mt-2 dark:border-gray-700">
+            <div className="flex justify-between items-center mb-4">
+              <Label title="Subcategorias" required={false} />
+              <Button 
+                type="button" 
+                variant="default" 
+                size="sm" 
+                onClick={() => { append({ name: "", code: nextCode() }) }}
+                className="border border-green-500 bg-green-500 hover:bg-green-800 text-white dark:text-gray-800"
+              >
+                <MdAdd size={18} /> Adicionar Subcategoria
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {fields.map((field, index) => (
+                <div key={field.id} className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg border dark:border-gray-700">
+                  <input placeholder="Nome da subcategoria" {...register(`subCategories.${index}.name` as const)} type="text" className="input-erp-primary input-erp-default"/>
+                  <IconDelete action="delete" getObj={() => remove(index)} />
+                </div>  
+              ))}
+            </div>
+            
+            {fields.length === 0 && (
+              <p className="text-xs text-gray-500 italic">Nenhuma subcategoria adicionada.</p>
+            )}
           </div>
         </div>
       </ComponentCard>

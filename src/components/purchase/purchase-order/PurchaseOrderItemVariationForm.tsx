@@ -65,7 +65,7 @@ export default function PurchaseOrderItemVariationForm({ id, productId, supplier
           return rowData;
         });
       }
-      console.log(result.variations)
+      
       setSelectedGrades(result.variationsCode || []);
       reset(result);
     } catch (error) {

@@ -5,7 +5,7 @@ import { api } from "@/service/api.service";
 import { configApi, resolveResponse } from "@/service/config.service";
 import { useAtom } from "jotai";
 import { useEffect, useRef, useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import ComponentCard from "@/components/common/ComponentCard";
 import { TProduct, TVariationProduct } from "@/types/product/product/product.type";
 import { FaPlus, FaTrash } from "react-icons/fa";
@@ -13,30 +13,42 @@ import { TVariation } from "@/types/product/variation/variation.type";
 import Label from "@/components/form/Label";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import Button from "@/components/ui/button/Button";
-import { MdCheck } from "react-icons/md";
+import { MdCheck, MdOutlineQrCodeScanner } from "react-icons/md";
+import { Modal } from "@/components/ui/modal";
+import { serialModalAtom } from "@/jotai/product/serial.jotai";
+import { TSerial } from "@/types/product/serial/serial.type";
+import { NumericFormat } from "react-number-format";
 
 type TProp = { 
   variations: any[];
   variationsCode: string[];
+  // serials: TSerial[];
   productId?: string; 
   sendBody: (body: any) => void;
+  sendCancel?: () => void;
   btnAdd?: boolean;
   btnSave?: boolean;
+  btnCancel?: boolean;
   btnDelete?: boolean;
   btnEdit?: boolean;
+  btnAddSerial?: boolean;
   qtdStock?: number;
   stockDisabled?: boolean;
   lineDefault?: number;
   typeBtnSave?: any;
 };
 
-export default function VariationsForm({ productId, variations = [], variationsCode = [], btnAdd = true, btnDelete = true, btnEdit = true, btnSave = true, qtdStock = 0, stockDisabled = false, lineDefault = 1, typeBtnSave = "submit", sendBody}: TProp) {
+export default function VariationsForm({ productId, variations = [], variationsCode = [], btnAdd = true, btnAddSerial = true, btnCancel = true, btnDelete = true, btnEdit = true, btnSave = true, qtdStock = 0, stockDisabled = false, lineDefault = 1, typeBtnSave = "submit", sendBody, sendCancel}: TProp) {
   const [_, setIsLoading] = useAtom(loadingAtom);
   const [variationTypes, setVariationTypes] = useState<TVariation[]>([]);
   const [selectedGrades, setSelectedGrades] = useState<string[]>([]);
+  const [modalSerial, setModalSerial] = useAtom<boolean>(serialModalAtom);
+  const [serials, setSerial] = useState<TSerial[]>([]);
+  const [currentVariation, setCurrentVariation] = useState<number>(-1);
+
   const isInitialMount = useRef(true); 
 
-  const { register, control, reset, getValues, setValue, watch } = useForm<TProduct>({
+  const { register, control, reset, getValues, setValue, watch } = useForm<any>({
     defaultValues: { variations: [] }
   });
 
@@ -45,37 +57,37 @@ export default function VariationsForm({ productId, variations = [], variationsC
     name: "variations",
   });
   
-  const getById = async (id: string, types: TVariation[]) => {
-    try {
-      setIsLoading(true);
-      const { data } = await api.get(`/products/${id}`, configApi());
-      const result = data.result.data;
+  // const getById = async (id: string, types: TVariation[]) => {
+  //   try {
+  //     setIsLoading(true);
+  //     const { data } = await api.get(`/products/${id}`, configApi());
+  //     const result = data.result.data;
 
-      if (result.variations) {
-        result.variations = result.variations.map((v: any) => {
-          const rowData: any = { ...v };
+  //     if (result.variations) {
+  //       result.variations = result.variations.map((v: any) => {
+  //         const rowData: any = { ...v };
 
-          v.attributes?.forEach((attr: any) => {
-            const variationType = types.find(t => t.name === attr.key);
-            if (variationType) {
-              const item = variationType.items.find(i => i.value === attr.value);
-              if (item) {
-                rowData[`variationItemId_${variationType.code}`] = item.code;
-              }
-            }
-          });
-          return rowData;
-        });
-      }
+  //         v.attributes?.forEach((attr: any) => {
+  //           const variationType = types.find(t => t.name === attr.key);
+  //           if (variationType) {
+  //             const item = variationType.items.find(i => i.value === attr.value);
+  //             if (item) {
+  //               rowData[`variationItemId_${variationType.code}`] = item.code;
+  //             }
+  //           }
+  //         });
+  //         return rowData;
+  //       });
+  //     }
 
-      setSelectedGrades(result.variationsCode || []);
-      reset(result);
-    } catch (error) {
-      resolveResponse(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  //     setSelectedGrades(result.variationsCode || []);
+  //     reset(result);
+  //   } catch (error) {
+  //     resolveResponse(error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   const update = () => {
     const body = generateBody();
@@ -110,7 +122,8 @@ export default function VariationsForm({ productId, variations = [], variationsC
         stock: Number(item.stock),
         variationId: item.variationId || variationTypes.find(v => v.code === Array.from(allUsedVariationCodes)[0])?.id,
         variationItemId: item.variationItemId || "VAR",
-        attributes
+        attributes,
+        serials: item.serials
       };
     });
 
@@ -131,10 +144,16 @@ export default function VariationsForm({ productId, variations = [], variationsC
       code: "",
       variationId: "",
       variationItemId: "",
-      value: ""
+      value: "",
+      serials: [{
+        code: "",
+        cost: 0,
+        price: 0,
+        hasAvailable: true
+      }]
     });
 
-    update();
+    // update();
   };
   
   const updateLine = async () => {
@@ -143,7 +162,23 @@ export default function VariationsForm({ productId, variations = [], variationsC
   
   const removeVariation = async (index: number) => {
     remove(index);
-    update();
+    // update();
+  };
+
+  const updateSerial = async () => {
+    const newList = watch("variations");
+    // console.log(newList)
+    // const body = generateBody();
+
+    // const totalCost = serials.reduce((acc, item) => acc + Number(item.cost), 0);
+    // const totalPrice = serials.reduce((acc, item) => acc + Number(item.price), 0);
+    // console.log(variations[currentVariation])
+    // console.log(serials)
+    newList[currentVariation].serials = serials;
+    // body.cost = totalCost / serials.length;
+    // body.price = totalPrice / serials.length;
+    console.log(newList)
+    setModalSerial(false);
   };
 
   useEffect(() => {
@@ -174,8 +209,6 @@ export default function VariationsForm({ productId, variations = [], variationsC
       };
       
       if (variations.length == 0 && isInitialMount.current) {
-        console.log(variations)
-        console.log(lineDefault)
         Array.from({ length: lineDefault }).forEach(() => {
           append({
             barcode: "",
@@ -183,7 +216,15 @@ export default function VariationsForm({ productId, variations = [], variationsC
             code: "",
             variationId: "",
             variationItemId: "",
-            value: ""
+            value: "",
+            serials: [
+              {
+                code: "",
+                cost: 0,
+                price: 0,
+                hasAvailable: true
+              }
+            ]
           });
         });
 
@@ -219,7 +260,7 @@ export default function VariationsForm({ productId, variations = [], variationsC
                     ))}
                     <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Estoque Atual</TableCell>
                     {
-                      btnEdit || btnDelete &&
+                      (btnEdit || btnDelete || btnAddSerial) &&
                       <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Ações</TableCell>
                     }
                   </TableRow>
@@ -258,8 +299,9 @@ export default function VariationsForm({ productId, variations = [], variationsC
                       <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
                         <input disabled={stockDisabled} {...register(`variations.${index}.stock`)} type="number" maxLength={40} placeholder="Estoque Atual" className="input-erp-primary input-erp-default w-full"/>
                       </TableCell>
+
                       {
-                        btnEdit || btnDelete &&
+                        (btnEdit || btnDelete || btnAddSerial) &&
                         <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
                           <div key={index} className="flex gap-3"> 
                             {
@@ -274,9 +316,46 @@ export default function VariationsForm({ productId, variations = [], variationsC
                                 <FaTrash />
                               </div>      
                             }
+                            {
+                              btnAddSerial &&
+                              <div onClick={() => {
+                                // const stockCount = variations[index].stock;
+                                // const serial = variations[index].serials;
+                                const stockCount = Number(getValues(`variations.${index}.stock`)) || 0;
+                                console.log(stockCount)
+                                const serial = getValues(`variations.${index}.serials`);
+                                
+                                // if (id && id !== "create") {
+                                  //   const body = {...getValues()};
+                                  //   setSerial(body.variations[index].serials);
+                                  // } else {};
+                                  
+                                if(serial.length == 0) {
+                                  console.log(stockCount)
+                                  console.log(serial)
+                                  const initialSerials = Array.from({ length: stockCount }, () => ({
+                                    code: "",
+                                    cost: 0,
+                                    price: 0,
+                                    hasAvailable: true
+                                  }));
+                                  console.log(initialSerials)
+
+                                  setSerial(initialSerials);
+                                } else {
+                                  setSerial(serial);
+                                }     
+
+                                setCurrentVariation(index);
+                                setModalSerial(true);
+                              }} className="cursor-pointer text-blue-400 hover:text-blue-500 text-lg">
+                                <MdOutlineQrCodeScanner />
+                              </div>   
+                            }
                           </div>
                         </TableCell>
                       }
+
                     </TableRow>
                   ))}
                 </TableBody>
@@ -293,11 +372,106 @@ export default function VariationsForm({ productId, variations = [], variationsC
           </div>
         }
       </ComponentCard>
+      
+      {
+        btnCancel &&
+        <Button onClick={() => {
+          if(sendCancel) sendCancel();
+        }} variant="outline" type="button" className="w-full md:max-w-20 mt-2 me-2" size="sm">Cancelar</Button>
+      }
 
       {
         btnSave &&
         <Button onClick={() => update()} type={typeBtnSave} className="w-full md:max-w-20 mt-2" size="sm">Salvar</Button>
       }
+
+      <Modal isOpen={modalSerial} onClose={() => setModalSerial(false)} className={`m-4 w-[80dvw] max-w-200 bg-red-400`}>
+        <div className={`no-scrollbar relative overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11`}>
+          <div className="px-2 pr-14">
+            <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">Serial</h4>
+          </div>
+
+          <form className="flex flex-col">
+            <div className={`max-h-[70dvh] custom-scrollbar overflow-y-auto px-2 pb-3`}>
+              <div className="grid grid-cols-8 gap-4 mb-2">
+                <div className="text-start text-gray-500 dark:text-gray-400 col-span-8 lg:col-span-4">Nº do Serial</div>
+                <div className="text-start text-gray-500 dark:text-gray-400 col-span-8 lg:col-span-2">Custo</div>
+                <div className="text-start text-gray-500 dark:text-gray-400 col-span-8 lg:col-span-2">Preço</div>
+              </div>
+
+              {
+                serials.map((serial: TSerial, index: number) => {
+                  return (
+                    <div key={index} className="grid grid-cols-8 gap-4 mb-3">
+                      
+                      <div className="col-span-8 lg:col-span-4">
+                        <input onInput={(e: any) => {
+                          serials[index].code = e.target.value;
+                        }} maxLength={50} defaultValue={serials[index].code} placeholder="Digite" type="text" className="input-erp-primary input-erp-default"/>
+                      </div>
+
+                      <div className="col-span-8 lg:col-span-2">
+                        <Controller
+                          name="cost"
+                          control={control}
+                          defaultValue={0}
+                          render={({ field: { onChange, value } }) => (
+                            <NumericFormat
+                              className="input-erp-primary input-erp-default" 
+                              value={serials[index].cost}
+                              onValueChange={(values) => {
+                                serials[index].cost = values.floatValue ? values.floatValue : 0;
+                              }}
+                              thousandSeparator="."
+                              decimalSeparator=","
+                              prefix="R$ "
+                              decimalScale={2}
+                              fixedDecimalScale
+                              allowNegative={false}
+                              placeholder="Custo"
+                            />
+                          )}
+                        />
+                      </div>
+                      
+                      <div className="col-span-8 lg:col-span-2">
+                        <Controller
+                          name="price"
+                          control={control}
+                          defaultValue={0}
+                          render={({ field: { onChange, value } }) => (
+                            <NumericFormat
+                              className="input-erp-primary input-erp-default" 
+                              value={serials[index].price}
+                              onValueChange={(values) => {
+                                serials[index].price = values.floatValue ? values.floatValue : 0;
+                              }}
+                              thousandSeparator="."
+                              decimalSeparator=","
+                              prefix="R$ "
+                              decimalScale={2}
+                              fixedDecimalScale
+                              allowNegative={false}
+                              placeholder="Preço"
+                            />
+                          )}
+                        />
+                      </div>                        
+                    </div>
+                  )
+                })
+              }
+            </div>
+            
+            <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
+              <Button size="sm" variant="outline" onClick={() => setModalSerial(false)}>Cancelar</Button>
+              <Button size="sm" variant="primary" onClick={() => {
+                updateSerial();
+              }}>Salvar</Button>
+            </div>
+          </form>
+        </div>
+      </Modal> 
     </>
   );
 }
