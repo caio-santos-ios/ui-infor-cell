@@ -18,6 +18,7 @@ export type TSalesOrder = {
     quantity: number;
     createItem: boolean;
     productHasSerial: string;
+    productHasVariations: string;
     serial: string;
     stockId: string;
 }
@@ -41,6 +42,7 @@ export const ResetSalesOrder: TSalesOrder = {
     createItem: true,
     variationId: "",
     productHasSerial: "no",
+    productHasVariations: "no",
     serial: "",
     stockId: ""
 }

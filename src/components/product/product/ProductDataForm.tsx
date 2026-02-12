@@ -10,10 +10,8 @@ import ComponentCard from "@/components/common/ComponentCard";
 import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
 import { useRouter } from "next/navigation";
-import { NumericFormat } from "react-number-format";
 import { ResetProduct, TProduct } from "@/types/product/product/product.type";
 import { TCategorie, TSubCategory } from "@/types/product/categorie/categorie.type";
-import { TModel } from "@/types/product/model/model.type";
 import Switch from "@/components/form/Switch";
 import TextArea from "@/components/form/input/TextArea";
 import { hasMoveStockProductAtom, hasVariationProductAtom } from "@/jotai/product/product.jotai";
@@ -173,10 +171,6 @@ export default function ProductDataForm({id}: TProp) {
             <Label title="Nome" />
             <input maxLength={30} placeholder="Nome" {...register("name")} type="text" className="input-erp-primary input-erp-default"/>
           </div>
-          {/* <div className="col-span-6 md:col-span-3 xl:col-span-2">
-            <Label title="SKU" required={false}/>
-            <input maxLength={15} placeholder="SKU" {...register("sku")} type="text" className="input-erp-primary input-erp-default"/>
-          </div> */}
           <div className="col-span-6 md:col-span-3 xl:col-span-2">
             <Label title="EAN/GTIN" required={false}/>
             <input maxLength={30} placeholder="EAN/GTIN" {...register("ean")} type="text" className="input-erp-primary input-erp-default"/>

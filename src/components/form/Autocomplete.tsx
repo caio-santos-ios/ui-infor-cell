@@ -65,7 +65,12 @@ export default function Autocomplete({ options, onSelect, onSearch, placeholder,
                             }}
                             >
                             <div className="flex flex-col">
-                                <span className="font-semibold">{opt[objValue]}</span>
+                                <span className="font-semibold">{opt[objValue]} 
+                                    {
+                                        opt["isOutOfStock"] &&
+                                        <span> - <span className="text-red-400">SEM ESTOQUE</span></span>
+                                    }
+                                </span>
                             </div>
                         </li>
                     ))}

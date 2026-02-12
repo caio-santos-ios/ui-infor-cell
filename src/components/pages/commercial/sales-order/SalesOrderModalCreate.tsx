@@ -141,7 +141,7 @@ export default function SalesOrderModalCreate() {
       setSalesOrderId(result.data.id);
       cleanItem();
 
-      await getSalesOrderItems(salesOrderId);
+      await getSalesOrderItems(result.data.id);
     } catch (error) {
       resolveResponse(error);
     } finally {
@@ -168,7 +168,6 @@ export default function SalesOrderModalCreate() {
 
   const getById = async (id: string) => {
     try {
-      // setIsLoading(true);
       const {data} = await api.get(`/sales-orders/${id}`, configApi());
       const result = data.result.data;
       const sellerName = result.userName ? result.userName : result.sellerName;
@@ -182,8 +181,6 @@ export default function SalesOrderModalCreate() {
       setSalesOrderCode(result.code);
     } catch (error) {
       resolveResponse(error);
-    } finally {
-      // setIsLoading(false);
     }
   };
 
@@ -203,7 +200,6 @@ export default function SalesOrderModalCreate() {
 
   const getBoxByCreatedBy = async () => {
     try {
-      // setIsLoading(true);
       const {data} = await api.get(`/boxes/verify`, configApi());
       const result = data.result;
       if(result.data == null) {
@@ -211,8 +207,6 @@ export default function SalesOrderModalCreate() {
       };
     } catch (error) {
       resolveResponse(error);
-    } finally {
-      // setIsLoading(false);
     }
   };
 
@@ -220,9 +214,9 @@ export default function SalesOrderModalCreate() {
     try {
       const {data} = await api.get(`/sales-orders-items?deleted=false&salesOrderId=${id}&orderBy=name&sort=desc&pageSize=1000&pageNumber=1`, configApi());
       const result = data.result;
-      setSalesOrderItems(result.data);
       const total = result.data.reduce((value: number, item: any) => value + parseFloat(item.total), 0);
       setTotalSalesOrder(total)
+      setSalesOrderItems(result.data);
     } catch (error) {
       resolveResponse(error);
     }
@@ -234,7 +228,8 @@ export default function SalesOrderModalCreate() {
       
       const {data} = await api.get(`/products/autocomplete?deleted=false&orderBy=name&sort=desc&pageSize=10&pageNumber=1&regex$or$name=${value}&regex$or$code=${value}`, configApi());
       const result = data.result;
-      setProducts(result.data);
+      const list = result.data.map((x: any) => ({...x, isOutOfStock: x.stock.length == 0}));
+      setProducts(list);
     } catch (error) {
       resolveResponse(error);
     }
@@ -264,28 +259,22 @@ export default function SalesOrderModalCreate() {
 
   const getUserLogged = async () => {
     try {
-      // setIsLoading(true);
       const {data} = await api.get(`/users/logged`, configApi());
       const result = data.result.data;
       setValueSalesOrder("sellerId", result.id); 
       setSellerDefault(result.id);
     } catch (error) {
       resolveResponse(error);
-    } finally {
-      // setIsLoading(false);
     }
   };
 
   const getSelectPaymentMethod = async () => {
     try {
-      // setIsLoading(true);
       const {data} = await api.get(`/payment-methods?deleted=false&ne$type=payable&orderBy=createdAt&sort=desc&pageSize=1000&pageNumber=1`, configApi());
       const result = data.result;
       setPaymentMethod(result.data);
     } catch (error) {
       resolveResponse(error);
-    } finally {
-      // setIsLoading(false);
     }
   };
 
@@ -368,8 +357,11 @@ export default function SalesOrderModalCreate() {
       const discountValue = watchSalesOrder("discountValue") || 0;
       const discountType = watchSalesOrder("discountType");
       const value = watchSalesOrder("value");
+
+      if(watchSalesOrder("quantity") == 0) {
+        setValueSalesOrder("quantity", 1);
+      };
       const quantity = watchSalesOrder("quantity");
-      
       const subTotal = parseFloat(value.toString()) * parseFloat(quantity.toString());
       
       if (discountType === "percentage") {
@@ -385,6 +377,14 @@ export default function SalesOrderModalCreate() {
   const normalizeValueSelect = (variation: any) => {
     const variationStr = variation.attributes.map((a: any) => (a.value));
     return variationStr.join(" / ");
+  };
+
+  const normalizeCost = (exchanges: any[], total: any) => {
+    const exchangeTotal = exchanges.reduce((value: number, item: any) => value + parseFloat(item.cost), 0);
+    console.log(total - exchangeTotal < 0 ? 0 : total - exchangeTotal);
+    console.log(total)
+    console.log(exchanges)
+    return parseFloat(total) - exchangeTotal < 0 ? 0 : formattedMoney(parseFloat(total) - exchangeTotal);
   };
 
   useEffect(() => {
@@ -418,10 +418,10 @@ export default function SalesOrderModalCreate() {
           setSerial(newSerials);
         };
       };
-
-      calculated();
     };
-  }, [watchSalesOrder("barcode"), watchSalesOrder("quantity"), watchSalesOrder("discountValue"), watchSalesOrder("discountType")]);
+
+    calculated();
+  }, [watchSalesOrder("barcode"), watchSalesOrder("quantity"), watchSalesOrder("value"), watchSalesOrder("discountValue"), watchSalesOrder("discountType")]);
 
   useEffect(() => {
     const intial = async () => {
@@ -446,8 +446,8 @@ export default function SalesOrderModalCreate() {
   }, [modalCreate]);
 
   return (
-    <Modal isOpen={modalCreate} onClose={() => setModalCreate(false)} className={`m-4  ${salesOrderStatus == "Finalizado" && 'max-w-[95dvw] lg:max-w-[45dvw]'}`}>
-      <div className={`h-[95dvh] ${salesOrderStatus == "Finalizado" && 'max-w-[95dvw] lg:max-w-[45dvw]'} no-scrollbar relative overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11`}>
+    <Modal isOpen={modalCreate} onClose={close} className={`m-4  ${modalBoxCreate ? 'w-[90dvw] max-w-180' : salesOrderStatus == "Finalizado" && 'max-w-[95dvw] lg:max-w-[45dvw]'}`}>
+      <div className={`${modalBoxCreate ? 'h-[50dvh]' : 'h-[95dvh]'} ${modalBoxCreate ? 'w-full max-w-180' : salesOrderStatus == "Finalizado" && 'max-w-[95dvw] lg:max-w-[45dvw]'} no-scrollbar relative overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11`}>
         <div className="px-2 pr-14">
           <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">{modalBoxCreate ? 'Abertura de Caixa' : 'Pedido de Venda'}</h4>
         </div>
@@ -455,35 +455,40 @@ export default function SalesOrderModalCreate() {
         <form className="flex flex-col">
           {
             modalBoxCreate ?
-            <div className={`min-h-[50dvh] min-w-[30dvw] custom-scrollbar overflow-y-auto px-2 pb-3`}>
-              <div className="mt-7">
-                <div className="grid grid-cols-2 gap-x-6 gap-y-5">
-                  <div className="col-span-6 xl:col-span-3">
-                    <Label title="Valor da Abertura" />
-                    <Controller
-                      name="openingValue"
-                      control={controlBox}
-                      defaultValue={0}
-                      render={({ field: { onChange, value } }) => (
-                        <NumericFormat
-                          className="input-erp-primary input-erp-default" 
-                          value={value}
-                          onValueChange={(values) => {
-                            const val = values.floatValue ?? 0;
-                            onChange(val);
-                          }}
-                          thousandSeparator="."
-                          decimalSeparator=","
-                          prefix="R$ "
-                          decimalScale={2}
-                          fixedDecimalScale
-                          allowNegative={false}
-                          placeholder="Valor da Abertura"
-                        />
-                      )}
-                    />
-                  </div>
+            <div className={`min-h-[25dvh] w-full max-w-180 custom-scrollbar overflow-y-auto px-2`}>
+              <div className="grid grid-cols-6 gap-4">
+                <div className="col-span-6 md:col-span-3">
+                  <Label title="Valor da Abertura" />
+                  <Controller
+                    name="openingValue"
+                    control={controlBox}
+                    defaultValue={0}
+                    render={({ field: { onChange, value } }) => (
+                      <NumericFormat
+                        className="input-erp-primary input-erp-default" 
+                        value={value}
+                        onValueChange={(values) => {
+                          const val = values.floatValue ?? 0;
+                          onChange(val);
+                        }}
+                        thousandSeparator="."
+                        decimalSeparator=","
+                        prefix="R$ "
+                        decimalScale={2}
+                        fixedDecimalScale
+                        allowNegative={false}
+                        placeholder="Valor da Abertura"
+                      />
+                    )}
+                  />
                 </div>
+                <div className="col-span-6 md:col-span-3">
+                  <Label title="Venda por 2 etapas?" required={false}/>
+                  <select {...RegisterBox("twoSteps")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
+                    <option value="yes" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Sim</option>
+                    <option value="no" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Não</option>
+                  </select>
+                </div>  
               </div>
             </div>
             :
@@ -589,13 +594,20 @@ export default function SalesOrderModalCreate() {
                               setValueSalesOrder("image", opt.image ?? "");
                               setValueSalesOrder("value", opt.price);
                               setValueSalesOrder("productHasSerial", opt.hasSerial);
-                              calculated();
+                              setValueSalesOrder("productHasVariations", opt.hasVariations);
+                              
+                              if(opt.hasVariations == "no") {
+                                setValueSalesOrder("value", opt.price);
+                              };
+                              
                               const stock = opt.stock.find((s: any) => s.quantity > 0);
                               if(stock) {
-                                console.log(stock.id)
                                 setValueSalesOrder("stockId", stock.id);
                                 setVariation(stock.variations);
-                              }
+                                setQuantityVariation(stock.quantity);
+                              };
+
+                              calculated();
                             }} options={products}/>
                           </div>
                           <div className="col-span-6 xl:col-span-2 hidden lg:flex">
@@ -612,20 +624,23 @@ export default function SalesOrderModalCreate() {
                           </div>
                           <div className="col-span-6 xl:col-span-4">
                             <div className="grid grid-cols-4 gap-4">
-                              <div className="col-span-6 xl:col-span-4">
-                                <Label title="Variação" />
-                                <select {...registerSalesOrder("barcode")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
-                                  <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Selecione</option>
-                                  {
-                                    variations.map((x: any, index: number) => {
-                                      return (
-                                        normalizeValueSelect(x).length > 0 &&
-                                        <option key={x.barcode} value={x.barcode} className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">{normalizeValueSelect(x)}</option>
-                                      ) 
-                                    })
-                                  }
-                                </select>
-                              </div>
+                              {
+                                watchSalesOrder("productHasVariations") == "yes" &&
+                                <div className="col-span-6 xl:col-span-4">
+                                  <Label title="Variação" />
+                                  <select {...registerSalesOrder("barcode")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
+                                    <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Selecione</option>
+                                    {
+                                      variations.map((x: any, index: number) => {
+                                        return (
+                                          normalizeValueSelect(x).length > 0 &&
+                                          <option key={x.barcode} value={x.barcode} className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">{normalizeValueSelect(x)}</option>
+                                        ) 
+                                      })
+                                    }
+                                  </select>
+                                </div>
+                              }
                               {
                                 watchSalesOrder("productHasSerial") == "yes" ?
                                 <div className="col-span-6 xl:col-span-4">
@@ -681,7 +696,7 @@ export default function SalesOrderModalCreate() {
                                 <Label title="Desconto" required={false}/>
                                 <div className="relative flex items-stretch w-full">
                                   <Controller
-                                    name="discountValue" // nome do campo de desconto no seu form
+                                    name="discountValue" 
                                     control={controlSalesOrder}
                                     defaultValue={0}
                                     render={({ field: { onChange, value } }) => (
@@ -761,6 +776,7 @@ export default function SalesOrderModalCreate() {
                     <div className="col-span-6 xl:col-span-3">
                       <Label title="Vendedor" />
                       <select disabled={salesOrderStatus == "Finalizado"} {...registerSalesOrder("sellerId")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
+                        {/* <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Selecione</option> */}
                         {
                           sellers.map((x: any) => {
                             return (
@@ -805,7 +821,7 @@ export default function SalesOrderModalCreate() {
                                       <TableCell className="text-sm px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.productName}</TableCell>
                                       <TableCell className="text-sm px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.quantity}</TableCell>
                                       <TableCell className="text-sm px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{formattedMoney(x.value)}</TableCell>
-                                      <TableCell className="text-sm px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{formattedMoney(x.total)}</TableCell>
+                                      <TableCell className="text-sm px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{normalizeCost(x.exchanges, x.total)}</TableCell>
                                       {
                                         !modalCreateFinish &&
                                         <TableCell className="text-sm px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
@@ -845,10 +861,12 @@ export default function SalesOrderModalCreate() {
               </div>
             </div>
           }
-          
-          <div className="col-span-12 lg:col-span-3 gap-3 px-2 lg:justify-end">
-            <h1 className={`${salesOrderStatus == "Rascunho" ? "w-6/12" : "w-12/12"} px-5 py-4 sm:px-6 text-start bg-green-600 text-white rounded-lg`}>TOTAL DO PEDIDO: <strong>{formattedMoney(totalSalesOrder)}</strong></h1>
-          </div>
+          {
+            !modalBoxCreate &&
+            <div className="col-span-12 lg:col-span-3 gap-3 px-2 lg:justify-end">
+              <h1 className={`${salesOrderStatus == "Rascunho" ? "w-6/12" : "w-12/12"} px-5 py-4 sm:px-6 text-start bg-green-600 text-white rounded-lg`}>TOTAL DO PEDIDO: <strong>{formattedMoney(totalSalesOrder)}</strong></h1>
+            </div>
+          }
 
           <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
             {

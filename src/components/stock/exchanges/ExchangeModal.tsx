@@ -27,6 +27,7 @@ export const ExchangeModal = () => {
     const [product, setProduct] = useAtom(productAtom);
     const [products, setProducts] = useState<any[]>([]);
     const [hasSerial, setHasSerial] = useState<boolean>(false);
+    const [hasVariations, setHasVariations] = useState<boolean>(false);
     const [salesOrderCode] = useAtom(salesOrderCodeAtom);
     const [salesOrderItemId] = useAtom(salesOrderItemIdAtom);
 
@@ -37,16 +38,19 @@ export const ExchangeModal = () => {
     const confirm = async (body: any) => {
         if(watch("cost") == 0) return toast.warn("Custo é obrigatório", {theme: 'colored'});
         if(hasSerial && !watch("serial")) return toast.warn("Serial é obrigatório", {theme: 'colored'});
-
-        body.variations[0].serials = [{
-            code: watch("serial"),
-            cost: watch("cost"),
-            price: 0,
-            hasAvailable: watch("forSale") == "yes"
-        }];
+        
+        if(hasVariations && hasSerial) {
+            body.variations[0].serials = [{
+                code: watch("serial"),
+                cost: watch("cost"),
+                price: 0,
+                hasAvailable: watch("forSale") == "yes"
+            }];
+        };
 
         const form = {...getValues(), ...body};
-        form.origin = `Troca no PV - nº ${salesOrderCode}`;
+        form.origin = `sales-order`;
+        form.originDescription = `Troca no PV - nº ${salesOrderCode}`;
         form.salesOrderItemId = salesOrderItemId;
 
         if(!form.id) {
@@ -147,8 +151,9 @@ export const ExchangeModal = () => {
                                 <Label title="Produto" />
                                 <Autocomplete defaultValue={watch("productName")} objKey="id" objValue="productName" onSearch={(value: string) => getAutocompleProduct(value)} onSelect={(opt) => { 
                                     console.log(opt)
-                                    setHasSerial(opt.hasSerial == "yes");
                                     setValue("productId", opt.id);
+                                    setHasSerial(opt.hasSerial == "yes");
+                                    setHasVariations(opt.hasVariations == "yes");
                                 }} options={products}/>
                             </div>
 
@@ -193,12 +198,23 @@ export const ExchangeModal = () => {
                                     <input {...register("serial")} maxLength={50} placeholder="Digite" type="text" className="input-erp-primary input-erp-default"/>
                                 </div>
                             }
-
-                            <div className="col-span-9">
-                                <VariationsForm variations={watch("variations")} variationsCode={watch("variationsCode")} productId="" sendBody={(body) => {
-                                    confirm(body);
-                                }} btnAdd={false} btnDelete={false} btnEdit={false} btnSave={true} lineDefault={1} qtdStock={1} stockDisabled={true} typeBtnSave="button"/>
-                            </div>
+                            {
+                                hasVariations &&
+                                <div className="col-span-9">
+                                    <VariationsForm variations={watch("variations")} variationsCode={watch("variationsCode")} productId="" sendBody={(body) => {
+                                        confirm(body);
+                                    }} btnAdd={false} btnDelete={false} btnEdit={false} btnSave={true} lineDefault={1} qtdStock={1} stockDisabled={true} typeBtnSave="button"/>
+                                </div>
+                            }
+                            {
+                                !hasVariations &&
+                                <div className="col-span-9">
+                                    <Button className="me-2" size="sm" variant="outline" onClick={() => {
+                                        setModal(true);
+                                    }}>Cancelar</Button>
+                                    <Button size="sm" variant="primary" onClick={() => confirm({...getValues()})}>Salvar</Button>
+                                </div>
+                            }
                         </div>
                     </div>
                 </form>
