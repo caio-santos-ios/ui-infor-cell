@@ -43,7 +43,7 @@ export default function Autocomplete({ options, onSelect, onSearch, placeholder,
                     disabled={disabled}
                     type="text"
                     className="input-erp-primary input-erp-default w-full pl-10"
-                    placeholder={placeholder || "Buscar produto..."}
+                    placeholder={placeholder || "Buscar..."}
                     value={searchTerm}
                     onChange={(e) => {
                         onSearch(e.target.value);

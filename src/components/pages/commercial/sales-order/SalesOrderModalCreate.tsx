@@ -24,16 +24,20 @@ import { useModal } from "@/hooks/useModal";
 import { ModalDelete } from "@/components/modalDelete/ModalDelete";
 import { MdAutorenew, MdOutlineScreenSearchDesktop } from "react-icons/md";
 import { TSerial } from "@/types/product/serial/serial.type";
-import { exchangeModalAtom } from "@/jotai/stock/exchange/exchange.jotai";
+import { exchangeModalAtom } from "@/jotai/stock/exchange.jotai";
 import { ExchangeModal } from "@/components/stock/exchanges/ExchangeModal";
 import { productAtom } from "@/jotai/product/product.jotai";
 import { salesOrderItemIdAtom } from "@/jotai/commercial/sales-order/salesOrderItem.jotai";
+import BoxModalSettings from "../box/BoxModalSettings";
+import { boxIdAtom } from "@/jotai/commercial/box/box.jotai";
 
 export default function SalesOrderModalCreate() {
   const [_, setIsLoading] = useAtom(loadingAtom);
   const [modalCreate, setModalCreate] = useAtom(salesOrderModalAtom);
   const [modalCreateFinish, setModalCreateFinish] = useState(false);
   const [modalBoxCreate, setModalBoxCreate] = useState<boolean>(false);
+  const [boxOpened, setBoxOpened] = useState<boolean>(false);
+  const [box, setBox] = useState<boolean>(false);
   const [products, setProducts] = useState<any[]>([]);
   const [customers, setCustomer] = useState<any[]>([{id: 'Ao consumidor', tradeName: 'Ao consumidor'}]);
   const [sellers, setSeller] = useState<any[]>([]);
@@ -43,18 +47,19 @@ export default function SalesOrderModalCreate() {
   const [quantityVariation, setQuantityVariation] = useState<number>(0);
   const [salesOrderId, setSalesOrderId] = useAtom(salesOrderIdAtom);
   const [salesOrderItems, setSalesOrderItems] = useState<any[]>([]);
-  const { isOpen, openModal, closeModal } = useModal();
+  const {isOpen, openModal, closeModal } = useModal();
   const [salesOrderItem, setSalesOrderItem] = useState<any>();
   const [totalSalesOrder, setTotalSalesOrder] = useState<string>('0');
   const [paymentMethods, setPaymentMethod] = useState<any[]>([]);
   const [quantityOfInstallments, setQuantityOfInstallments] = useState<number>(0);
-  const [__, setModal] = useAtom(exchangeModalAtom);
+  const [modalCreateExchange, setModal] = useAtom(exchangeModalAtom);
   const [___, setProduct] = useAtom(productAtom);
   const [____, setSalesOrderCode] = useAtom(salesOrderCodeAtom);
   const [_____, setSalesOrderItemId] = useAtom(salesOrderItemIdAtom);
   const [salesOrderStatus] = useAtom(salesOrderStatusAtom);
+  const [______, setBoxId] = useAtom(boxIdAtom);
   
-  const { getValues: getValuesBox, register: RegisterBox, control: controlBox } = useForm<TBox>({
+  const { getValues: getValuesBox, register: RegisterBox, control: controlBox, reset: ResetBoxing, setValue: SetValueBox } = useForm<TBox>({
     defaultValues: ResetBox
   });
   
@@ -76,6 +81,7 @@ export default function SalesOrderModalCreate() {
         variationId: watchSalesOrder("variationId"),
         barcode: watchSalesOrder("barcode"),
         total: watchSalesOrder("total"),
+        subTotal: watchSalesOrder("subTotal"),
         value: watchSalesOrder("value"),
         quantity: watchSalesOrder("quantity"),
         discountType: watchSalesOrder("discountType"),
@@ -108,6 +114,7 @@ export default function SalesOrderModalCreate() {
         sellerId: watchSalesOrder("sellerId"),
         variationId: watchSalesOrder("variationId"),
         total: watchSalesOrder("total"),
+        subTotal: watchSalesOrder("subTotal"),
         value: watchSalesOrder("value"),
         quantity: watchSalesOrder("quantity"),
         discountType: watchSalesOrder("discountType"),
@@ -142,6 +149,20 @@ export default function SalesOrderModalCreate() {
       cleanItem();
 
       await getSalesOrderItems(result.data.id);
+    } catch (error) {
+      resolveResponse(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const update = async () => {
+    try {
+      setIsLoading(true);
+      const {data} = await api.put(`/sales-orders`, {...getValuesSalesOrder()}, configApi());
+      const result = data.result;
+      resolveResponse({status: 200, message: result.message});
+      close();
     } catch (error) {
       resolveResponse(error);
     } finally {
@@ -197,13 +218,50 @@ export default function SalesOrderModalCreate() {
       setIsLoading(false);
     }
   };
+  
+  const updateBox = async () => {
+    try {
+      setIsLoading(true);
+      const {data} = await api.put(`/boxes/close`, {...getValuesBox()}, configApi());
+      const result = data.result;
+      resolveResponse({status: 200, message: result.message});
+      setModalBoxCreate(false);
+    } catch (error) {
+      resolveResponse(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const getBoxByCreatedBy = async () => {
     try {
       const {data} = await api.get(`/boxes/verify`, configApi());
       const result = data.result;
+
+      setBoxOpened(false);
+      setModalBoxCreate(false);
+
       if(result.data == null) {
         setModalBoxCreate(true);
+      } else {
+        ResetBoxing(result.data);
+        setBoxId(result.data.id);
+        SetValueBox("closingValue", result.data.value);
+        
+        const createdAt = result.data.createdAt; 
+        const [year, month, day] = createdAt.split("T")[0].split("-");
+        const dateCreated = new Date(Number(year), Number(month) - 1, Number(day));
+        
+        const toDay = new Date();
+        toDay.setHours(0, 0, 0, 0);
+
+        const isAbertoOntem = dateCreated.getTime() < toDay.getTime();
+
+        if (isAbertoOntem) {
+          setBoxOpened(true);
+          setModalBoxCreate(true);
+          setBox(result.data);
+        };
       };
     } catch (error) {
       resolveResponse(error);
@@ -282,10 +340,19 @@ export default function SalesOrderModalCreate() {
     setSalesOrderItem(obj);
 
     if(action == "edit") {
-      setVariation(obj.productVariations);
+      if(obj.productHasVariations == "yes") {
+        setVariation(obj.stockVariations.variations);
+
+        const currentVariation = obj.stockVariations.variations.find((x: any) => x.barcode == obj.barcode);
+        if(currentVariation) {
+          setSerial(currentVariation.serials);
+        };
+      } else {
+        setQuantityVariation(parseFloat(obj.stockVariations.quantity));
+      };
       
       setTimeout(() => {
-        setQuantityVariation(parseFloat(obj.quantity));
+        setValueSalesOrder("productHasVariations", obj.productHasVariations);
         setValueSalesOrder("productHasSerial", obj.productHasSerial);
         setValueSalesOrder("barcode", obj.barcode);
         setValueSalesOrder("quantity", parseFloat(obj.quantity));
@@ -295,7 +362,12 @@ export default function SalesOrderModalCreate() {
         setValueSalesOrder("value", obj.value);
         setValueSalesOrder("discountType", obj.discountType);
         setValueSalesOrder("discountValue", obj.discountValue);
-        setValueSalesOrder("image", obj.image);
+        setValueSalesOrder("serial", obj.serial);
+        console.log(obj.serial)
+        
+        if(obj.image) {
+          setValueSalesOrder("image", obj.image);
+        };
         calculated();
       }, 50);
     };
@@ -338,6 +410,8 @@ export default function SalesOrderModalCreate() {
     setVariation([]);
     setProducts([]);
     setSerial([]);
+
+    setSalesOrderItem({id: ""})
   };
   
   const close = () => {
@@ -370,6 +444,7 @@ export default function SalesOrderModalCreate() {
   
       const total = subTotal - discountValue;
       setValueSalesOrder("total", total < 0 ? 0 : total);
+      setValueSalesOrder("subTotal", subTotal < 0 ? 0 : subTotal);
       setValueSalesOrder("value", value);
     }, 10)
   };
@@ -377,14 +452,6 @@ export default function SalesOrderModalCreate() {
   const normalizeValueSelect = (variation: any) => {
     const variationStr = variation.attributes.map((a: any) => (a.value));
     return variationStr.join(" / ");
-  };
-
-  const normalizeCost = (exchanges: any[], total: any) => {
-    const exchangeTotal = exchanges.reduce((value: number, item: any) => value + parseFloat(item.cost), 0);
-    console.log(total - exchangeTotal < 0 ? 0 : total - exchangeTotal);
-    console.log(total)
-    console.log(exchanges)
-    return parseFloat(total) - exchangeTotal < 0 ? 0 : formattedMoney(parseFloat(total) - exchangeTotal);
   };
 
   useEffect(() => {
@@ -409,13 +476,16 @@ export default function SalesOrderModalCreate() {
   useEffect(() => {
     if(watchSalesOrder("barcode")) {
       const variation = variations.find(x => x.barcode == watchSalesOrder("barcode"));
-
+      
       if(variation) {
         setQuantityVariation(variation.stock);
         setValueSalesOrder("variationId", variation.variationId);
         if(watchSalesOrder("productHasSerial") == "yes") {
-          const newSerials = variation.serials.filter((s: TSerial) => s.hasAvailable);
-          setSerial(newSerials);
+          
+          if(!salesOrderItem.id) {
+            const newSerials = variation.serials.filter((s: TSerial) => s.hasAvailable);~
+            setSerial(newSerials);
+          };
         };
       };
     };
@@ -425,6 +495,7 @@ export default function SalesOrderModalCreate() {
 
   useEffect(() => {
     const intial = async () => {
+      setTotalSalesOrder('0,00')
       resetSalesOrder(ResetSalesOrder);
       setValueSalesOrder("id", salesOrderId);
       setIsLoading(true);
@@ -432,7 +503,7 @@ export default function SalesOrderModalCreate() {
       await getUserLogged();
       await getSelectPaymentMethod();
       
-      if(modalCreate && salesOrderStatus == "Rascunho") {
+      if(modalCreate && salesOrderStatus == "Em Aberto") {
         await getBoxByCreatedBy();
       };
 
@@ -445,10 +516,21 @@ export default function SalesOrderModalCreate() {
     intial();
   }, [modalCreate]);
 
+  useEffect(() => {
+    const initial = async () => {
+      if(salesOrderId) {
+        await getSalesOrderItems(salesOrderId);
+      };
+    };
+    initial();
+  }, [modalCreateExchange]);
+
   return (
-    <Modal isOpen={modalCreate} onClose={close} className={`m-4  ${modalBoxCreate ? 'w-[90dvw] max-w-180' : salesOrderStatus == "Finalizado" && 'max-w-[95dvw] lg:max-w-[45dvw]'}`}>
-      <div className={`${modalBoxCreate ? 'h-[50dvh]' : 'h-[95dvh]'} ${modalBoxCreate ? 'w-full max-w-180' : salesOrderStatus == "Finalizado" && 'max-w-[95dvw] lg:max-w-[45dvw]'} no-scrollbar relative overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11`}>
-        <div className="px-2 pr-14">
+    <Modal isOpen={modalCreate} onClose={() => {
+        modalBoxCreate ? setModalBoxCreate(false) : close()
+      }} className={`m-4  ${modalBoxCreate ? 'w-[90dvw] max-w-180' : salesOrderStatus == "Finalizado" && 'max-w-[95dvw] lg:max-w-[45dvw]'}`}>
+      <div className={`${modalBoxCreate ? 'h-[60dvh]' : 'h-[95dvh]'} ${modalBoxCreate ? 'w-full max-w-180' : salesOrderStatus == "Finalizado" && 'max-w-[95dvw] lg:max-w-[45dvw]'} no-scrollbar relative overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11`}>
+        <div className="px-2 pr-14 mb-4">
           <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">{modalBoxCreate ? 'Abertura de Caixa' : 'Pedido de Venda'}</h4>
         </div>
 
@@ -457,6 +539,37 @@ export default function SalesOrderModalCreate() {
             modalBoxCreate ?
             <div className={`min-h-[25dvh] w-full max-w-180 custom-scrollbar overflow-y-auto px-2`}>
               <div className="grid grid-cols-6 gap-4">
+                {
+                  boxOpened &&
+                  <div className="col-span-6">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4 bg-amber-50 border-l-4 border-amber-500 rounded-r-lg shadow-sm dark:bg-amber-900/20 dark:border-amber-600">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-amber-500 rounded-full text-white">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        
+                        <div>
+                          <h3 className="text-sm font-bold text-amber-800 dark:text-amber-200 uppercase tracking-wide">
+                            Caixa Pendente
+                          </h3>
+                          <p className="text-sm text-amber-700 dark:text-amber-300">
+                            Existe um caixa aberto de <strong>ontem</strong>. Para continuar com as vendas de hoje, é necessário encerrá-lo.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2 shrink-0">
+                        <Button size="sm" variant="outline" onClick={() => {
+                          setModalBoxCreate(false);
+                          setBoxOpened(false);
+                        }}>Ignorar</Button>
+                        <Button size="sm" variant="primary" onClick={() => updateBox()}>Fechar e Abrir Novo</Button>
+                      </div>
+                    </div>
+                  </div>
+                }
                 <div className="col-span-6 md:col-span-3">
                   <Label title="Valor da Abertura" />
                   <Controller
@@ -478,13 +591,42 @@ export default function SalesOrderModalCreate() {
                         fixedDecimalScale
                         allowNegative={false}
                         placeholder="Valor da Abertura"
+                        disabled={boxOpened}
                       />
                     )}
                   />
                 </div>
+                {
+                  boxOpened &&
+                  <div className="col-span-6 md:col-span-3">
+                    <Label title="Valor do Fechamento" />
+                    <Controller
+                      name="closingValue"
+                      control={controlBox}
+                      defaultValue={0}
+                      render={({ field: { onChange, value } }) => (
+                        <NumericFormat
+                          className="input-erp-primary input-erp-default" 
+                          value={value}
+                          onValueChange={(values) => {
+                            const val = values.floatValue ?? 0;
+                            onChange(val);
+                          }}
+                          thousandSeparator="."
+                          decimalSeparator=","
+                          prefix="R$ "
+                          decimalScale={2}
+                          fixedDecimalScale
+                          allowNegative={false}
+                          placeholder="Valor do Fechamento"
+                        />
+                      )}
+                    />
+                  </div>
+                }
                 <div className="col-span-6 md:col-span-3">
                   <Label title="Venda por 2 etapas?" required={false}/>
-                  <select {...RegisterBox("twoSteps")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
+                  <select disabled={boxOpened} {...RegisterBox("twoSteps")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
                     <option value="yes" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Sim</option>
                     <option value="no" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Não</option>
                   </select>
@@ -492,10 +634,10 @@ export default function SalesOrderModalCreate() {
               </div>
             </div>
             :
-            <div className={`min-h-[60dvh] max-h-[70dvh] ${salesOrderStatus == "Rascunho" ? 'min-w-[30dvw]': 'w-full'} custom-scrollbar overflow-y-auto px-2 pb-3`}>
+            <div className={`min-h-[60dvh] max-h-[70dvh] ${salesOrderStatus == "Em Aberto" ? 'min-w-[30dvw]': 'w-full'} custom-scrollbar overflow-y-auto px-2 pb-3`}>
               <div className="grid grid-cols-12 gap-4 mt-7">
                 {
-                  salesOrderStatus == "Rascunho" &&
+                  salesOrderStatus == "Em Aberto" &&
                   <div className="col-span-12 lg:col-span-6">
                     <div className="grid grid-cols-6 gap-4">
                       {
@@ -588,20 +730,23 @@ export default function SalesOrderModalCreate() {
                         <>
                           <div className="col-span-6">
                             <Label title="Produto" />
-                            <Autocomplete defaultValue={watchSalesOrder("productName")} objKey="id" objValue="productName" onSearch={(value: string) => getAutocompleProduct(value)} onSelect={(opt) => {
+                            <Autocomplete placeholder="Buscar produto...." defaultValue={watchSalesOrder("productName")} objKey="id" objValue="productName" onSearch={(value: string) => getAutocompleProduct(value)} onSelect={(opt) => {
                               setValueSalesOrder("productId", opt.id);
                               setValueSalesOrder("productName", opt.productName);
                               setValueSalesOrder("image", opt.image ?? "");
                               setValueSalesOrder("value", opt.price);
                               setValueSalesOrder("productHasSerial", opt.hasSerial);
                               setValueSalesOrder("productHasVariations", opt.hasVariations);
-                              
+
                               if(opt.hasVariations == "no") {
                                 setValueSalesOrder("value", opt.price);
                               };
                               
                               const stock = opt.stock.find((s: any) => s.quantity > 0);
                               if(stock) {
+                                if(opt.hasSerial == "no") {
+                                  setValueSalesOrder("value", parseFloat(stock.price));
+                                };
                                 setValueSalesOrder("stockId", stock.id);
                                 setVariation(stock.variations);
                                 setQuantityVariation(stock.quantity);
@@ -614,11 +759,11 @@ export default function SalesOrderModalCreate() {
                             {
                               watchSalesOrder("image") != "" ?
                               <div className="lg:h-10 xl:h-52">
-                                <img className="w-auto h-auto object-cover rounded-lg" src={`${uriBase}/${watchSalesOrder("image")}`} alt="foto do usuário" />
+                                <img className="w-auto h-auto object-cover rounded-lg" src={`${uriBase}/${watchSalesOrder("image")}`} alt="foto do produto" />
                               </div>
                               :
                               <div className="h-52">
-                                <img className="w-full h-full object-cover rounded-lg" src="/assets/images/produto-sem-foto.png" alt="foto do usuário" />
+                                <img className="w-full h-full object-cover rounded-lg" src="/assets/images/produto-sem-foto.png" alt="foto do produto" />
                               </div>
                             }
                           </div>
@@ -771,12 +916,11 @@ export default function SalesOrderModalCreate() {
                   </div>
                 }
 
-                <div className={`col-span-12 ${salesOrderStatus == "Rascunho" ? 'lg:col-span-6' : 'lg:col-span-12'}`}>
+                <div className={`col-span-12 ${salesOrderStatus == "Em Aberto" ? 'lg:col-span-6' : 'lg:col-span-12'}`}>
                   <div className="grid grid-cols-6 gap-4">
                     <div className="col-span-6 xl:col-span-3">
                       <Label title="Vendedor" />
                       <select disabled={salesOrderStatus == "Finalizado"} {...registerSalesOrder("sellerId")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
-                        {/* <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Selecione</option> */}
                         {
                           sellers.map((x: any) => {
                             return (
@@ -809,7 +953,7 @@ export default function SalesOrderModalCreate() {
                                     <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Valor Unitário</TableCell>
                                     <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Valor Total</TableCell>
                                     {
-                                      !modalCreateFinish && salesOrderStatus == "Rascunho" &&
+                                      !modalCreateFinish && salesOrderStatus == "Em Aberto" &&
                                       <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Ações</TableCell>
                                     }
                                   </TableRow>
@@ -821,17 +965,17 @@ export default function SalesOrderModalCreate() {
                                       <TableCell className="text-sm px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.productName}</TableCell>
                                       <TableCell className="text-sm px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.quantity}</TableCell>
                                       <TableCell className="text-sm px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{formattedMoney(x.value)}</TableCell>
-                                      <TableCell className="text-sm px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{normalizeCost(x.exchanges, x.total)}</TableCell>
+                                      <TableCell className="text-sm px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{formattedMoney(x.total)}</TableCell>
                                       {
                                         !modalCreateFinish &&
                                         <TableCell className="text-sm px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
                                           <div className="flex gap-3">       
                                             {
-                                              permissionUpdate("A", "A3") && salesOrderStatus == "Rascunho" &&
+                                              permissionUpdate("A", "A3") && salesOrderStatus == "Em Aberto" &&
                                               <IconEdit action="edit" obj={x} getObj={getObj}/>
                                             }   
                                             {
-                                              permissionUpdate("A", "A3") && salesOrderStatus == "Rascunho" &&
+                                              permissionUpdate("A", "A3") && salesOrderStatus == "Em Aberto" &&
                                               <div onClick={() => {
                                                 setSalesOrderItemId(x.id);
                                                 setProduct({...x, hasSerial: x.productHasSerial});
@@ -841,7 +985,7 @@ export default function SalesOrderModalCreate() {
                                               </div>
                                             }   
                                             {
-                                              permissionDelete("A", "A3") && salesOrderStatus == "Rascunho" &&
+                                              permissionDelete("A", "A3") && salesOrderStatus == "Em Aberto" &&
                                               <IconDelete action="delete" obj={x} getObj={getObj}/>                                                   
                                             }                                          
                                           </div>
@@ -864,7 +1008,7 @@ export default function SalesOrderModalCreate() {
           {
             !modalBoxCreate &&
             <div className="col-span-12 lg:col-span-3 gap-3 px-2 lg:justify-end">
-              <h1 className={`${salesOrderStatus == "Rascunho" ? "w-6/12" : "w-12/12"} px-5 py-4 sm:px-6 text-start bg-green-600 text-white rounded-lg`}>TOTAL DO PEDIDO: <strong>{formattedMoney(totalSalesOrder)}</strong></h1>
+              <h1 className={`${salesOrderStatus == "Em Aberto" ? "w-6/12" : "w-12/12"} px-5 py-4 sm:px-6 text-start bg-green-600 text-white rounded-lg`}>TOTAL DO PEDIDO: <strong>{formattedMoney(totalSalesOrder)}</strong></h1>
             </div>
           }
 
@@ -879,18 +1023,19 @@ export default function SalesOrderModalCreate() {
 
             {
               modalBoxCreate ?
+              !boxOpened &&
               <Button size="sm" variant="primary" onClick={() => createBox()}>Confirmar</Button>
               :
               <>
                 {
-                  !modalCreateFinish && salesOrderStatus == "Rascunho" &&
+                  !modalCreateFinish && salesOrderStatus == "Em Aberto" &&
                   <Button size="sm" variant="outline" onClick={() => {
-                    close();
+                    update();
                   }}>Salvar Venda</Button>
                 }
 
                 {
-                  salesOrderStatus == "Rascunho" ?
+                  salesOrderStatus == "Em Aberto" ?
                   modalCreateFinish ?
                   <Button size="sm" variant="primary" onClick={() => finish()}>Finalizar Venda</Button>
                   :
@@ -908,6 +1053,7 @@ export default function SalesOrderModalCreate() {
       
       <ModalDelete confirm={destroy} isOpen={isOpen} closeModal={closeModal} title="Excluir Item Pedido de Venda" />  
       <ExchangeModal />        
+      <BoxModalSettings />        
     </Modal> 
   );
 }

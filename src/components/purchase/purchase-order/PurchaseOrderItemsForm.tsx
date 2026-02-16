@@ -43,7 +43,7 @@ type TProp = {
 export default function PurchaseOrderIemsForm({id}: TProp) {
   const [_, setIsLoading] = useAtom(loadingAtom);
   const [products, setProducts] = useState<TProduct[]>([]);
-  const [suppliers, setSupplier] = useState<TSupplier[]>([]);
+  const [suppliers, setSuppliers] = useState<TSupplier[]>([]);
   const [variations, setVariation] = useState<any[]>([]);
   const [selectedValues, setSelectedValues] = useState<any[]>([]);
   const [items, setItem] = useState<TPurchaseOrderItem[]>([]);
@@ -91,8 +91,6 @@ export default function PurchaseOrderIemsForm({id}: TProp) {
           quantity += parseFloat(v.stock.toString());
         });
   
-        // body.cost = cost / quantity;
-        // body.price = price / quantity;
         body.quantity = quantity;
       };
     };
@@ -207,32 +205,6 @@ export default function PurchaseOrderIemsForm({id}: TProp) {
       setModalViewStock(true);
     };
   };
-  
-  // const getSelectProduct = async () => {
-  //   try {
-  //     setIsLoading(true);
-  //     const {data} = await api.get(`/products/select?deleted=false`, configApi());
-  //     const result = data.result.data;
-  //     setProducts(result);
-  //   } catch (error) {
-  //     resolveResponse(error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-  
-  const getSelectSupplier = async () => {
-    try {
-      setIsLoading(true);
-      const {data} = await api.get(`/suppliers?deleted=false`, configApi());
-      const result = data.result.data;
-      setSupplier(result);
-    } catch (error) {
-      resolveResponse(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const getAutocompleProduct = async (value: string) => {
     try {
@@ -241,6 +213,18 @@ export default function PurchaseOrderIemsForm({id}: TProp) {
       const {data} = await api.get(`/products/autocomplete?deleted=false&orderBy=name&sort=desc&pageSize=10&pageNumber=1&regex$or$name=${value}&regex$or$code=${value}`, configApi());
       const result = data.result;
       setProducts(result.data);
+    } catch (error) {
+      resolveResponse(error);
+    }
+  };
+
+  const getAutocompleSupplier = async (value: string) => {
+    try {
+      if(!value) return setSuppliers([]);
+      
+      const {data} = await api.get(`/suppliers/autocomplete?deleted=false&orderBy=corporateName&sort=desc&pageSize=10&pageNumber=1&regex$or$tradeName=${value}&regex$or$corporateName=${value}`, configApi());
+      const result = data.result;
+      setSuppliers(result.data);
     } catch (error) {
       resolveResponse(error);
     }
@@ -271,8 +255,6 @@ export default function PurchaseOrderIemsForm({id}: TProp) {
 
   useEffect(() => {
     const initial = async () => {
-      await getSelectSupplier();
-  
       if(id != "create") {
         await getByPurchaseOrderId(id!);
         await getByPurchaseId(id!);
@@ -289,16 +271,7 @@ export default function PurchaseOrderIemsForm({id}: TProp) {
           <div className="grid grid-cols-6 gap-2">  
             <div className="col-span-6 xl:col-span-2">
               <Label title="Produto"/>
-              {/* <select {...register("productId")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
-                <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Selecione</option>
-                {
-                  products.map((x: TProduct) => {
-                    return <option key={x.id} value={x.id} className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">{x.code} - {x.name}</option>
-                  })
-                }
-              </select> */}
-              <Autocomplete defaultValue={watch("productName")} objKey="id" objValue="productName" onSearch={(value: string) => getAutocompleProduct(value)} onSelect={(opt) => {
-                console.log(opt)
+              <Autocomplete placeholder="Buscar produto..." defaultValue={watch("productName")} objKey="id" objValue="productName" onSearch={(value: string) => getAutocompleProduct(value)} onSelect={(opt) => {
                 setValue("hasProductVariations", opt.hasVariations);
                 setValue("variationsCode", opt.variationsCode);
                 setValue("hasProductSerial", opt.hasSerial);
@@ -308,14 +281,9 @@ export default function PurchaseOrderIemsForm({id}: TProp) {
             </div>  
             <div className="col-span-6 xl:col-span-2">
               <Label title="Fornecedor"/>
-              <select {...register("supplierId")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
-                <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Selecione</option>
-                {
-                  suppliers.map((x: TSupplier) => {
-                    return <option key={x.id} value={x.id} className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">{x.tradeName}</option>
-                  })
-                }
-              </select>
+              <Autocomplete placeholder="Buscar fornecedor..." defaultValue={watch("supplierName")} objKey="id" objValue="corporateName" onSearch={(value: string) => getAutocompleSupplier(value)} onSelect={(opt) => {
+                setValue("supplierId", opt.id);
+              }} options={suppliers}/>
             </div>
             {
               watch("hasProductSerial") == "no" &&

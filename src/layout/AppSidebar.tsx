@@ -46,7 +46,8 @@ const staticNavItems: NavItem[] = [
     code: "C",
     subItems: [
       {name: "Pedidos de Vendas", path: "/commercials/sales-orders", code: "C1", pro: false, authorized: false },
-      {name: "Orçamentos", path: "/commercials/budgets", code: "C2", pro: false, authorized: false },
+      {name: "Caixas", path: "/commercials/box", code: "C2", pro: false, authorized: false },
+      // {name: "Orçamentos", path: "/commercials/budgets", code: "C2", pro: false, authorized: false },
     ]
   },
   {
@@ -66,6 +67,7 @@ const staticNavItems: NavItem[] = [
     code: "F",
     subItems: [
       {name: "Posição de Estoque", path: "/stock/stock-position", code: "F1", pro: false, authorized: false },
+      {name: "Ajustes", path: "/stock/adjustment", code: "F4", pro: false, authorized: false },
       {name: "Transferências", path: "/stock/transfer", code: "F2", pro: false, authorized: false },
       {name: "Trocas e Devoluções", path: "/stock/exchanges", code: "F3", pro: false, authorized: false },
     ]

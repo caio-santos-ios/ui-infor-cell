@@ -25,6 +25,7 @@ export type TPurchaseOrderItem = {
     purchaseOrderId: string;
     productId: string;
     productName: string;
+    supplierName: string;
     cost: number;
     costDiscount: number;
     price: number;
@@ -59,7 +60,8 @@ export const ResetPurchaseOrderItem: TPurchaseOrderItem = {
     variationsCode: [],
     hasProductSerial: "yes",
     hasProductVariations: "yes",
-    serials: []
+    serials: [],
+    supplierName: ""
 }
 
 export type TPurchaseOrder = {

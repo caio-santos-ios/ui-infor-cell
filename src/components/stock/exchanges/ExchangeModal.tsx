@@ -10,7 +10,7 @@ import { salesOrderCodeAtom } from "@/jotai/commercial/sales-order/salesOrder.jo
 import { salesOrderItemIdAtom } from "@/jotai/commercial/sales-order/salesOrderItem.jotai";
 import { loadingAtom } from "@/jotai/global/loading.jotai";
 import { productAtom } from "@/jotai/product/product.jotai";
-import { exchangeModalAtom } from "@/jotai/stock/exchange/exchange.jotai";
+import { exchangeModalAtom } from "@/jotai/stock/exchange.jotai";
 import { api } from "@/service/api.service";
 import { configApi, resolveResponse } from "@/service/config.service";
 import { TSerial } from "@/types/product/serial/serial.type";
@@ -150,7 +150,6 @@ export const ExchangeModal = () => {
                             <div className="col-span-9">
                                 <Label title="Produto" />
                                 <Autocomplete defaultValue={watch("productName")} objKey="id" objValue="productName" onSearch={(value: string) => getAutocompleProduct(value)} onSelect={(opt) => { 
-                                    console.log(opt)
                                     setValue("productId", opt.id);
                                     setHasSerial(opt.hasSerial == "yes");
                                     setHasVariations(opt.hasVariations == "yes");

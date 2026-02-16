@@ -8,36 +8,26 @@ import { api } from "@/service/api.service";
 import { configApi, resolveResponse } from "@/service/config.service";
 import { paginationAtom } from "@/jotai/global/pagination.jotai";
 import { formattedMoney, maskDate } from "@/utils/mask.util";
-import { permissionDelete, permissionRead, permissionUpdate } from "@/utils/permission.util";
+import { permissionRead } from "@/utils/permission.util";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { NotData } from "@/components/not-data/NotData";
 import { storeLoggedAtom } from "@/jotai/global/store.jotai";
-import { salesOrderIdAtom, salesOrderModalAtom, salesOrderSettingModalAtom, salesOrderStatusAtom } from "@/jotai/commercial/sales-order/salesOrder.jotai";
-import SalesOrderModalCreate from "./SalesOrderModalCreate";
-import { IconEdit } from "@/components/iconEdit/IconEdit";
-import { IconDelete } from "@/components/iconDelete/IconDelete";
-import { ModalDelete } from "@/components/modalDelete/ModalDelete";
+import { salesOrderModalAtom } from "@/jotai/commercial/sales-order/salesOrder.jotai";
 import { useModal } from "@/hooks/useModal";
 import { ResetSalesOrder, TSalesOrder } from "@/types/commercial/sales-orders/sales-order.type";
-import { IconView } from "@/components/iconView/IconView";
-import { SalesOrderSettingsButtonCreate } from "./SalesOrderSettingsButtonCreate";
-import { boxSettingModalAtom } from "@/jotai/commercial/box/box.jotai";
 
-export default function SalesOrderTable() {
+export default function BoxTable() {
   const [_, setLoading] = useAtom(loadingAtom);
   const [pagination, setPagination] = useAtom(paginationAtom); 
   const [storeLogged] = useAtom(storeLoggedAtom);
   const { isOpen, openModal, closeModal } = useModal();
   const [salesOrder, setSalesOrder] = useState<TSalesOrder>(ResetSalesOrder);
-  const [modalCreate, setModalCreate] = useAtom(salesOrderModalAtom);
-  const [__, setSalesOrderId] = useAtom(salesOrderIdAtom);
-  const [___, setSalesOrderStatus] = useAtom(salesOrderStatusAtom);
-  const [boxModalSettings] = useAtom(boxSettingModalAtom);  
+  const [modalCreate, setModalCreate] = useAtom(salesOrderModalAtom); 
 
   const getAll = async (page: number) => {
     try {
       setLoading(true);
-      const {data} = await api.get(`/sales-orders?deleted=false&orderBy=createdAt&sort=desc&pageSize=10&pageNumber=${page}`, configApi());
+      const {data} = await api.get(`/boxes?deleted=false&status=opened&orderBy=createdAt&sort=desc&pageSize=10&pageNumber=${page}`, configApi());
       const result = data.result;
       
       setPagination({
@@ -79,8 +69,8 @@ export default function SalesOrderTable() {
 
   const getObj = (obj: any, action: string) => {
     setSalesOrder(obj);
-    setSalesOrderId(obj.id);
-    setSalesOrderStatus(obj.status);
+    // setSalesOrderId(obj.id);
+    // setSalesOrderStatus(obj.status);
     
     if(action == "edit") {
       setModalCreate(true);
@@ -103,11 +93,6 @@ export default function SalesOrderTable() {
 
   return (
     <>
-      <SalesOrderModalCreate />
-      {
-        modalCreate && !boxModalSettings &&
-        <SalesOrderSettingsButtonCreate />
-      }
       {
 
           pagination.data.length > 0 ?
@@ -118,28 +103,21 @@ export default function SalesOrderTable() {
                   <Table className="divide-y">
                     <TableHeader className="border-b border-gray-100 dark:border-white/5 tele-table-thead">
                       <TableRow>
-                        <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Número da Venda</TableCell>
-                        <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Cliente</TableCell>
-                        <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Vendedor</TableCell>
-                        <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Status</TableCell>
-                        <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Quantidade</TableCell>
-                        <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Total</TableCell>
-                        <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Data da Criação</TableCell>
-                        <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Ações</TableCell>
+                        <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Operador</TableCell>
+                        <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Valor atual</TableCell>
+                        <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Valor atual</TableCell>
+                        <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Data da abertura</TableCell>
+                        {/* <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Ações</TableCell> */}
                       </TableRow>
                     </TableHeader>
 
                     <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
                       {pagination.data.map((x: any) => (
                         <TableRow key={x.id}>
-                          <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.code}</TableCell>
-                          <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{!x.customerName ? 'Ao Consumidor' : x.customerName}</TableCell>
-                          <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{!x.employeeName ? x.userName : x.employeeName}</TableCell>
-                          <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.status}</TableCell>
-                          <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.quantity}</TableCell>
-                          <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{formattedMoney(x.total)}</TableCell>
+                          <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.user}</TableCell>
+                          <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{formattedMoney(x.value)}</TableCell>
                           <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{maskDate(x.createdAt)}</TableCell>
-                          <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
+                          {/* <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
                             <div className="flex gap-3">       
                               {
                                 permissionUpdate("A", "A3") && x.status == "Finalizado" &&
@@ -154,7 +132,7 @@ export default function SalesOrderTable() {
                                 <IconDelete action="delete" obj={x} getObj={getObj}/>                                                   
                               }                                          
                             </div>
-                          </TableCell>
+                          </TableCell> */}
                         </TableRow>
                       ))}
                     </TableBody>
@@ -163,7 +141,7 @@ export default function SalesOrderTable() {
               </div>
             </div>
             <Pagination currentPage={pagination.currentPage} totalCount={pagination.totalCount} totalData={pagination.data.length} totalPages={pagination.totalPages} onPageChange={changePage} />        
-            <ModalDelete confirm={destroy} isOpen={isOpen} closeModal={closeModal} title="Excluir Pedido de Venda" />          
+            {/* <ModalDelete confirm={destroy} isOpen={isOpen} closeModal={closeModal} title="Excluir Pedido de Venda" />           */}
           </>
           :
           <NotData />

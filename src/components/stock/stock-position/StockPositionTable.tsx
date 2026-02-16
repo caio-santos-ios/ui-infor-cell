@@ -22,7 +22,7 @@ import { ResetExchange, TExchange } from "@/types/stock/exchange/exchange.type";
 import { ResetStockPosition, TStockPosition } from "@/types/stock/stock-position/stock-position.type";
 import { TVariation } from "@/types/product/variation/variation.type";
 import { TSerial } from "@/types/product/serial/serial.type";
-import { TTransfer } from "@/types/stock/transfer/transfer.type";
+import { ResetTransfer, TTransfer } from "@/types/stock/transfer/transfer.type";
 import { IconViewStock } from "@/components/iconViewStock/IconViewStock";
 import { ResetProduct } from "@/types/product/product/product.type";
 import { productAtom } from "@/jotai/product/product.jotai";
@@ -43,7 +43,7 @@ export default function StockPositionTable() {
   const [___, setProduct] = useAtom(productAtom);
 
   const { register, setValue, getValues, reset, watch } = useForm<TTransfer>({
-    defaultValues: ResetExchange
+    defaultValues: ResetTransfer
   });
 
   const getAll = async (page: number) => {
@@ -85,6 +85,8 @@ export default function StockPositionTable() {
   const getObj = async (obj: any, action: string) => {
     if(action == "edit") {
       await getSelectStore();
+      reset(ResetTransfer);
+      setQuantity(0);
       setValue("storeOriginId", obj.store);
       setValue("productHasSerial", obj.productHasSerial);
       setValue("productHasVariations", obj.productHasVariations);
@@ -131,7 +133,8 @@ export default function StockPositionTable() {
   useEffect(() => {
     const item: any = variations.find(v => v.barcode == watch("barcode"));
     if(item) {
-      setSerial(item.serials);
+      const listSerial = item.serials.filter((x: any) => x.hasAvailable);
+      setSerial(listSerial);
       setValue("variationId", item.variationId);
       setQuantity(parseFloat(item.stock.toString()));
     };
@@ -165,13 +168,8 @@ export default function StockPositionTable() {
                 {pagination.data.map((x: any) => (
                   <TableRow key={x.id}>
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.productName}</TableCell>
-                    {/* <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.supplierName}</TableCell> */}
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
                       {x.quantity}
-                      {/* {
-                        permissionRead("A", "A2") &&
-                        <IconViewStock action="viewSerial" obj={x} getObj={getObj}/>
-                      }   */}
                     </TableCell>
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{maskDate(x.createdAt)}</TableCell>
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.originDescription}</TableCell>
@@ -251,7 +249,7 @@ export default function StockPositionTable() {
                       </div>  
                     }
                     {
-                      watch("barcode") && watch("productHasSerial") == "no" &&
+                      watch("barcode") && watch("productHasSerial") == "no" && watch("productHasVariations") == "yes" &&
                       <div className="col-span-12 md:col-span-6 xl:col-span-3">
                         <Label title="Quantidade"/>
                         <select {...register("quantity")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
@@ -264,7 +262,7 @@ export default function StockPositionTable() {
                       </div>  
                     }
                     {
-                      watch("productHasSerial") == "no" && watch("productHasSerial") == "no" &&
+                      watch("productHasSerial") == "no" && watch("productHasVariations") == "no" &&
                       <div className="col-span-12 md:col-span-6 xl:col-span-3">
                         <Label title="Quantidade"/>
                         <select {...register("quantity")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">

@@ -56,38 +56,6 @@ export default function VariationsForm({ productId, variations = [], variationsC
     control,
     name: "variations",
   });
-  
-  // const getById = async (id: string, types: TVariation[]) => {
-  //   try {
-  //     setIsLoading(true);
-  //     const { data } = await api.get(`/products/${id}`, configApi());
-  //     const result = data.result.data;
-
-  //     if (result.variations) {
-  //       result.variations = result.variations.map((v: any) => {
-  //         const rowData: any = { ...v };
-
-  //         v.attributes?.forEach((attr: any) => {
-  //           const variationType = types.find(t => t.name === attr.key);
-  //           if (variationType) {
-  //             const item = variationType.items.find(i => i.value === attr.value);
-  //             if (item) {
-  //               rowData[`variationItemId_${variationType.code}`] = item.code;
-  //             }
-  //           }
-  //         });
-  //         return rowData;
-  //       });
-  //     }
-
-  //     setSelectedGrades(result.variationsCode || []);
-  //     reset(result);
-  //   } catch (error) {
-  //     resolveResponse(error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
 
   const update = () => {
     const body = generateBody();
@@ -162,22 +130,11 @@ export default function VariationsForm({ productId, variations = [], variationsC
   
   const removeVariation = async (index: number) => {
     remove(index);
-    // update();
   };
 
   const updateSerial = async () => {
     const newList = watch("variations");
-    // console.log(newList)
-    // const body = generateBody();
-
-    // const totalCost = serials.reduce((acc, item) => acc + Number(item.cost), 0);
-    // const totalPrice = serials.reduce((acc, item) => acc + Number(item.price), 0);
-    // console.log(variations[currentVariation])
-    // console.log(serials)
     newList[currentVariation].serials = serials;
-    // body.cost = totalCost / serials.length;
-    // body.price = totalPrice / serials.length;
-    console.log(newList)
     setModalSerial(false);
   };
 
@@ -297,7 +254,7 @@ export default function VariationsForm({ productId, variations = [], variationsC
                       })}
 
                       <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
-                        <input disabled={stockDisabled} {...register(`variations.${index}.stock`)} type="number" maxLength={40} placeholder="Estoque Atual" className="input-erp-primary input-erp-default w-full"/>
+                        <input disabled={stockDisabled} {...register(`variations.${index}.stock`)} type="number" maxLength={40} placeholder="Estoque Atual" className="input-erp-primary input-erp-default w-full no-spinner"/>
                       </TableCell>
 
                       {
@@ -319,32 +276,21 @@ export default function VariationsForm({ productId, variations = [], variationsC
                             {
                               btnAddSerial &&
                               <div onClick={() => {
-                                // const stockCount = variations[index].stock;
-                                // const serial = variations[index].serials;
                                 const stockCount = Number(getValues(`variations.${index}.stock`)) || 0;
-                                console.log(stockCount)
                                 const serial = getValues(`variations.${index}.serials`);
                                 
-                                // if (id && id !== "create") {
-                                  //   const body = {...getValues()};
-                                  //   setSerial(body.variations[index].serials);
-                                  // } else {};
-                                  
                                 if(serial.length == 0) {
-                                  console.log(stockCount)
-                                  console.log(serial)
+                                  
                                   const initialSerials = Array.from({ length: stockCount }, () => ({
                                     code: "",
                                     cost: 0,
                                     price: 0,
                                     hasAvailable: true
                                   }));
-                                  console.log(initialSerials)
-
                                   setSerial(initialSerials);
                                 } else {
                                   setSerial(serial);
-                                }     
+                                };
 
                                 setCurrentVariation(index);
                                 setModalSerial(true);

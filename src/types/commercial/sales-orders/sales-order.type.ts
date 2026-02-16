@@ -12,6 +12,7 @@ export type TSalesOrder = {
     image: string;
     value: number;
     total: number;
+    subTotal: number;
     discountValue: number;
     discountType: string;
     variationId: string;
@@ -36,6 +37,7 @@ export const ResetSalesOrder: TSalesOrder = {
     image: "",
     value: 0,
     total: 0,
+    subTotal: 0,
     discountValue: 0,
     discountType: "money",
     quantity: 1,
