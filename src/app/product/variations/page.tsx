@@ -1,5 +1,6 @@
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
-import { VariationButtonCreate } from "@/components/product/variation/VariationButtonCreate";
+import VariationButtonCreate from "@/components/product/variation/VariationButtonCreate";
+// import { VariationButtonCreate } from "@/components/product/Variation/VariationButtonCreate";
 import VariationTable from "@/components/product/variation/VariationTable";
 import { Metadata } from "next";
 

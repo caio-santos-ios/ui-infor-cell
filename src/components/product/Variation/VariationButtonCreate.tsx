@@ -4,7 +4,7 @@ import Button from "@/components/ui/button/Button"
 import { variationModalAtom } from "@/jotai/product/variation/variation.jotai";
 import { useAtom } from "jotai";
 
-export const VariationButtonCreate = () => {
+export default function VariationButtonCreate() {
     const [_, setModal] = useAtom(variationModalAtom);
 
     return (
