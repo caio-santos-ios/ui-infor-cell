@@ -18,17 +18,18 @@ import {
     ResetAccountPayable,
     TAccountPayable,
 } from "@/types/financial/account-payable/account-payable.type";
+import Autocomplete from "@/components/form/Autocomplete";
 
 export default function AccountPayableModalCreate() {
     const [_, setIsLoading] = useAtom(loadingAtom);
     const [modalCreate, setModalCreate] = useAtom(accountPayableModalAtom);
     const [accountPayableId, setAccountPayableId] = useAtom(accountPayableIdAtom);
     const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+    const [suppliers, setSuppliers] = useState<any[]>([]);
+    const [numberOfInstallments, setNumberOfInstallments] = useState<number>(0);
 
-    const { getValues, setValue, register, reset, control, watch } =
-        useForm<TAccountPayable>({ defaultValues: ResetAccountPayable });
+    const { getValues, setValue, register, reset, control, watch } = useForm<TAccountPayable>({ defaultValues: ResetAccountPayable });
 
-    // ─── API ──────────────────────────────────────────────────────────────────
     const create = async () => {
         try {
             setIsLoading(true);
@@ -59,7 +60,9 @@ export default function AccountPayableModalCreate() {
         try {
             setIsLoading(true);
             const { data } = await api.get(`/accounts-payable/${id}`, configApi());
-            reset(data.result.data);
+            const result = data.result.data;
+            reset(result);
+            setValue("dueDate", result.dueDate.split("T")[0]);
         } catch (error) {
             resolveResponse(error);
         } finally {
@@ -69,8 +72,7 @@ export default function AccountPayableModalCreate() {
 
     const getPaymentMethods = async () => {
         try {
-            const { data } = await api.get(
-                `/payment-methods?deleted=false&ne$type=receivable&orderBy=name&sort=asc&pageSize=100&pageNumber=1`,
+            const { data } = await api.get(`/payment-methods?deleted=false&ne$type=receivable&orderBy=name&sort=asc&pageSize=100&pageNumber=1`,
                 configApi()
             );
             setPaymentMethods(data.result.data ?? []);
@@ -79,7 +81,17 @@ export default function AccountPayableModalCreate() {
         }
     };
 
-    // ─── helpers ──────────────────────────────────────────────────────────────
+    const getAutocompleSupplier = async (value: string) => {
+        try {
+            if(!value) return setSuppliers([]);
+            const {data} = await api.get(`/suppliers?deleted=false&orderBy=tradeName&sort=desc&pageSize=10&pageNumber=1&regex$or$tradeName=${value}&regex$or$corporateName=${value}`, configApi());
+            const result = data.result;
+            setSuppliers(result.data);
+        } catch (error) {
+        resolveResponse(error);
+        }
+    };
+
     const close = () => {
         setModalCreate(false);
         setAccountPayableId("");
@@ -96,7 +108,6 @@ export default function AccountPayableModalCreate() {
         initial();
     }, [modalCreate]);
 
-    // ─── render ───────────────────────────────────────────────────────────────
     return (
         <Modal
             isOpen={modalCreate}
@@ -126,45 +137,18 @@ export default function AccountPayableModalCreate() {
                                 />
                             </div>
 
-                            {/* Fornecedor */}
-                            <div className="col-span-6 lg:col-span-4">
+                            <div className="col-span-6">
                                 <Label title="Fornecedor" required={false} />
-                                <input
-                                    maxLength={100}
-                                    placeholder="Nome do fornecedor"
-                                    {...register("supplierName")}
-                                    type="text"
-                                    className="input-erp-primary input-erp-default"
-                                />
+                                <Autocomplete placeholder="Buscar fornecedor..." defaultValue={watch("supplierName")} objKey="id" objValue="tradeName" onSearch={(value: string) => getAutocompleSupplier(value)} onSelect={(opt) => {
+                                    setValue("supplierId", opt.id);
+                                }} options={suppliers}/>
                             </div>
 
-                            {/* Origem */}
-                            <div className="col-span-6 lg:col-span-2">
-                                <Label title="Origem" required={false} />
-                                <select
-                                    {...register("originType")}
-                                    className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800"
-                                >
-                                    <option value="manual">Manual</option>
-                                    <option value="purchase-order">Pedido de Compra</option>
-                                    <option value="service-order">Ordem de Serviço</option>
-                                </select>
-                            </div>
-
-                            {/* Forma de Pagamento */}
-                            <div className="col-span-6 lg:col-span-3">
+                            <div className="col-span-6 lg:col-span-4">
                                 <Label title="Forma de Pagamento" required={false} />
                                 <select
                                     {...register("paymentMethodId")}
-                                    onChange={(e) => {
-                                        const selected = paymentMethods.find(
-                                            (p) => p.id === e.target.value
-                                        );
-                                        setValue("paymentMethodId", e.target.value);
-                                        setValue("paymentMethodName", selected?.name ?? "");
-                                    }}
-                                    className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800"
-                                >
+                                    className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800">
                                     <option value="">Selecione</option>
                                     {paymentMethods.map((p: any) => (
                                         <option key={p.id} value={p.id}>
@@ -174,8 +158,7 @@ export default function AccountPayableModalCreate() {
                                 </select>
                             </div>
 
-                            {/* Valor */}
-                            <div className="col-span-6 lg:col-span-3">
+                            <div className="col-span-6 lg:col-span-2">
                                 <Label title="Valor" />
                                 <Controller
                                     name="amount"
@@ -198,7 +181,6 @@ export default function AccountPayableModalCreate() {
                                 />
                             </div>
 
-                            {/* Parcela nº */}
                             <div className="col-span-6 lg:col-span-3">
                                 <Label title="Parcela Nº" required={false} />
                                 <input
@@ -210,7 +192,6 @@ export default function AccountPayableModalCreate() {
                                 />
                             </div>
 
-                            {/* Total de parcelas */}
                             <div className="col-span-6 lg:col-span-3">
                                 <Label title="Total de Parcelas" required={false} />
                                 <input
@@ -222,7 +203,6 @@ export default function AccountPayableModalCreate() {
                                 />
                             </div>
 
-                            {/* Vencimento */}
                             <div className="col-span-6 lg:col-span-3">
                                 <Label title="Data de Vencimento" />
                                 <input
@@ -232,7 +212,6 @@ export default function AccountPayableModalCreate() {
                                 />
                             </div>
 
-                            {/* Observações */}
                             <div className="col-span-6">
                                 <Label title="Observações" required={false} />
                                 <textarea
@@ -249,15 +228,10 @@ export default function AccountPayableModalCreate() {
                         <Button size="sm" variant="outline" onClick={close}>
                             Cancelar
                         </Button>
-                        {accountPayableId ? (
-                            <Button size="sm" variant="primary" onClick={update}>
-                                Salvar
-                            </Button>
-                        ) : (
-                            <Button size="sm" variant="primary" onClick={create}>
-                                Adicionar
-                            </Button>
-                        )}
+                        {
+                            (watch("status") != "paid" && watch("status") != "cancelled") &&
+                            (accountPayableId ? <Button size="sm" variant="primary" onClick={() => update()}>Salvar</Button> : <Button size="sm" variant="primary" onClick={() => create()}>Adicionar</Button>)
+                        }
                     </div>
                 </form>
             </div>

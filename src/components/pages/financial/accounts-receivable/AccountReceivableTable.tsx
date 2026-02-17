@@ -21,6 +21,7 @@ import AccountReceivableModalCreate from "./AccountReceivableModalCreate";
 import AccountReceivableModalPay from "./AccountReceivableModalPay";
 import { accountReceivableIdAtom, accountReceivableModalAtom, accountReceivablePayModalAtom } from "@/jotai/financial/accounts-receivable/accountsReceivable.jotai";
 import { MdPayment } from "react-icons/md";
+import { IconView } from "@/components/iconView/IconView";
 
 export default function AccountReceivableTable() {
   const [_, setLoading] = useAtom(loadingAtom);
@@ -80,6 +81,7 @@ export default function AccountReceivableTable() {
     setAccountReceivableId(obj.id);
 
     if (action === "edit") setModalCreate(true);
+    if (action === "view") setModalCreate(true);
     if (action === "delete") openModal();
     if (action === "pay") setPayModal(true);
   };
@@ -143,11 +145,14 @@ export default function AccountReceivableTable() {
                                 <MdPayment size={18} />
                               </button>
                             )}
-                            {permissionUpdate("H", "H1") && (
+                            {permissionUpdate("H", "H1") && x.status !== "paid" && x.status !== "cancelled" && (
                               <IconEdit action="edit" obj={x} getObj={getObj} />
                             )}
-                            {permissionDelete("H", "H1") && (
+                            {permissionDelete("H", "H1") && x.status !== "paid" && x.status !== "cancelled" && (
                               <IconDelete action="delete" obj={x} getObj={getObj} />
+                            )}
+                            {permissionDelete("H", "H1") && (x.status == "paid" || x.status == "cancelled") && (
+                              <IconView action="view" obj={x} getObj={getObj} />
                             )}
                           </div>
                         </TableCell>

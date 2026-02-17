@@ -29,6 +29,7 @@ import {
 } from "@/types/financial/account-payable/account-payable.type";
 import AccountPayableModalCreate from "./AccountPayableModalCreate";
 import AccountPayableModalPay from "./AccountPayableModalPay";
+import { IconView } from "@/components/iconView/IconView";
 
 export default function AccountPayableTable() {
     const [_, setLoading] = useAtom(loadingAtom);
@@ -40,7 +41,6 @@ export default function AccountPayableTable() {
     const { isOpen, openModal, closeModal } = useModal();
     const [accountPayable, setAccountPayable] = useState<TAccountPayable>(ResetAccountPayable);
 
-    // ─── API ──────────────────────────────────────────────────────────────────
     const getAll = async (page: number) => {
         try {
             setLoading(true);
@@ -89,6 +89,7 @@ export default function AccountPayableTable() {
         setAccountPayableId(obj.id);
 
         if (action === "edit") setModalCreate(true);
+        if (action === "view") setModalCreate(true);
         if (action === "pay") setModalPay(true);
         if (action === "delete") openModal();
     };
@@ -99,7 +100,6 @@ export default function AccountPayableTable() {
         }
     }, [storeLogged, modalCreate]);
 
-    // ─── render ───────────────────────────────────────────────────────────────
     return (
         <>
             <AccountPayableModalCreate />
@@ -157,11 +157,14 @@ export default function AccountPayableTable() {
                                                                     <MdPayment size={18} />
                                                                 </button>
                                                             )}
-                                                            {permissionUpdate("H", "H2") && (
+                                                            {permissionUpdate("H", "H2") && x.status !== "paid" && x.status !== "cancelled" && (
                                                                 <IconEdit action="edit" obj={x} getObj={getObj} />
                                                             )}
-                                                            {permissionDelete("H", "H2") && (
+                                                            {permissionDelete("H", "H2") && x.status !== "paid" && x.status !== "cancelled" && (
                                                                 <IconDelete action="delete" obj={x} getObj={getObj} />
+                                                            )}
+                                                            {permissionDelete("H", "H2") && (x.status == "paid" || x.status == "cancelled") && (
+                                                                <IconView action="view" obj={x} getObj={getObj} />
                                                             )}
                                                         </div>
                                                     </TableCell>
