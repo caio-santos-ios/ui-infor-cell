@@ -12,7 +12,7 @@ import { permissionDelete, permissionRead, permissionUpdate } from "@/utils/perm
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { NotData } from "@/components/not-data/NotData";
 import { storeLoggedAtom } from "@/jotai/global/store.jotai";
-import { salesOrderIdAtom, salesOrderModalAtom, salesOrderSettingModalAtom, salesOrderStatusAtom } from "@/jotai/commercial/sales-order/salesOrder.jotai";
+import { salesOrderIdAtom, salesOrderModalAtom, salesOrderStatusAtom } from "@/jotai/commercial/sales-order/salesOrder.jotai";
 import SalesOrderModalCreate from "./SalesOrderModalCreate";
 import { IconEdit } from "@/components/iconEdit/IconEdit";
 import { IconDelete } from "@/components/iconDelete/IconDelete";
@@ -22,6 +22,9 @@ import { ResetSalesOrder, TSalesOrder } from "@/types/commercial/sales-orders/sa
 import { IconView } from "@/components/iconView/IconView";
 import { SalesOrderSettingsButtonCreate } from "./SalesOrderSettingsButtonCreate";
 import { boxSettingModalAtom } from "@/jotai/commercial/box/box.jotai";
+import { IoReceipt } from "react-icons/io5";
+import ReactDOMServer from "react-dom/server";
+import { SalesOrderReceiptPrint } from "./SalesOrderReceiptPrint";
 
 export default function SalesOrderTable() {
   const [_, setLoading] = useAtom(loadingAtom);
@@ -95,6 +98,48 @@ export default function SalesOrderTable() {
     };
   };
 
+  const printReceipt = async (id: string) => {
+    try {
+      setLoading(true);
+      const {data} = await api.get(`/sales-orders/receipt/${id}`, configApi());
+      const result = data.result.data;
+      console.log(result)
+      
+      const receiptHtml = ReactDOMServer.renderToString(<SalesOrderReceiptPrint data={result} />);
+  
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+
+      const doc = iframe.contentWindow?.document;
+
+      if (doc) {
+        doc.open();
+        doc.write(`
+          <html>
+            <head>
+              <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+              <style>
+                @page { size: 80mm auto; margin: 0; }
+                body { margin: 0; padding: 0; }
+              </style>
+            </head>
+            <body onload="window.print(); window.close();">
+              ${receiptHtml}
+            </body>
+          </html>
+        `);
+        doc.close();
+      }
+
+      setTimeout(() => document.body.removeChild(iframe), 1000);
+    } catch (error) {
+      resolveResponse(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if(permissionRead("F", "F1")) {
       getAll(1);
@@ -141,6 +186,10 @@ export default function SalesOrderTable() {
                           <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{maskDate(x.createdAt)}</TableCell>
                           <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
                             <div className="flex gap-3">       
+                              {
+                                permissionUpdate("A", "A3") && x.status == "Finalizado" &&
+                                <IoReceipt onClick={() => printReceipt(x.id)} className="text-green-500"/>
+                              }   
                               {
                                 permissionUpdate("A", "A3") && x.status == "Finalizado" &&
                                 <IconView action="view" obj={x} getObj={getObj}/>

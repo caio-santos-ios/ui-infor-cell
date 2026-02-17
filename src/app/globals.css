@@ -12,9 +12,6 @@
   @apply flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg shadow-theme-xs
 }
 
-
-
-
 @custom-variant dark (&:is(.dark *));
 
 @theme {
@@ -861,5 +858,26 @@ span.flatpickr-weekday,
   .no-spinner {
     -moz-appearance: textfield;
     appearance: textfield;
+  }
+}
+
+@media screen {
+  .print-only {
+    display: none;
+  }
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-only, .print-only * {
+    visibility: visible;
+  }
+  .print-only {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
   }
 }
