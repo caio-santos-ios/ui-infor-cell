@@ -28,7 +28,7 @@ export default function CategoryForm({id}: TProp) {
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "subCategories"
+    name: "subcategories"
   });
 
   const save = async (body: TCategorie) => {
@@ -121,7 +121,7 @@ export default function CategoryForm({id}: TProp) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {fields.map((field, index) => (
                 <div key={field.id} className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg border dark:border-gray-700">
-                  <input placeholder="Nome da subcategoria" {...register(`subCategories.${index}.name` as const)} type="text" className="input-erp-primary input-erp-default"/>
+                  <input placeholder="Nome da subcategoria" {...register(`subcategories.${index}.name` as const)} type="text" className="input-erp-primary input-erp-default"/>
                   <IconDelete action="delete" getObj={() => remove(index)} />
                 </div>  
               ))}
