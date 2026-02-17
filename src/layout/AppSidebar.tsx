@@ -85,9 +85,11 @@ const staticNavItems: NavItem[] = [
     icon: "MdAttachMoney",
     name: "Financeiro",
     authorized: false,
-    code: "F",
+    code: "H",
     subItems: [
-      {name: "Formas de Pagamentos", path: "/financial/payment-methods", code: "F1", pro: false, authorized: false }
+      {name: "Formas de Pagamentos", path: "/financial/payment-methods", code: "H1", pro: false, authorized: false },
+      {name: "Contas a Receber",     path: "/financial/accounts-receivable", code: "H2", pro: false, authorized: false },
+      {name: "Contas a Pagar",     path: "/financial/accounts-payable", code: "H3", pro: false, authorized: false },
     ]
   }
 ];

@@ -1,0 +1,7 @@
+.erp-container {
+    height: calc(100dvh - 12rem);
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+}
