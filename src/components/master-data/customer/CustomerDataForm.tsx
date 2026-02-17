@@ -6,7 +6,7 @@ import Button from "@/components/ui/button/Button";
 import { loadingAtom } from "@/jotai/global/loading.jotai";
 import { api } from "@/service/api.service";
 import { configApi, resolveResponse } from "@/service/config.service";
-import { maskCPF, maskPhone } from "@/utils/mask.util";
+import { maskCNPJ, maskCPF, maskPhone } from "@/utils/mask.util";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -109,7 +109,7 @@ export default function CustomerDataForm({id}: TProp) {
             watch("type") == "J" ?
             <div className="col-span-6 xl:col-span-2">
               <Label title="CNPJ"/>
-              <input placeholder="CNPJ" {...register("document")} type="text" className="input-erp-primary input-erp-default"/>
+              <input placeholder="CNPJ" onInput={(e: React.ChangeEvent<HTMLInputElement>) => maskCNPJ(e)} {...register("document")} type="text" className="input-erp-primary input-erp-default"/>
             </div>
             :
             <div className="col-span-6 xl:col-span-2">

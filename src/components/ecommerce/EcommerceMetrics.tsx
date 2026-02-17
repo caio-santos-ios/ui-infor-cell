@@ -26,6 +26,7 @@ export const EcommerceMetrics = () => {
     api
       .get("/dashboard/cards", configApi())
       .then((res) => {
+        
         setData(res.data?.result?.data ?? null);
       })
       .catch(() => {
