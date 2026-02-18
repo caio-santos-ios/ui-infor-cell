@@ -89,7 +89,9 @@ const staticNavItems: NavItem[] = [
     subItems: [
       {name: "Formas de Pagamentos", path: "/financial/payment-methods", code: "H1", pro: false, authorized: false },
       {name: "Contas a Receber",     path: "/financial/accounts-receivable", code: "H2", pro: false, authorized: false },
-      {name: "Contas a Pagar",     path: "/financial/accounts-payable", code: "H3", pro: false, authorized: false },
+      {name: "Contas a Pagar",       path: "/financial/accounts-payable", code: "H3", pro: false, authorized: false },
+      {name: "Plano de Contas",      path: "/financial/chart-of-accounts", code: "H4", pro: false, authorized: false },
+      {name: "DRE",      path: "/financial/dre", code: "H5", pro: false, authorized: false },
     ]
   }
 ];
@@ -214,15 +216,13 @@ const AppSidebar: React.FC = () => {
                       <div 
                         ref={(el) => { subMenuRefs.current[`${index}`] = el; }} 
                         className="overflow-hidden transition-all duration-300" 
-                        style={{ height: openSubmenu?.index === index ? `${subMenuHeight[`${index}`]}px` : "0px" }}
-                      >
+                        style={{ height: !isMobileOpen && !isExpanded && !isHovered ? "0px" : openSubmenu?.index === index ? `${subMenuHeight[`${index}`]}px` : "0px" }}>
                         <ul className="mt-2 space-y-1 ml-9">
                           {nav.subItems.map((subItem) => (subItem.authorized || isAdmin) && (
                             <li key={subItem.name}>
                               <Link 
                                 href={subItem.path} 
-                                className={`menu-dropdown-item ${isActive(subItem.path) ? "menu-dropdown-item-active" : "menu-dropdown-item-inactive"}`}
-                              >
+                                className={`menu-dropdown-item ${isActive(subItem.path) ? "menu-dropdown-item-active" : "menu-dropdown-item-inactive"}`}>
                                 {subItem.name}
                               </Link>
                             </li>

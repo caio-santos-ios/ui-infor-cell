@@ -14,13 +14,13 @@ import { MdClose, MdQrCode } from "react-icons/md";
 import Switch from "@/components/form/Switch";
 import { TVariation } from "@/types/product/variation/variation.type";
 import { variationSerialModalAtom } from "@/jotai/product/variation/variation.jotai";
+import { IconDelete } from "@/components/iconDelete/IconDelete";
 
 type TProp = { id?: string; };
 
 export default function VariationForm({ id }: TProp) {
   const [_, setIsLoading] = useAtom(loadingAtom);
   const [__, setModalCreate] = useAtom(variationSerialModalAtom);
-  const [variationIndex, setVariationIndex] = useState<number>(-1);
 
   const { register, control, reset, getValues, watch } = useForm<TVariation>({
     defaultValues: { items: [] }
@@ -66,7 +66,7 @@ export default function VariationForm({ id }: TProp) {
   const addNewVariation = () => {
     append({
       code: (fields.length + 1).toString().padStart(6, '0'),
-      key: "",
+      key: watch("name"),
       value: "",
       active: true,
       deleted: false,
@@ -86,18 +86,8 @@ export default function VariationForm({ id }: TProp) {
       ...getValues(),
       items: itemsNew,
     });
-    console.log(itemsNew)
-    // remove(index);
+
     update();
-  };
-
-  const openModalSerial = (index: number) => {
-    setVariationIndex(index);
-    setModalCreate(true);
-  };
-
-  const closeModalSerial = () => {
-    setVariationIndex(-1);
   };
 
   return (
@@ -135,13 +125,10 @@ export default function VariationForm({ id }: TProp) {
               />
             </div>
 
-            <div className="col-span-6 xl:col-span-1 self-end flex gap-2">
-              <div title="Excluír" onClick={() => removeVariation(index)} className="cursor-pointer text-black dark:text-white bg-red-400 hover:bg-red-600 p-1 rounded-lg">
-                <MdClose size={20}/>
-              </div>
-              {/* <div title="Adicionar serial" onClick={() => openModalSerial(index)} className="cursor-pointer text-black dark:text-white bg-blue-400 hover:bg-blue-600 p-1 rounded-lg">
-                <MdQrCode size={20}/>
-              </div> */}
+            <div className="col-span-6 xl:col-span-1 self-center flex gap-2">
+              <IconDelete action="delete" obj={field} getObj={({}) => {
+                removeVariation(index);
+              }}/>
             </div>
           </React.Fragment>
         ))}
@@ -159,8 +146,6 @@ export default function VariationForm({ id }: TProp) {
           </Button>
         </div>
       </div>
-
-      {/* <VariationSerialModalCreate id={id} send={closeModalSerial} index={variationIndex} /> */}
     </ComponentCard>
   );
 }

@@ -17,14 +17,17 @@ export default function VariationModalCreate() {
   const [modalCreate, setModalCreate] = useAtom(variationModalAtom);
   const router = useRouter();
 
-  const { getValues, register } = useForm<TVariation>({
+  const { getValues, register, watch } = useForm<TVariation>({
     defaultValues: ResetVariation
   });
 
   const create = async () => {
     try {
       setIsLoading(true);
-      const {data} = await api.post(`/variations`, {...getValues()}, configApi());
+      const body = {...getValues()}; 
+      body.items[0].key = watch("name");
+      
+      const {data} = await api.post(`/variations`, body, configApi());
       const result = data.result;
       resolveResponse({status: 201, message: result.message});
       router.push(`/product/variations/${result.data.id}`);

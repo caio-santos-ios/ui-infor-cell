@@ -30,6 +30,7 @@ const AppHeader: React.FC = () => {
   };
 
   const toggleApplicationMenu = () => {
+    console.log("teste")
     setApplicationMenuOpen(!isApplicationMenuOpen);
   };
   const inputRef = useRef<HTMLInputElement>(null);
