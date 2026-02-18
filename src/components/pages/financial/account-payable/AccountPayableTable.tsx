@@ -30,6 +30,7 @@ import {
 import AccountPayableModalCreate from "./AccountPayableModalCreate";
 import AccountPayableModalPay from "./AccountPayableModalPay";
 import { IconView } from "@/components/iconView/IconView";
+import SupplierModalCreate from "@/components/master-data/supplier/SupplierModalCreate";
 
 export default function AccountPayableTable() {
     const [_, setLoading] = useAtom(loadingAtom);
@@ -135,7 +136,7 @@ export default function AccountPayableTable() {
                                                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">{x.code}</TableCell>
                                                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">{x.supplierName || "—"}</TableCell>
                                                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">{x.description}</TableCell>
-                                                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">{x.paymentMethodName || "—"}</TableCell>
+                                                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">{x.paymentMethodName}</TableCell>
                                                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">{formattedMoney(x.amount)}</TableCell>
                                                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">
                                                         {x.installmentNumber}/{x.totalInstallments}
@@ -191,6 +192,8 @@ export default function AccountPayableTable() {
                         closeModal={closeModal}
                         title="Excluir Conta a Pagar"
                     />
+
+                    <SupplierModalCreate />
                 </>
             ) : (
                 <NotData />

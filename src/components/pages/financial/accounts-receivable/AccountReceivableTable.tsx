@@ -22,6 +22,7 @@ import AccountReceivableModalPay from "./AccountReceivableModalPay";
 import { accountReceivableIdAtom, accountReceivableModalAtom, accountReceivablePayModalAtom } from "@/jotai/financial/accounts-receivable/accountsReceivable.jotai";
 import { MdPayment } from "react-icons/md";
 import { IconView } from "@/components/iconView/IconView";
+import CustomerModalCreate from "@/components/master-data/customer/CustomerModalCreate";
 
 export default function AccountReceivableTable() {
   const [_, setLoading] = useAtom(loadingAtom);
@@ -129,7 +130,7 @@ export default function AccountReceivableTable() {
                       <TableRow key={x.id}>
                         <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-700 dark:text-gray-200 font-medium">{x.customerName || "—"}</TableCell>
                         <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.description}</TableCell>
-                        <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.paymentMethodName || "—"}</TableCell>
+                        <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.paymentMethodName}</TableCell>
                         <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-700 dark:text-gray-200 font-medium">{formattedMoney(x.amount)}</TableCell>
                         <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.installmentNumber}/{x.totalInstallments}</TableCell>
                         <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{maskDate(x.dueDate)}</TableCell>
@@ -170,6 +171,7 @@ export default function AccountReceivableTable() {
             totalPages={pagination.totalPages}
             onPageChange={changePage}
           />
+          <CustomerModalCreate />
           <ModalDelete confirm={destroy} isOpen={isOpen} closeModal={closeModal} title="Excluir Conta a Receber" />
         </>
       ) : (

@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { api } from "@/service/api.service";
 import { configApi } from "@/service/config.service";
 import { TDashboardMonthlySales } from "@/types/dashboard/dashboard-card.type";
+import { useAtom } from "jotai";
+import { loadingAtom } from "@/jotai/global/loading.jotai";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
@@ -21,7 +23,7 @@ function formatCurrency(value: number): string {
 
 export default function MonthlySalesChart() {
   const [data, setData] = useState<TDashboardMonthlySales | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useAtom(loadingAtom);
 
   useEffect(() => {
     api
@@ -84,7 +86,8 @@ export default function MonthlySalesChart() {
   ];
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-5 pt-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 sm:pt-6">
+    !loading &&
+    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-5 pt-5 dark:border-gray-800 dark:bg-white/3 sm:px-6 sm:pt-6">
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
           Vendas Mensais

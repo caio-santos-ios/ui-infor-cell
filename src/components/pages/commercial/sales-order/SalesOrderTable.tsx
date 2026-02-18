@@ -103,7 +103,6 @@ export default function SalesOrderTable() {
       setLoading(true);
       const {data} = await api.get(`/sales-orders/receipt/${id}`, configApi());
       const result = data.result.data;
-      console.log(result)
       
       const receiptHtml = ReactDOMServer.renderToString(<SalesOrderReceiptPrint data={result} />);
   

@@ -5,6 +5,8 @@ import { ArrowDownIcon, ArrowUpIcon, BoxIconLine, GroupIcon } from "@/icons";
 import { api } from "@/service/api.service";
 import { configApi } from "@/service/config.service";
 import { TDashboardCards } from "@/types/dashboard/dashboard-card.type";
+import { useAtom } from "jotai";
+import { loadingAtom } from "@/jotai/global/loading.jotai";
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat("pt-BR", {
@@ -20,7 +22,7 @@ function formatNumber(value: number): string {
 
 export const EcommerceMetrics = () => {
   const [data, setData] = useState<TDashboardCards | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useAtom(loadingAtom);
 
   useEffect(() => {
     api
@@ -60,6 +62,7 @@ export const EcommerceMetrics = () => {
   const customersGrowthPositive = (data?.customers.growthPercent ?? 0) >= 0;
 
   return (
+    !loading &&
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
 
       {/* Card — Clientes do Mês */}

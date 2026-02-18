@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { api } from "@/service/api.service";
 import { configApi } from "@/service/config.service";
 import { TDashboardMonthlyTarget } from "@/types/dashboard/dashboard-card.type";
+import { loadingAtom } from "@/jotai/global/loading.jotai";
+import { useAtom } from "jotai";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
@@ -19,7 +21,7 @@ function formatCurrency(value: number): string {
 
 export default function MonthlyTarget() {
   const [data, setData] = useState<TDashboardMonthlyTarget | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useAtom(loadingAtom);
 
   useEffect(() => {
     api
@@ -87,7 +89,8 @@ export default function MonthlyTarget() {
   );
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03]">
+    !loading &&
+    <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/3">
       <div className="px-5 pt-5 bg-white shadow-default rounded-2xl pb-11 dark:bg-gray-900 sm:px-6 sm:pt-6">
         <div className="flex justify-between">
           <div>

@@ -1,14 +1,15 @@
 "use client";
+
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { ApexOptions } from "apexcharts";
 import flatpickr from "flatpickr";
 import { Portuguese } from "flatpickr/dist/l10n/pt";
-import ChartTab from "../common/ChartTab";
-import { CalenderIcon } from "../../icons";
 import { api } from "@/service/api.service";
 import { configApi } from "@/service/config.service";
 import { TDashboardMonthlySales } from "@/types/dashboard/dashboard-card.type";
+import { loadingAtom } from "@/jotai/global/loading.jotai";
+import { useAtom } from "jotai";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
@@ -26,7 +27,7 @@ function formatCurrency(value: number): string {
 export default function StatisticsChart() {
   const datePickerRef = useRef<HTMLInputElement>(null);
   const [data, setData] = useState<TDashboardMonthlySales | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useAtom(loadingAtom);
 
   useEffect(() => {
     api
@@ -105,7 +106,8 @@ export default function StatisticsChart() {
   ];
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 sm:pt-6">
+    !loading &&
+    <div className="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 dark:border-gray-800 dark:bg-white/3 sm:px-6 sm:pt-6">
       <div className="flex flex-col gap-5 mb-6 sm:flex-row sm:justify-between">
         <div className="w-full">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
@@ -115,17 +117,6 @@ export default function StatisticsChart() {
             Faturamento e pedidos por mês
           </p>
         </div>
-        {/* <div className="flex items-center gap-3 sm:justify-end">
-          <ChartTab />
-          <div className="relative inline-flex items-center">
-            <CalenderIcon className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 lg:left-3 lg:top-1/2 lg:translate-x-0 lg:-translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none z-10" />
-            <input
-              ref={datePickerRef}
-              className="h-10 w-10 lg:w-40 lg:h-auto lg:pl-10 lg:pr-3 lg:py-2 rounded-lg border border-gray-200 bg-white text-sm font-medium text-transparent lg:text-gray-700 outline-none dark:border-gray-700 dark:bg-gray-800 dark:lg:text-gray-300 cursor-pointer"
-              placeholder="Selecione o período"
-            />
-          </div>
-        </div> */}
       </div>
 
       {loading ? (

@@ -1,12 +1,12 @@
 .loading-overlay {
-    background-color: rgb(246, 244, 244);
-    position: absolute;
-    width: 100dvw;
-    height: 100dvh;
-    z-index: 100;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  /* background-color: rgb(246, 244, 244); */
+  position: absolute;
+  width: 100dvw;
+  height: 100dvh;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .container-loader {

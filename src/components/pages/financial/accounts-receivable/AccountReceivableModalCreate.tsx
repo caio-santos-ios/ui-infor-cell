@@ -12,12 +12,17 @@ import { useEffect, useState } from "react";
 import { ResetAccountReceivable, TAccountReceivable } from "@/types/financial/accounts-receivable/accounts-receivable.type";
 import { accountReceivableIdAtom, accountReceivableModalAtom } from "@/jotai/financial/accounts-receivable/accountsReceivable.jotai";
 import { NumericFormat } from "react-number-format";
+import AutocompletePlus from "@/components/form/AutocompletePlus";
+import { customerAtom, customerModalCreateAtom } from "@/jotai/masterData/customer.jotai";
 
 export default function AccountReceivableModalCreate() {
   const [_, setIsLoading] = useAtom(loadingAtom);
   const [modalCreate, setModalCreate] = useAtom(accountReceivableModalAtom);
   const [accountReceivableId, setAccountReceivableId] = useAtom(accountReceivableIdAtom);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+  const [customers, setCustomers] = useState<any[]>([]);
+  const [__, setCustomerModalCreate] = useAtom(customerModalCreateAtom);
+  const [customer, setCustomer] = useAtom(customerAtom);
 
   const { getValues, setValue, register, reset, control, watch } = useForm<TAccountReceivable>({
     defaultValues: ResetAccountReceivable
@@ -66,22 +71,39 @@ export default function AccountReceivableModalCreate() {
   };
 
   const getPaymentMethods = async () => {
-        try {
-            const { data } = await api.get(`/payment-methods?deleted=false&ne$type=receivable&orderBy=name&sort=asc&pageSize=100&pageNumber=1`,
-                configApi()
-            );
-            setPaymentMethods(data.result.data ?? []);
-        } catch {
-            setPaymentMethods([]);
-        }
-    };
+    try {
+        const { data } = await api.get(`/payment-methods?deleted=false&ne$type=payable&orderBy=name&sort=asc&pageSize=100&pageNumber=1`,
+            configApi()
+        );
+        setPaymentMethods(data.result.data ?? []);
+    } catch {
+        setPaymentMethods([]);
+    }
+  };
 
+  const getAutocompleCustomer = async (value: string) => {
+    try {
+      if(!value) return setCustomers([]);
+      const {data} = await api.get(`/customers?deleted=false&orderBy=tradeName&sort=desc&pageSize=10&pageNumber=1&regex$or$tradeName=${value}&regex$or$corporateName=${value}&regex$or$document=${value}`, configApi());
+      const result = data.result;
+      setCustomers(result.data);
+    } catch (error) {
+      resolveResponse(error);
+    }
+  };
 
   const close = () => {
     setModalCreate(false);
     setAccountReceivableId("");
     reset(ResetAccountReceivable);
   };
+
+  useEffect(() => {
+    if(customer.id && customer.tradeName) {
+      setValue("customerId", customer.id);
+      setValue("customerName", customer.tradeName);
+    };
+  }, [customer])
 
   useEffect(() => {
     const initial = async () => {
@@ -112,8 +134,12 @@ export default function AccountReceivableModalCreate() {
               </div>
 
               <div className="col-span-6">
-                <Label title="Nome do Cliente" required={false}/>
-                <input maxLength={150} placeholder="Nome do cliente" {...register("customerName")} type="text" className="input-erp-primary input-erp-default" />
+                <Label title="Cliente" required={false}/>
+                <AutocompletePlus onAddClick={() => {
+                    setCustomerModalCreate(true); 
+                  }} placeholder="Buscar cliente..." defaultValue={watch("customerName")} objKey="id" objValue="tradeName" onSearch={(value: string) => getAutocompleCustomer(value)} onSelect={(opt) => {
+                  setValue("customerId", opt.id);
+                }} options={customers}/>
               </div>
 
               <div className="col-span-6 lg:col-span-4">

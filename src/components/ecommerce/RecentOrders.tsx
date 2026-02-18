@@ -11,6 +11,8 @@ import Badge from "../ui/badge/Badge";
 import { api } from "@/service/api.service";
 import { configApi } from "@/service/config.service";
 import { TDashboardRecentOrder } from "@/types/dashboard/dashboard-card.type";
+import { loadingAtom } from "@/jotai/global/loading.jotai";
+import { useAtom } from "jotai";
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat("pt-BR", {
@@ -37,7 +39,7 @@ function statusColor(status: string): "success" | "warning" | "error" | "info" {
 
 export default function RecentOrders() {
   const [orders, setOrders] = useState<TDashboardRecentOrder[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useAtom(loadingAtom);
 
   useEffect(() => {
     api
@@ -48,7 +50,8 @@ export default function RecentOrders() {
   }, []);
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
+    !loading &&
+    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/3 sm:px-6">
       <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
           Pedidos Recentes

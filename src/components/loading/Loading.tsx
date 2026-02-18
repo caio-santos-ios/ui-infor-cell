@@ -9,7 +9,7 @@ export const Loading = () => {
     
     return (
         loading &&
-        <div className="loading-overlay">
+        <div className="loading-overlay bg-white dark:bg-gray-900">
             <div className="container-loader">
                 <div className="loader"></div>
                 <p className="title-loader">Carregando...</p>

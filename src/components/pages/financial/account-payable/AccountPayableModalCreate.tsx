@@ -19,6 +19,8 @@ import {
     TAccountPayable,
 } from "@/types/financial/account-payable/account-payable.type";
 import Autocomplete from "@/components/form/Autocomplete";
+import AutocompletePlus from "@/components/form/AutocompletePlus";
+import { supplierAtom, supplierModalCreateAtom } from "@/jotai/masterData/supplier.jotai";
 
 export default function AccountPayableModalCreate() {
     const [_, setIsLoading] = useAtom(loadingAtom);
@@ -27,6 +29,8 @@ export default function AccountPayableModalCreate() {
     const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
     const [suppliers, setSuppliers] = useState<any[]>([]);
     const [numberOfInstallments, setNumberOfInstallments] = useState<number>(0);
+    const [__, setSupplierModalCreate] = useAtom(supplierModalCreateAtom);
+    const [supplier] = useAtom(supplierAtom);
 
     const { getValues, setValue, register, reset, control, watch } = useForm<TAccountPayable>({ defaultValues: ResetAccountPayable });
 
@@ -88,7 +92,7 @@ export default function AccountPayableModalCreate() {
             const result = data.result;
             setSuppliers(result.data);
         } catch (error) {
-        resolveResponse(error);
+            resolveResponse(error);
         }
     };
 
@@ -97,6 +101,13 @@ export default function AccountPayableModalCreate() {
         setAccountPayableId("");
         reset(ResetAccountPayable);
     };
+
+    useEffect(() => {
+        if(supplier.id && supplier.tradeName) {
+        setValue("supplierId", supplier.id);
+        setValue("supplierName", supplier.tradeName);
+        };
+    }, [supplier])
 
     useEffect(() => {
         const initial = async () => {
@@ -139,7 +150,9 @@ export default function AccountPayableModalCreate() {
 
                             <div className="col-span-6">
                                 <Label title="Fornecedor" required={false} />
-                                <Autocomplete placeholder="Buscar fornecedor..." defaultValue={watch("supplierName")} objKey="id" objValue="tradeName" onSearch={(value: string) => getAutocompleSupplier(value)} onSelect={(opt) => {
+                                <AutocompletePlus onAddClick={() => {
+                                    setSupplierModalCreate(true);
+                                }} placeholder="Buscar fornecedor..." defaultValue={watch("supplierName")} objKey="id" objValue="tradeName" onSearch={(value: string) => getAutocompleSupplier(value)} onSelect={(opt) => {
                                     setValue("supplierId", opt.id);
                                 }} options={suppliers}/>
                             </div>
