@@ -6,11 +6,8 @@ import { configApi, resolveResponse } from "@/service/config.service";
 import { useAtom } from "jotai";
 import Button from "@/components/ui/button/Button";
 import { Modal } from "@/components/ui/modal";
-import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
-import { paymentMethodIdAtom } from "@/jotai/financial/payment-methods/paymentMethod.jotai";
-import { ResetSerial, TSerial } from "@/types/product/serial/serial.type";
-import { serialIdModalViewStockAtom, serialModalViewStockAtom } from "@/jotai/product/serial.jotai";
+import { serialModalViewStockAtom } from "@/jotai/product/serial.jotai";
 import { productAtom } from "@/jotai/product/product.jotai";
 import { ResetProduct } from "@/types/product/product/product.type";
 import { NotData } from "@/components/not-data/NotData";
@@ -21,7 +18,7 @@ import { variationCurrentAtom } from "@/jotai/product/variation/variation.jotai"
 export default function SerialModalViewStock() {
   const [_, setIsLoading] = useAtom(loadingAtom);
   const [modal, setModal] = useAtom(serialModalViewStockAtom);
-  const [currentVariation, setCurrentVariation] = useAtom(variationCurrentAtom);
+  const [__, setCurrentVariation] = useAtom(variationCurrentAtom);
   const [product, setProduct] = useAtom(productAtom);
   const [stocks, setStock] = useState<any[]>([]);
   const [hasSerial, setHasSerial] = useState<boolean>(false);
@@ -32,7 +29,7 @@ export default function SerialModalViewStock() {
     setIsLoading(true);
     const { data } = await api.get(`stocks/product/${id}`, configApi());
     const result = data.result.data;
-    // console.log(result)
+
     if (result.length > 0) {
       const apiHasSerial = result[0].productHasSerial === "yes";
       const apiHasVariation = result[0].productHasVariations === "yes";
@@ -45,71 +42,70 @@ export default function SerialModalViewStock() {
         const listStock: any[] = [];
 
         result.forEach((res: any) => {
-            console.log(res)
-            variations.forEach((item: any) => {
-              console.log(item)
-              item.forEach((varia: any) => {
-                if(hasSerial) {
-    
-                } else {
-                  let variation = varia.attributes.map((a: any) => (`${a.key}: ${a.value}`));
-                  variation = variation.join(" / ");
-                  
-                  const existedIndex = listStock.findIndex((x: any) => x.variation == variation);
-                  if(existedIndex >= 0) {
-                    listStock[existedIndex].quantity += parseFloat(varia.stock);
-                  } else {
-                    listStock.push({
-                      storeName: res.storeName,
-                      productName: res.productName,
-                      serial: "",
-                      quantity: parseFloat(varia.stock),
-                      createdAt: res.createdAt,
-                      variation
-                    });
-                  }
-                  // console.log(varia)
-                }
-              });
-              // if (item && item.variations) {
-              //   const idx = parseInt(currentVariation) || 0;
-              //   const variation = item.variations[idx];
+          variations.forEach((item: any) => {
+            const itemFilted = item.filter((x: any) => x.stock > 0);
+            
+            itemFilted.forEach((varia: any) => {
+              if(hasSerial) {
+                console.log("teste")
+              } else {
+                let variation = varia.attributes.map((a: any) => (`${a.key}: ${a.value}`));
+                variation = variation.join(" / ");
                 
-              //   if (variation && apiHasSerial) {
-              //     item.variations.forEach((v: any) => {
-              //       let variationList = v.attributes.map((a: any) => (`${a.key}: ${a.value}`));
-              //       variationList = variationList.join(" / ");
-    
-              //       const serialList = variation.serials.filter((x: any) => x.hasAvailable);
-              //       serialList.forEach((serial: TSerial) => {
-              //       listStock.push({
-              //         storeName: item.storeName,
-              //         productName: item.productName,
-              //         serial: serial.code,
-              //         quantity: 1,
-              //         createdAt: item.createdAt,
-              //         variation: variationList
-              //       });
-              //     });
-              //   });
-              //   } else if (variation) {
-              //     item.variations.forEach((v: any) => {
-              //       console.log(v)
-              //       let variation = v.attributes.map((a: any) => (`${a.key}: ${a.value}`));
-              //       variation = variation.join(" / ");
-    
-              //       listStock.push({
-              //         storeName: item.storeName,
-              //         productName: item.productName,
-              //         serial: "",
-              //         quantity: v.stock,
-              //         createdAt: item.createdAt,
-              //         variation
-              //       });
-              //     });
-              //   };
-              // };
+                const existedIndex = listStock.findIndex((x: any) => x.variation == variation);
+                if(existedIndex >= 0) {
+                  listStock[existedIndex].quantity += parseFloat(varia.stock);
+                } else {
+                  listStock.push({
+                    storeName: res.storeName,
+                    productName: res.productName,
+                    serial: "",
+                    quantity: parseFloat(varia.stock),
+                    createdAt: res.createdAt,
+                    variation
+                  });
+                }
+              }
             });
+            // if (item && item.variations) {
+            //   const idx = parseInt(currentVariation) || 0;
+            //   const variation = item.variations[idx];
+              
+            //   if (variation && apiHasSerial) {
+            //     item.variations.forEach((v: any) => {
+            //       let variationList = v.attributes.map((a: any) => (`${a.key}: ${a.value}`));
+            //       variationList = variationList.join(" / ");
+  
+            //       const serialList = variation.serials.filter((x: any) => x.hasAvailable);
+            //       serialList.forEach((serial: TSerial) => {
+            //       listStock.push({
+            //         storeName: item.storeName,
+            //         productName: item.productName,
+            //         serial: serial.code,
+            //         quantity: 1,
+            //         createdAt: item.createdAt,
+            //         variation: variationList
+            //       });
+            //     });
+            //   });
+            //   } else if (variation) {
+            //     item.variations.forEach((v: any) => {
+            //       console.log(v)
+            //       let variation = v.attributes.map((a: any) => (`${a.key}: ${a.value}`));
+            //       variation = variation.join(" / ");
+  
+            //       listStock.push({
+            //         storeName: item.storeName,
+            //         productName: item.productName,
+            //         serial: "",
+            //         quantity: v.stock,
+            //         createdAt: item.createdAt,
+            //         variation
+            //       });
+            //     });
+            //   };
+            // };
+          });
         });        
 
         setStock(listStock);
