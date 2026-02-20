@@ -63,7 +63,7 @@ export default function SignUpForm() {
               </div>
               
               <div className="col-span-4">
-                <Label title="CPF/CNPJ"/>
+                <Label title="CPF ou CNPJ"/>
                 <input placeholder="Seu CPF ou CNPJ" onInput={(e: any) => {
                   if(e.target.value.length <= 14) {
                     maskCPF(e);
