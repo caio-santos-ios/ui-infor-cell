@@ -69,7 +69,9 @@ export default function SignUpForm() {
                     maskCPF(e);
                   } else {
                     maskCNPJ(e);
-                  }
+                  };
+
+                  setValue("document", e.target.value);
                 }} type="text" className="input-erp-primary input-erp-default"/>
               </div>
 
