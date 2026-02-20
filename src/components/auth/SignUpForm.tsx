@@ -6,7 +6,7 @@ import { loadingAtom } from "@/jotai/global/loading.jotai";
 import { api } from "@/service/api.service";
 import { resolveResponse } from "@/service/config.service";
 import { ResetSignUp, TSignUp } from "@/types/auth/signUp.type";
-import { maskPhone } from "@/utils/mask.util";
+import { maskCNPJ, maskCPF, maskPhone } from "@/utils/mask.util";
 import { useAtom } from "jotai";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -51,33 +51,44 @@ export default function SignUpForm() {
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto py-4">
         <div>
           <form onSubmit={handleSubmit(create)}>
-            <div className="space-y-5">
-              <div>
+            <div className="grid grid-cols-4 gap-3">
+              <div className="col-span-4">
                 <Label title="Nome da empresa"/>
                 <input placeholder="Nome da sua empresa" {...register("companyName")} type="text" className="input-erp-primary input-erp-default"/>
               </div>
 
-              <div>
+              <div className="col-span-4">
                 <Label title="Nome completo"/>
                 <input placeholder="Seu nome completo" {...register("name")} type="text" className="input-erp-primary input-erp-default"/>
               </div>
+              
+              <div className="col-span-4">
+                <Label title="CPF/CNPJ"/>
+                <input placeholder="Seu CPF ou CNPJ" onInput={(e: any) => {
+                  if(e.target.value.length <= 14) {
+                    maskCPF(e);
+                  } else {
+                    maskCNPJ(e);
+                  }
+                }} type="text" className="input-erp-primary input-erp-default"/>
+              </div>
 
-              <div>
+              <div className="col-span-4">
                 <Label title="E-mail"/>
                 <input placeholder="Seu e-mail" {...register("email")} type="email" className="input-erp-primary input-erp-default"/>
               </div>
               
-              <div>
+              <div className="col-span-2">
                 <Label title="Telefone"/>
                 <input placeholder="Seu telefone" onInput={(e: React.ChangeEvent<HTMLInputElement>) => maskPhone(e)} {...register("phone")} type="text" className="input-erp-primary input-erp-default"/>
               </div>
               
-              <div>
+              <div className="col-span-2">
                 <Label title="WhatsApp (Opcional)" required={false}/>
                 <input placeholder="Seu whatsapp" onInput={(e: React.ChangeEvent<HTMLInputElement>) => maskPhone(e)} {...register("whatsapp")} type="text" className="input-erp-primary input-erp-default"/>
               </div>
 
-              <div>
+              <div className="col-span-4">
                 <Label title="Senha"/>
                 <div className="relative">
                   <input placeholder="Sua senha" {...register("password")} type={showPassword ? "text" : "password"} className="input-erp-primary input-erp-default"/>
@@ -91,7 +102,7 @@ export default function SignUpForm() {
                 </div>
               </div>
               {/* <!-- Checkbox --> */}
-              <div className="flex items-center gap-3">
+              <div className="col-span-4 flex items-center gap-3">
                 <Checkbox
                   className="w-5 h-5"
                   checked={isChecked}
@@ -108,7 +119,7 @@ export default function SignUpForm() {
                   </span>
                 </p>
               </div>
-              <div>
+              <div className="col-span-4">
                 <Button type="submit" className="w-full" size="sm">Cadastrar</Button>
               </div>
             </div>

@@ -5,6 +5,7 @@ export type TSignUp = {
     phone: string;
     whatsapp: string;
     password: string;
+    document: string;
     privacyPolicy: boolean;
 }
 
@@ -15,5 +16,6 @@ export const ResetSignUp: TSignUp = {
     phone: "",
     whatsapp: "",
     password: "",
-    privacyPolicy: false
+    privacyPolicy: false,
+    document: ""
 } 
