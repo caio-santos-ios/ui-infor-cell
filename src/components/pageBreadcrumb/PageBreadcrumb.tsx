@@ -16,7 +16,7 @@ const PageBreadcrumb: React.FC<BreadcrumbProps> = ({ pageTitle, pageSubTitle, pa
   const IconComponent = icons[pageIcon];
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
       <div className="text-gray-800 dark:text-white/90 flex items-center gap-2">
         {IconComponent && <IconComponent size={20} />}
         <h2 className="text-xl font-semibold text-gray-800 dark:text-white/90" x-text="pageName">

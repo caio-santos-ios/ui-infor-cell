@@ -44,7 +44,7 @@ export default function AutocompletePlus({ options, onSelect, onSearch, placehol
                 <input
                     disabled={disabled}
                     type="text"
-                    className="input-erp-primary input-erp-default w-full pl-4 pr-10" // pr-10 para não encostar no ícone
+                    className="h-11 w-full rounded-lg border appearance-none py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 focus:border-(--erp-primary-color) dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-(--erp-primary-color) bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/10 dark:border-gray-700 pl-4 pr-15"
                     placeholder={placeholder || "Buscar..."}
                     value={searchTerm}
                     onChange={(e) => {
@@ -58,7 +58,7 @@ export default function AutocompletePlus({ options, onSelect, onSearch, placehol
                 <button
                     type="button"
                     onClick={onAddClick}
-                    className="absolute right-3 p-1 text-brand-500 hover:text-brand-600 transition-colors"
+                    className="absolute right-0 p-3 bg-brand-500 hover:bg-brand-600 text-white transition-colors rounded-e-lg"
                     title="Adicionar novo"
                 >
                     <FiPlus size={20} />

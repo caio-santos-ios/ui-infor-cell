@@ -73,6 +73,8 @@ export default function EmployeeDataForm({id}: TProp) {
       const result = data.result.data;
       setMyStore(result.stores);
       reset(result);
+      const date = result.dateOfBirth.split("T")[0];
+      setValue("dateOfBirth", date);
     } catch (error) {
       resolveResponse(error);
     } finally {
