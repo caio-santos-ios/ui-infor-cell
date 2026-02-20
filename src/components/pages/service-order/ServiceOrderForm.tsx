@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import CustomerModalCreate from "@/components/master-data/customer/CustomerModalCreate";
 import Link from "next/link";
 import Button from "@/components/ui/button/Button";
+import SupplierModalCreate from "@/components/master-data/supplier/SupplierModalCreate";
 
 type TProp = { id?: string };
 
@@ -156,7 +157,7 @@ export default function ServiceOrderForm({ id }: TProp) {
         )
       }
       {isEdit && (
-        <div className="flex flex-wrap items-center gap-3 mb-4 p-4 rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
+        <div className="flex flex-wrap items-center gap-3 mb-4 p-3 rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
           <div className="flex items-center gap-3 flex-1">
             <span className="font-semibold text-gray-800 dark:text-white/90">
               OS #{watch("code")}
@@ -164,6 +165,26 @@ export default function ServiceOrderForm({ id }: TProp) {
             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.color}`}>
               {statusInfo.label}
             </span>
+            <span className="font-semibold text-gray-800 dark:text-white/90">
+              -
+            </span>
+            
+            <span className="font-semibold text-gray-800 dark:text-white/90">
+              CLIENTE: <span className="text-brand-400">{watch("customerName")}</span>
+            </span>
+            
+            <span className="font-semibold text-gray-800 dark:text-white/90">|</span>
+            
+            <span className="font-semibold text-gray-800 dark:text-white/90">
+              TEL: <span className="text-brand-400">{watch("customerPhone")}</span>
+            </span>
+
+            <span className="font-semibold text-gray-800 dark:text-white/90">|</span>
+            
+            <span className="font-semibold text-gray-800 dark:text-white/90">
+              E-MAIL: <span className="text-brand-400">{watch("customerEmail")}</span>
+            </span>
+
             {isWarranty && (
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
                 ⚠ GARANTIA INTERNA — financeiro bloqueado
@@ -259,6 +280,7 @@ export default function ServiceOrderForm({ id }: TProp) {
       )}
 
       <CustomerModalCreate />
+      <SupplierModalCreate />
     </>
   );
 }

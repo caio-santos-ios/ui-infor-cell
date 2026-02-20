@@ -30,18 +30,16 @@ export default function ServiceOrderTable() {
 
   const getAll = async (page: number) => {
     try {
-      setLoading(true);
-      // const params = new URLSearchParams({
-      //   deleted: "false",
-      //   orderBy: "openedAt",
-      //   sort: "desc",
-      //   pageSize: "10",
-      //   pageNumber: String(page),
-      // });
-      // if (search) params.set("search", search);
-      // if (statusFilter) params.set("status", statusFilter);
+      let strSearch = "deleted=false";
+      if(search) {
+        strSearch += `&regex$or$code=${search}&regex$or$customerName=${search}&regex$or$device.serialImei`;
+      };
 
-      const { data } = await api.get(`/serviceOrders?deleted=false&orderBy=createdAt&sort=desc&pageSize=10&pageNumber=${page}`, configApi());
+      if(statusFilter) {
+        strSearch += `&status=${statusFilter}`;
+      };
+
+      const { data } = await api.get(`/serviceOrders?${strSearch}&orderBy=createdAt&sort=desc&pageSize=10&pageNumber=${page}`, configApi());
       const result = data.result;
       
       setPagination({
@@ -85,6 +83,12 @@ export default function ServiceOrderTable() {
 
   useEffect(() => {
     if (permissionRead("A", "A4")) getAll(1);
+  }, [search, statusFilter]);
+
+  useEffect(() => {
+    setLoading(true);
+    if (permissionRead("A", "A4")) getAll(1);
+    setLoading(false);
   }, []);
 
   const statusOptions = [
@@ -125,7 +129,7 @@ export default function ServiceOrderTable() {
       <div className="flex flex-col sm:flex-row gap-2 mb-3">
         <input
           type="text"
-          placeholder="Buscar por Nº OS, cliente, serial, telefone..."
+          placeholder="Buscar por Nº OS, cliente, serial..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && getAll(1)}

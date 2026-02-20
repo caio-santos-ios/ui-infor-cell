@@ -30,7 +30,9 @@ export type TServiceOrder = {
   id: string;
   code: string;
   customerId: string;
-  customer?: any;
+  customerName: string;
+  customerPhone: string;
+  customerEmail: string;
   openedByUserId: string;
   openedAt: string;
   closedAt?: string;
@@ -112,6 +114,9 @@ export const ResetServiceOrder: TServiceOrder = {
   updatedAt: "",
   store: "",
   company: "",
+  customerName: "",
+  customerPhone: "",
+  customerEmail: ""
 };
 
 export const ResetServiceOrderItem: TServiceOrderItem = {

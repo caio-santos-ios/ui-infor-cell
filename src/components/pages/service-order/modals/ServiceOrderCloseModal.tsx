@@ -20,6 +20,7 @@ export default function ServiceOrderCloseModal({ serviceOrderId, isWarranty, onC
   const [paymentMethodId, setPaymentMethodId] = useState("");
   const [paymentMethodName, setPaymentMethodName] = useState("");
   const [installments, setInstallments] = useState(1);
+  const [quantityInstallment, setQuantityInstallment] = useState(0);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [orderTotal, setOrderTotal] = useState(0);
 
@@ -27,19 +28,16 @@ export default function ServiceOrderCloseModal({ serviceOrderId, isWarranty, onC
     try {
       const { data } = await api.get("/payment-methods?deleted=false&ne$type=payable&pageSize=50&pageNumber=1", configApi());
       setPaymentMethods(data.result.data || []);
-    } catch { /* skip */ }
+    } catch {}
   };
 
   const fetchOrderTotal = async () => {
     try {
-      const { data } = await api.get(
-        `/serviceOrderItems?deleted=false&serviceOrderId=${serviceOrderId}&pageSize=100&pageNumber=1`,
-        configApi()
-      );
+      const { data } = await api.get(`/serviceOrderItems?deleted=false&serviceOrderId=${serviceOrderId}&pageSize=100&pageNumber=1`, configApi());
       const items = data.result.data || [];
       const total = items.reduce((acc: number, item: any) => acc + (item.quantity * item.price), 0);
       setOrderTotal(total);
-    } catch { /* skip */ }
+    } catch {}
   };
 
   useEffect(() => {
@@ -64,10 +62,10 @@ export default function ServiceOrderCloseModal({ serviceOrderId, isWarranty, onC
         paymentMethodId: isWarranty ? "" : paymentMethodId,
         paymentMethodName: isWarranty ? "" : paymentMethodName,
         numberOfInstallments: installments,
-        updatedBy: userId,
-        company: localStorage.getItem("nameCompany") || "",
-        store: localStorage.getItem("nameStore") || "",
-        plan: localStorage.getItem("typePlan") || "",
+        // updatedBy: userId,
+        // company: localStorage.getItem("nameCompany") || "",
+        // store: localStorage.getItem("nameStore") || "",
+        // plan: localStorage.getItem("typePlan") || "",
       };
       const { data } = await api.put("/serviceOrders/close", payload, configApi());
       resolveResponse({ status: 200, message: data.result?.message || "OS encerrada com sucesso" });
@@ -78,6 +76,17 @@ export default function ServiceOrderCloseModal({ serviceOrderId, isWarranty, onC
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    setQuantityInstallment(0);
+
+    if(paymentMethodId) {
+      const payment = paymentMethods.find((p: any) => p.id === paymentMethodId);
+      if(payment) {
+        setQuantityInstallment(payment.numberOfInstallments);
+      };
+    };
+  }, [paymentMethodId]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -146,26 +155,29 @@ export default function ServiceOrderCloseModal({ serviceOrderId, isWarranty, onC
                     }}
                     className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 text-gray-800"
                   >
-                    <option value="">Selecionar forma de pagamento...</option>
+                    <option value="">Selecionar</option>
                     {paymentMethods.map((pm: any) => (
                       <option key={pm.id} value={pm.id} className="dark:bg-gray-900">{pm.name}</option>
                     ))}
                   </select>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Parcelas</label>
-                  <select
-                    value={installments}
-                    onChange={(e) => setInstallments(Number(e.target.value))}
-                    className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 text-gray-800"
-                  >
-                    {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => (
-                      <option key={n} value={n} className="dark:bg-gray-900">
-                        {n}x de {formattedMoney(orderTotal / n)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {
+                  paymentMethodId && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Parcelas</label>
+                      <select
+                        value={installments}
+                        onChange={(e) => setInstallments(Number(e.target.value))}
+                        className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 text-gray-800">
+                        {Array.from({ length: quantityInstallment }, (_, i) => i + 1).map((n) => (
+                          <option key={n} value={n} className="dark:bg-gray-900">
+                            {n}x de {formattedMoney(orderTotal / n)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )
+                }
               </div>
             </>
           )}

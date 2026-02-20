@@ -26,25 +26,11 @@ export default function ServiceOrderDeviceTab({ register, watch, setValue, onSav
   const [customerSearch, setCustomerSearch] = useState("");
   const [brands, setBrands] = useState<any[]>([]);
   const [models, setModels] = useState<any[]>([]);
-  const [loadingCustomers, setLoadingCustomers] = useState(false);
   const [__, setCustomerModalCreate] = useAtom(customerModalCreateAtom);
   const [customer, setCustomer] = useAtom(customerAtom);
 
   const customerId = watch("customerId");
   const brandId = watch("device.brandId");
-
-  const searchCustomers = async (q: string) => {
-    if (!q || q.length < 2) return;
-    try {
-      setLoadingCustomers(true);
-      const { data } = await api.get(`/customers?deleted=false&search=${encodeURIComponent(q)}&pageSize=10&pageNumber=1`, configApi());
-      setCustomers(data.result.data || []);
-    } catch (error) {
-      resolveResponse(error);
-    } finally {
-      setLoadingCustomers(false);
-    }
-  };
 
   const fetchBrands = async () => {
     try {
@@ -78,26 +64,20 @@ export default function ServiceOrderDeviceTab({ register, watch, setValue, onSav
   const handleSerialBlur = () => {
     const serialImei = watch("device.serialImei");
     if (serialImei || customerId) {
-      onWarrantyCheck(customerId, serialImei);
+      // onWarrantyCheck(customerId, serialImei);
     }
   };
 
   const selectCustomer = (customer: any) => {
-    setValue("customerId", customer.id);
-    setCustomerSearch(customer.corporateName);
-    setCustomers([]);
+    // setValue("customerId", customer.id);
+    // setCustomerSearch(customer.corporateName);
+    // setCustomers([]);
   };
 
   const selectBrand = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const brand = brands.find((b) => b.id === e.target.value);
     setValue("device.brandId", e.target.value);
     setValue("device.brandName", brand?.name || "");
-  };
-
-  const selectModel = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const model = models.find((m) => m.id === e.target.value);
-    setValue("device.modelId", e.target.value);
-    setValue("device.modelName", model?.name || "");
   };
 
   useEffect(() => {

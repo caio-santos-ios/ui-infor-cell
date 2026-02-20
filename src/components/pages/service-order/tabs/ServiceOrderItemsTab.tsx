@@ -13,6 +13,8 @@ import { permissionDelete, permissionUpdate } from "@/utils/permission.util";
 import { IconEdit } from "@/components/iconEdit/IconEdit";
 import { IconDelete } from "@/components/iconDelete/IconDelete";
 import Button from "@/components/ui/button/Button";
+import AutocompletePlus from "@/components/form/AutocompletePlus";
+import { supplierModalCreateAtom } from "@/jotai/masterData/supplier.jotai";
 
 type TProp = {
   serviceOrderId: string;
@@ -28,6 +30,8 @@ export default function ServiceOrderItemsTab({ serviceOrderId, isWarranty, isClo
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<TServiceOrderItem>(emptyItem());
   const [employees, setEmployees] = useState<any[]>([]);
+  const [suppliers, setSuppliers] = useState<any[]>([]);
+  const [__, setSupplierModalCreate] = useAtom(supplierModalCreateAtom);
 
   const fetchItems = async () => {
     try {
@@ -47,6 +51,18 @@ export default function ServiceOrderItemsTab({ serviceOrderId, isWarranty, isClo
       const { data } = await api.get("/employees/select/technicians", configApi());
       setEmployees(data.result.data || []);
     } catch { /* skip */ }
+  };
+
+
+  const getAutocompleSupplier = async (value: string) => {
+    try {
+        if(!value) return setSuppliers([]);
+        const {data} = await api.get(`/suppliers?deleted=false&orderBy=tradeName&sort=desc&pageSize=10&pageNumber=1&regex$or$tradeName=${value}&regex$or$corporateName=${value}`, configApi());
+        const result = data.result;
+        setSuppliers(result.data);
+    } catch (error) {
+        resolveResponse(error);
+    }
   };
 
   const saveItem = async () => {
@@ -233,13 +249,19 @@ export default function ServiceOrderItemsTab({ serviceOrderId, isWarranty, isClo
             {form.itemType === "part" && (
               <div className="col-span-6 xl:col-span-3">
                 <Label title="Fornecedor" required={false} />
-                <input
+                {/* <input
                   type="text"
                   placeholder="Nome do fornecedor"
                   value={form.supplierName}
                   onChange={(e) => setForm((p) => ({ ...p, supplierName: e.target.value }))}
                   className="input-erp-primary input-erp-default"
-                />
+                /> */}
+                <AutocompletePlus onAddClick={() => {
+                  setSupplierModalCreate(true);
+                }} placeholder="Buscar fornecedor..." defaultValue={form.supplierName} objKey="id" objValue="tradeName" onSearch={(value: string) => getAutocompleSupplier(value)} onSelect={(opt) => {
+                    // setValue("supplierId", opt.id);
+                  setForm((p) => ({ ...p, supplierName: opt.tradeName, supplierId: opt.id}))
+                }} options={suppliers}/>
               </div>
             )}
           </div>
