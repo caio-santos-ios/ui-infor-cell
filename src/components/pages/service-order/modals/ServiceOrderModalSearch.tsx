@@ -5,7 +5,6 @@ import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
 import { Modal } from "@/components/ui/modal";
 import { paginationAtom } from "@/jotai/global/pagination.jotai";
-import { customerAtom } from "@/jotai/masterData/customer.jotai";
 import { serviceOrderModalSearchAtom, serviceOrderSearchAtom } from "@/jotai/serviceOrder/manege.jotai";
 import { api } from "@/service/api.service";
 import { configApi, resolveParamsRequest, resolveResponse } from "@/service/config.service";
@@ -34,6 +33,7 @@ export default function ServiceOrderModalSearch() {
     const [___, setSearch] = useAtom(serviceOrderSearchAtom);
     const [customers, setCustomers] = useState<any[]>([]);
     const [stores, setStore] = useState<TStore[]>([]);
+    const [brands, setBrands] = useState<any[]>([]);
 
     const { register, getValues, setValue, reset, watch } = useForm<TServiceOrderSearch>();
 
@@ -64,7 +64,7 @@ export default function ServiceOrderModalSearch() {
     const getAutocompleCustomer = async (value: string) => {
         try {
         if(!value) return setCustomers([]);
-        const {data} = await api.get(`/customers?deleted=false&orderBy=tradeName&sort=desc&pageSize=10&pageNumber=1&regex$or$tradeName=${value}&regex$or$corporateName=${value}&regex$or$document=${value}`, configApi());
+        const {data} = await api.get(`/customers?deleted=false&orderBy=tradeName&sort=desc&pageSize=10&pageNumber=1&regex$or$tradeName=${value}&regex$or$corporateName=${value}&regex$or$document=${value}&regex$or$phone=${value}`, configApi());
         const result = data.result;
         setCustomers(result.data);
         } catch (error) {
@@ -84,7 +84,15 @@ export default function ServiceOrderModalSearch() {
             setLoading(false);
         }
     };
+
+    const fetchBrands = async () => {
+        try {
+            const { data } = await api.get("/brands?deleted=false&pageSize=100&pageNumber=1", configApi());
+            setBrands(data.result.data || []);
+        } catch {}
+    };
     
+    useEffect(() => { fetchBrands(); }, []);
 
     useEffect(() => {
         getSelectStore();
@@ -139,6 +147,19 @@ export default function ServiceOrderModalSearch() {
                                 <Autocomplete placeholder="Buscar cliente..." defaultValue={watch("customerName")} objKey="id" objValue="tradeName" onSearch={(value: string) => getAutocompleCustomer(value)} onSelect={(opt) => {
                                     setValue("customerId", opt.id);
                                 }} options={customers}/>
+                            </div>
+
+                            <div className="col-span-12 xl:col-span-3">
+                                <Label title="Marca" required={false}/>
+                                <select value={watch("device.brandId")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 text-gray-800">
+                                    <option value="">Selecione</option>
+                                    {brands.map((b: any) => <option key={b.id} value={b.id} className="dark:bg-gray-900">{b.name}</option>)}
+                                </select>
+                            </div>
+
+                            <div className="col-span-12 xl:col-span-3">
+                                <Label title="Modelo" required={false} />
+                                <input {...register("device.modelName")} placeholder="Digite" type="text" className="input-erp-primary input-erp-default" />
                             </div>
                             
                             <div className="col-span-6 md:col-span-3">

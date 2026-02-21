@@ -160,6 +160,8 @@ export type TServiceOrderSearch = {
   openedAt: any;
   device: {
     serialImei: string;
+    brandId: string;
+    modelName: string;
   },
   status: string;
   customerId: string;
@@ -172,6 +174,8 @@ export const ResetServiceOrderSearch: TServiceOrderSearch = {
   openedAt: null,
   device: {
     serialImei: "",
+    brandId: "",
+    modelName: ""
   },
   status: "",
   customerName: "",
