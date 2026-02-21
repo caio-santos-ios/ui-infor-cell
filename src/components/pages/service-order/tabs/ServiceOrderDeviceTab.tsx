@@ -132,7 +132,7 @@ export default function ServiceOrderDeviceTab({ register, watch, setValue, onSav
         </div>
 
         <div className="col-span-12 xl:col-span-3">
-          <Label title="Marca" />
+          <Label title="Marca"/>
           <select value={watch("device.brandId")} onChange={selectBrand} disabled={isClosed} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 text-gray-800">
             <option value="">Selecione</option>
             {brands.map((b: any) => <option key={b.id} value={b.id} className="dark:bg-gray-900">{b.name}</option>)}
@@ -140,12 +140,12 @@ export default function ServiceOrderDeviceTab({ register, watch, setValue, onSav
         </div>
 
         <div className="col-span-12 xl:col-span-3">
-          <Label title="Modelo" required={false} />
+          <Label title="Modelo"/>
           <input {...register("device.modelName")} placeholder="Modelo (opcional)" disabled={isClosed} type="text" className="input-erp-primary input-erp-default" />
         </div>
 
         <div className="col-span-12 xl:col-span-3">
-          <Label title="Nº de Série / IMEI" />
+          <Label title="Nº de Série / IMEI"/>
           <input
             {...register("device.serialImei")}
             onBlur={handleSerialBlur}
@@ -157,7 +157,7 @@ export default function ServiceOrderDeviceTab({ register, watch, setValue, onSav
         </div>
 
         <div className="col-span-12 xl:col-span-3">
-          <Label title="Senha de Desbloqueio" required={false} />
+          <Label title="Senha de Desbloqueio"/>
           <input {...register("device.unlockPassword")} placeholder="Senha de desbloqueio (opcional)" disabled={isClosed} type="text" className="input-erp-primary input-erp-default" />
         </div>
         
