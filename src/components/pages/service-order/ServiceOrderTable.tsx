@@ -126,7 +126,7 @@ export default function ServiceOrderTable() {
                 <Table className="divide-y">
                   <TableHeader className="border-b border-gray-100 dark:border-white/5 tele-table-thead">
                     <TableRow>
-                      {["Nº OS", "Abertura", "Cliente", "Equipamento", "Status", "Últ. Atualização", "Ações"].map((h) => (
+                      {["Situação", "Nº OS", "Abertura", "Cliente", "Equipamento", "Últ. Atualização", "Ações"].map((h) => (
                         <TableCell key={h} isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
                           {h}
                         </TableCell>
@@ -138,6 +138,11 @@ export default function ServiceOrderTable() {
                       const statusInfo = STATUS_LABELS[x.status] ?? { label: x.status, color: "bg-gray-100 text-gray-600" };
                       return (
                         <TableRow key={x.id} className="hover:bg-gray-50 dark:hover:bg-white/3 transition-colors">
+                          <TableCell className="px-5 py-4 sm:px-6 text-start">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.color}`}>
+                              {statusInfo.label}
+                            </span>
+                          </TableCell>
                           <TableCell className="px-5 py-4 sm:px-6 text-start">
                             <div className="flex items-center gap-2">
                               <span className="font-medium text-gray-800 dark:text-white/90 text-sm">
@@ -164,11 +169,7 @@ export default function ServiceOrderTable() {
                               )}
                             </div>
                           </TableCell>
-                          <TableCell className="px-5 py-4 sm:px-6 text-start">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.color}`}>
-                              {statusInfo.label}
-                            </span>
-                          </TableCell>
+                          
                           <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">
                             {maskDate(x.updatedAt)}
                           </TableCell>
