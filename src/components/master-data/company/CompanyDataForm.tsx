@@ -11,9 +11,7 @@ import { maskCNPJ, maskPhone } from "@/utils/mask.util";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import "./style.css";
 import DropzoneComponent from "@/components/form/form-elements/DropZone";
-import { CompanyLogo } from "@/components/logoCompany/LogoCompany";
 import { useRouter } from "next/navigation";
 
 type TProp = {

@@ -5,7 +5,7 @@ import AutocompletePlus from "@/components/form/AutocompletePlus";
 import TextArea from "@/components/form/input/TextArea";
 import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
-import { customerAtom, customerModalCreateAtom } from "@/jotai/masterData/customer.jotai";
+import { customerAtom, customerIdModalAtom, customerModalCreateAtom } from "@/jotai/masterData/customer.jotai";
 import { api } from "@/service/api.service";
 import { configApi, resolveResponse } from "@/service/config.service";
 import { useAtom } from "jotai";
@@ -27,6 +27,7 @@ export default function ServiceOrderDeviceTab({ register, watch, setValue, onSav
   const [brands, setBrands] = useState<any[]>([]);
   const [models, setModels] = useState<any[]>([]);
   const [__, setCustomerModalCreate] = useAtom(customerModalCreateAtom);
+  const [___, setCustomerIdModal] = useAtom(customerIdModalAtom);
   const [customer, setCustomer] = useAtom(customerAtom);
 
   const customerId = watch("customerId");
@@ -39,13 +40,13 @@ export default function ServiceOrderDeviceTab({ register, watch, setValue, onSav
     } catch { /* skip */ }
   };
 
-  const fetchModels = async (brandId: string) => {
-    if (!brandId) return;
-    try {
-      const { data } = await api.get(`/groups?deleted=false&pageSize=100&pageNumber=1&brandId=${brandId}`, configApi());
-      setModels(data.result.data || []);
-    } catch { /* skip */ }
-  };
+  // const fetchModels = async (brandId: string) => {
+  //   if (!brandId) return;
+  //   try {
+  //     const { data } = await api.get(`/groups?deleted=false&pageSize=100&pageNumber=1&brandId=${brandId}`, configApi());
+  //     setModels(data.result.data || []);
+  //   } catch { /* skip */ }
+  // };
 
   const getAutocompleCustomer = async (value: string) => {
     try {
@@ -59,7 +60,7 @@ export default function ServiceOrderDeviceTab({ register, watch, setValue, onSav
   };
 
   useEffect(() => { fetchBrands(); }, []);
-  useEffect(() => { if (brandId) fetchModels(brandId); }, [brandId]);
+  // useEffect(() => { if (brandId) fetchModels(brandId); }, [brandId]);
 
   const handleSerialBlur = () => {
     const serialImei = watch("device.serialImei");
@@ -93,10 +94,14 @@ export default function ServiceOrderDeviceTab({ register, watch, setValue, onSav
 
         <div className="col-span-12 xl:col-span-6 relative">
           <Label title="Cliente" />
-          <AutocompletePlus disabled={isClosed} onAddClick={() => {
-              setCustomerModalCreate(true);
-            }} placeholder="Buscar cliente..." defaultValue={watch("customerName")} objKey="id" objValue="tradeName" onSearch={(value: string) => getAutocompleCustomer(value)} onSelect={(opt) => {
+          <AutocompletePlus disabled={isClosed} onEditClick={() => {
+            setCustomerModalCreate(true);
+            setCustomerIdModal(watch("customerId"));
+            setCustomer((e: any) => ({...e, id: watch("customerId")}));
+          }} onAddClick={() => {setCustomerModalCreate(true)}} 
+            placeholder="Buscar cliente..." defaultValue={watch("customerName")} objKey="id" objValue="tradeName" onSearch={(value: string) => getAutocompleCustomer(value)} onSelect={(opt) => {
             setValue("customerId", opt.id);
+            setCustomers([]);
           }} options={customers}/>
           {customers.length > 0 && (
             <div className="absolute top-full left-0 right-0 z-10 mt-1 rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 shadow-lg max-h-48 overflow-y-auto">
@@ -135,6 +140,11 @@ export default function ServiceOrderDeviceTab({ register, watch, setValue, onSav
         </div>
 
         <div className="col-span-12 xl:col-span-3">
+          <Label title="Modelo" required={false} />
+          <input {...register("device.modelName")} placeholder="Modelo (opcional)" disabled={isClosed} type="text" className="input-erp-primary input-erp-default" />
+        </div>
+
+        <div className="col-span-12 xl:col-span-3">
           <Label title="Nº de Série / IMEI" />
           <input
             {...register("device.serialImei")}
@@ -150,6 +160,17 @@ export default function ServiceOrderDeviceTab({ register, watch, setValue, onSav
           <Label title="Senha de Desbloqueio" required={false} />
           <input {...register("device.unlockPassword")} placeholder="Senha de desbloqueio (opcional)" disabled={isClosed} type="text" className="input-erp-primary input-erp-default" />
         </div>
+        
+        <div className="col-span-12 xl:col-span-3">
+          <Label title="Prioridade" />
+          <select {...register("priority")} disabled={isClosed} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 text-gray-800">
+            <option value="baixa">Baixa</option>
+            <option value="normal">Normal</option>
+            <option value="alta">Alta</option>
+            <option value="urgente">Urgente</option>
+            <option value="crítica">Crítica</option>
+          </select>
+        </div>
 
         <div className="col-span-12 xl:col-span-6">
           <Label title="Acessórios Entregues" required={false} />
@@ -158,7 +179,12 @@ export default function ServiceOrderDeviceTab({ register, watch, setValue, onSav
 
         <div className="col-span-12 xl:col-span-6">
           <Label title="Estado Físico" required={false} />
-          <input {...register("device.physicalCondition")} placeholder="Ex: arranhado, tela trincada..." disabled={isClosed} type="text" className="input-erp-primary input-erp-default" />
+          <select {...register("device.physicalCondition")} disabled={isClosed} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 text-gray-800">
+            <option value="000001">Novo</option>
+            <option value="000002">Tela com Riscos</option>
+            <option value="000003">Carcaça Amassada</option>
+            <option value="000004">Outros</option>
+          </select>
         </div>
 
         <div className="col-span-12">

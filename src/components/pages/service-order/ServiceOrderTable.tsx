@@ -18,6 +18,9 @@ import { ModalDelete } from "@/components/modalDelete/ModalDelete";
 import { NotData } from "@/components/not-data/NotData";
 import { ResetServiceOrder, STATUS_LABELS, TServiceOrder } from "@/types/order-service/order-service.type";
 import { IconView } from "@/components/iconView/IconView";
+import Label from "@/components/form/Label";
+import Button from "@/components/ui/button/Button";
+import ServiceOrderModalSearch from "./modals/ServiceOrderModalSearch";
 
 export default function ServiceOrderTable() {
   const [_, setLoading] = useAtom(loadingAtom);
@@ -91,21 +94,11 @@ export default function ServiceOrderTable() {
     setLoading(false);
   }, []);
 
-  const statusOptions = [
-    { value: "", label: "Todos os status" },
-    { value: "open", label: "Aberta" },
-    { value: "analysis", label: "Em Análise" },
-    { value: "waiting_approval", label: "Aguardando Aprovação" },
-    { value: "waiting_part", label: "Aguardando Peça" },
-    { value: "in_repair", label: "Em Reparo" },
-    { value: "ready", label: "Pronta p/ Retirada" },
-    { value: "closed", label: "Encerrada" },
-    { value: "cancelled", label: "Cancelada" },
-  ];
+
 
   return (
     <div className="">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+      <div className="grid grid-cols-4 md:grid-cols-4 gap-3 mb-4">
         {[
           { label: "Abertas", status: "open", color: "text-blue-600 dark:text-blue-400" },
           { label: "Em Reparo", status: "in_repair", color: "text-indigo-600 dark:text-indigo-400" },
@@ -117,8 +110,7 @@ export default function ServiceOrderTable() {
             <button
               key={card.status}
               onClick={() => { setStatusFilter(card.status); getAll(1); }}
-              className={`rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3 p-4 text-left hover:border-brand-300 transition-colors cursor-pointer`}
-            >
+              className={`rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3 p-2 lg:p-4 text-left hover:border-brand-300 transition-colors cursor-pointer`}>
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{card.label}</p>
               <p className={`text-2xl font-bold ${card.color}`}>{count}</p>
             </button>
@@ -126,45 +118,9 @@ export default function ServiceOrderTable() {
         })}
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-2 mb-3">
-        <input
-          type="text"
-          placeholder="Buscar por Nº OS, cliente, serial..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && getAll(1)}
-          className="input-erp-primary input-erp-default flex-1"
-        />
-        <select
-          value={statusFilter}
-          onChange={(e) => { setStatusFilter(e.target.value); getAll(1); }}
-          className="h-11 rounded-lg border border-gray-300 bg-transparent px-4 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 text-gray-800 min-w-[200px]"
-        >
-          {statusOptions.map((o) => (
-            <option key={o.value} value={o.value} className="dark:bg-gray-900">
-              {o.label}
-            </option>
-          ))}
-        </select>
-        <button
-          onClick={() => getAll(1)}
-          className="h-11 px-5 rounded-lg bg-brand-500 text-white text-sm font-medium hover:bg-brand-600 transition-colors"
-        >
-          Buscar
-        </button>
-        {(search || statusFilter) && (
-          <button
-            onClick={() => { setSearch(""); setStatusFilter(""); getAll(1); }}
-            className="h-11 px-4 rounded-lg border border-gray-300 text-sm text-gray-600 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-          >
-            Limpar
-          </button>
-        )}
-      </div>
-
       {pagination.data.length > 0 ? (
         <>
-          <div className="erp-container-table rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3 mb-3">
+          <div className="max-h-[calc(100dvh-30rem)] lg:max-h-[calc(100dvh-24rem)] overflow-y-auto rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3 mb-3">
             <div className="max-w-full overflow-x-auto tele-container-table">
               <div className="min-w-[1100px] divide-y">
                 <Table className="divide-y">
@@ -197,9 +153,6 @@ export default function ServiceOrderTable() {
                           <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">
                             {maskDate(x.openedAt)}
                           </TableCell>
-                          {/* <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">
-                            {x.store || "—"}
-                          </TableCell> */}
                           <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">
                             {x.customerName}
                           </TableCell>
@@ -234,6 +187,7 @@ export default function ServiceOrderTable() {
               </div>
             </div>
           </div>
+
           <Pagination
             currentPage={pagination.currentPage}
             totalCount={pagination.totalCount}
@@ -244,8 +198,9 @@ export default function ServiceOrderTable() {
           <ModalDelete confirm={destroy} isOpen={isOpen} closeModal={closeModal} title="Excluir Ordem de Serviço" />
         </>
       ) : (
-        <NotData />
+        <NotData h="3rem" />
       )}
+      <ServiceOrderModalSearch />
     </div>
   );
 }

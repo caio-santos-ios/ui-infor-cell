@@ -62,11 +62,8 @@ export default function ServiceOrderCloseModal({ serviceOrderId, isWarranty, onC
         paymentMethodId: isWarranty ? "" : paymentMethodId,
         paymentMethodName: isWarranty ? "" : paymentMethodName,
         numberOfInstallments: installments,
-        // updatedBy: userId,
-        // company: localStorage.getItem("nameCompany") || "",
-        // store: localStorage.getItem("nameStore") || "",
-        // plan: localStorage.getItem("typePlan") || "",
       };
+
       const { data } = await api.put("/serviceOrders/close", payload, configApi());
       resolveResponse({ status: 200, message: data.result?.message || "OS encerrada com sucesso" });
       onSuccess();
@@ -106,7 +103,6 @@ export default function ServiceOrderCloseModal({ serviceOrderId, isWarranty, onC
             </div>
           )}
 
-          {/* Warranty period */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Período de Garantia

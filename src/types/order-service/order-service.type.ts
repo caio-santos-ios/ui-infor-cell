@@ -54,6 +54,8 @@ export type TServiceOrder = {
   updatedAt: string;
   store: string;
   company: string;
+  priority: string;
+  model: string;
 };
 
 export type TServiceOrderItem = {
@@ -88,7 +90,7 @@ export const ResetServiceOrderDevice: TServiceOrderDevice = {
   customerReportedIssue: "",
   unlockPassword: "",
   accessories: "",
-  physicalCondition: "",
+  physicalCondition: "novo",
 };
 
 export const ResetServiceOrder: TServiceOrder = {
@@ -116,7 +118,9 @@ export const ResetServiceOrder: TServiceOrder = {
   company: "",
   customerName: "",
   customerPhone: "",
-  customerEmail: ""
+  customerEmail: "",
+  priority: "baixa",
+  model: ""
 };
 
 export const ResetServiceOrderItem: TServiceOrderItem = {
@@ -149,4 +153,28 @@ export const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   ready: { label: "Pronta p/ Retirada", color: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
   closed: { label: "Encerrada", color: "bg-gray-100 text-gray-600 dark:bg-gray-700/50 dark:text-gray-400" },
   cancelled: { label: "Cancelada", color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" },
+};
+
+export type TServiceOrderSearch = {
+  code: "",
+  openedAt: any;
+  device: {
+    serialImei: string;
+  },
+  status: string;
+  customerId: string;
+  customerName: string;
+  store: string;
+};
+
+export const ResetServiceOrderSearch: TServiceOrderSearch = {
+  code: "",
+  openedAt: null,
+  device: {
+    serialImei: "",
+  },
+  status: "",
+  customerName: "",
+  customerId: "",
+  store: ""
 };

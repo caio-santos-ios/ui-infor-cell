@@ -97,7 +97,6 @@ export const saveLocalStorage = (data: TDataLocal, hasToken: boolean = false) =>
     localStorage.setItem("master", data.master);
   };
 
-  // localStorage.setItem("typeUser", data.typeUser);
   localStorage.setItem("expirationDate", data.expirationDate);
   localStorage.setItem("typePlan", data.typePlan);
   localStorage.setItem("subscriberPlan", data.subscriberPlan);
@@ -112,7 +111,6 @@ export const saveLocalStorage = (data: TDataLocal, hasToken: boolean = false) =>
 };
 
 export const removeLocalStorage = () => { 
-  // localStorage.removeItem("typeUser");
   localStorage.removeItem("master");
   localStorage.removeItem("expirationDate");
   localStorage.removeItem("typePlan");
@@ -128,3 +126,22 @@ export const removeLocalStorage = () => {
   localStorage.removeItem("nameStore");
   localStorage.removeItem("modules");
 };
+
+export const resolveParamsRequest = (params: any, prefix = '') => {
+  if (params == undefined || params == null) return '';
+
+  let _params = '';
+  for (const [key, value] of Object.entries(params)) {
+    const fullKey = prefix ? `${prefix}.${key}` : key;
+
+    if (value !== null && value !== undefined && typeof value === 'object') {
+      _params += resolveParamsRequest(value, fullKey);
+    } else if (typeof value === 'boolean') {
+      _params += `&${fullKey}=${value}`;
+    } else {
+      if (value) _params += `&${fullKey}=${value}`;
+    }
+  }
+
+  return _params;
+}

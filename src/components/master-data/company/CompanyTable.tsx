@@ -14,7 +14,6 @@ import { useRouter } from "next/navigation";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { IconEdit } from "@/components/iconEdit/IconEdit";
 import { IconDelete } from "@/components/iconDelete/IconDelete";
-import { Modal } from "@/components/ui/modal";
 import { useModal } from "@/hooks/useModal";
 import { ModalDelete } from "@/components/modalDelete/ModalDelete";
 
@@ -98,11 +97,11 @@ export default function CompanyTable() {
               <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
                 {pagination.data.map((x: TCompany) => (
                   <TableRow key={x.id}>
-                    <TableCell className="px-5 py-4 sm:px-6 text-start">{x.corporateName}</TableCell>
-                    <TableCell className="px-5 py-4 sm:px-6 text-start">{x.tradeName}</TableCell>
-                    <TableCell className="px-5 py-4 sm:px-6 text-start">{x.document}</TableCell>
-                    <TableCell className="px-5 py-4 sm:px-6 text-start">{maskDate(x.createdAt)}</TableCell>
-                    <TableCell className="px-5 py-4 sm:px-6 text-start">
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.corporateName}</TableCell>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.tradeName}</TableCell>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.document}</TableCell>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{maskDate(x.createdAt)}</TableCell>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
                       <div className="flex gap-3">       
                         {
                           permissionUpdate("A", "A1") &&

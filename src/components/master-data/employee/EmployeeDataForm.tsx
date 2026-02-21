@@ -182,7 +182,7 @@ export default function EmployeeDataForm({id}: TProp) {
 
           <div className="col-span-6 xl:col-span-1">
             <Label title="Data de Nascimento" required={false}/>
-            <input placeholder="Whatsapp" {...register("dateOfBirth")} type="date" className="input-erp-primary input-erp-default"/>
+            <input placeholder="Data de Nascimento" {...register("dateOfBirth")} type="date" className="input-erp-primary input-erp-default"/>
           </div>
           
           

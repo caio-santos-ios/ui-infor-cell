@@ -17,12 +17,12 @@ const AppHeader: React.FC = () => {
   const [isAdmin] = useAtom(userAdmin);  
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
   const [typePlan, setTypePlan] = useState<string>("");
-  const [timePlan, setTimePlan] = useState<string>("");
   const [timeLeft, setTimeLeft] = useState<TimeRemaining | null>(null);
-  const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
+  const { isMobileOpen, isExpanded, toggleSidebar, toggleMobileSidebar } = useSidebar();
 
   const handleToggle = () => {
     if (window.innerWidth >= 1024) {
+      localStorage.setItem("isExpanded", isExpanded ? "false" : "true");
       toggleSidebar();
     } else {
       toggleMobileSidebar();
@@ -30,7 +30,6 @@ const AppHeader: React.FC = () => {
   };
 
   const toggleApplicationMenu = () => {
-    console.log("teste")
     setApplicationMenuOpen(!isApplicationMenuOpen);
   };
   const inputRef = useRef<HTMLInputElement>(null);
@@ -117,13 +116,12 @@ const AppHeader: React.FC = () => {
             </svg>
           </button>
         </div>
-        <div className={`${isApplicationMenuOpen ? "flex" : "hidden"} items-center justify-between w-full gap-4 px-5 py-4 lg:flex shadow-theme-md lg:justify-end lg:px-0 lg:shadow-none`}>
+        <div className={`${isApplicationMenuOpen ? "flex" : "hidden"} flex-col lg:flex-row lg:items-center justify-between w-full gap-4 px-5 py-4 lg:flex shadow-theme-md lg:justify-end lg:px-0 lg:shadow-none`}>
           <CompanyDropdown /> 
-          <div className="flex items-center gap-2 2xsm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <ThemeToggleButton />
-            {/* <NotificationDropdown />  */}
+            <UserDropdown /> 
           </div>
-          <UserDropdown /> 
         </div>
       </div>
     </header>

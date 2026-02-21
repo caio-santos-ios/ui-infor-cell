@@ -1,15 +1,16 @@
 "use client";
 
-import Button from "@/components/ui/button/Button";
 import { loadingAtom } from "@/jotai/global/loading.jotai";
-import { api } from "@/service/api.service";
+import { api, uriBase } from "@/service/api.service";
 import { configApi, resolveResponse } from "@/service/config.service";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { FaCheck, FaCreditCard, FaBarcode, FaQrcode, FaTimes } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
 import { MdStarBorder, MdStarHalf, MdStar, MdDiamond } from "react-icons/md";
 import { toast } from "react-toastify";
+import Button from "@/components/ui/button/Button";
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 
@@ -37,8 +38,7 @@ interface SubscriptionResult {
 const PLANS: PlanOption[] = [
   {
     name: "Platina",
-    // price: "R$ 379,00/mês",
-    price: "R$ 5/mês",
+    price: "R$ 379,00/mês",
     value: 379,
     discount: "R$ 583,08",
     items: [
@@ -51,8 +51,7 @@ const PLANS: PlanOption[] = [
   },
   {
     name: "Ouro",
-    // price: "R$ 289,00/mês",
-    price: "R$ 5/mês",
+    price: "R$ 289,00/mês",
     value: 289,
     discount: "R$ 444,62",
     items: [
@@ -65,8 +64,7 @@ const PLANS: PlanOption[] = [
   },
   {
     name: "Prata",
-    // price: "R$ 199,00/mês",
-    price: "R$ 5/mês",
+    price: "R$ 199,00/mês",
     value: 199,
     discount: "R$ 306,15",
     items: [
@@ -79,8 +77,7 @@ const PLANS: PlanOption[] = [
   },
   {
     name: "Bronze",
-    // price: "R$ 119,00/mês",
-    price: "R$ 5/mês",
+    price: "R$ 119,00/mês",
     value: 119,
     discount: "R$ 183,08",
     items: [
@@ -105,12 +102,15 @@ function PlanIcon({ name }: { name: string }) {
 // ─── Componente principal ─────────────────────────────────────────────────────
 export const SubscriptionFlow = () => {
   const [, setLoading] = useAtom(loadingAtom);
-  const [step, setStep] = useState<"plans" | "payment" | "result">("plans");
+  const [step, setStep] = useState<"plans" | "payment" | "result" | "finish">("plans");
   const [selectedPlan, setSelectedPlan] = useState<PlanOption | null>(null);
   const [billingType, setBillingType] = useState<BillingType>("PIX");
   const [result, setResult] = useState<SubscriptionResult | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [countdown, setCountdown] = useState(5);
+  const [time, setTime] = useState(1);
+  const router = useRouter();
 
   // Dados do cartão
   const [card, setCard] = useState({
@@ -124,6 +124,33 @@ export const SubscriptionFlow = () => {
   const handleSelectPlan = (plan: PlanOption) => {
     setSelectedPlan(plan);
     setStep("payment");
+  };
+
+  useEffect(() => {
+    if(step == "result") {
+      setTimeout(async () => {
+        setTime(time + 1);
+        await getResult();
+      }, 1000);
+    };
+  }, [time]);
+
+  const getResult = async () => {
+    try {
+      const { data } = await api.get(`/subscriptions/plan`, configApi());
+      const result = data.result;
+      if(result.data.status == "ACTIVE") {
+        localStorage.setItem("typePlan", result.data.planType);
+        resolveResponse({status: 200, message: "Plano assinado com sucesso!"});
+
+        setTimeout(() => {
+          router.push("/dashboard");
+          setStep("finish");
+        }, 2000);
+      }
+    } catch (error) {
+      resolveResponse(error);
+    }
   };
 
   const handleSubmit = async () => {
@@ -152,6 +179,7 @@ export const SubscriptionFlow = () => {
       resolveResponse(response);
       setResult(response.data.result?.data ?? response.data.result);
       setStep("result");
+      setTime(2);
     } catch (err: any) {
       resolveResponse(err);
     } finally {
@@ -165,10 +193,6 @@ export const SubscriptionFlow = () => {
     toast.success("Copiado!", { theme: "colored" });
     setTimeout(() => setCopied(false), 2000);
   };
-
-  useEffect(() => {
-    setLoading(false);
-  }, []);
 
   // ── Step: Selecionar Plano ──────────────────────────────────────────────────
   if (step === "plans") {
@@ -206,7 +230,6 @@ export const SubscriptionFlow = () => {
 
               <div className="mb-4">
                 <span className="line-through text-gray-400 text-sm">{plan.discount}</span>
-                {/* <div className="text-2xl font-bold text-gray-900 dark:text-white">{plan.price}</div> */}
                 <div className="text-2xl font-bold text-gray-900 dark:text-white">{plan.price}</div>
               </div>
 
@@ -368,7 +391,7 @@ export const SubscriptionFlow = () => {
   // ── Step: Resultado / Pagamento ───────────────────────────────────────────
   if (step === "result" && result) {
     return (
-      <div className="w-full max-w-lg px-4">
+      <div className="w-full max-w-lg px-4 h-[calc(100dvh-10rem)]">
         <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-white/5 p-6 shadow-sm">
           <div className="text-center mb-6">
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-green-100 dark:bg-green-900/30 mb-3">
@@ -378,6 +401,16 @@ export const SubscriptionFlow = () => {
             <p className="text-sm text-gray-500 mt-1">
               Plano <strong>{result.planType}</strong> — aguardando pagamento
             </p>
+            {/* Indicador de escuta SSE para PIX e Boleto */}
+            {(result.billingType === "PIX" || result.billingType === "BOLETO") && (
+              <div className="flex items-center justify-center gap-2 mt-3 text-xs text-brand-500 dark:text-brand-400">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-500" />
+                </span>
+                Aguardando confirmação — você será redirecionado automaticamente
+              </div>
+            )}
           </div>
 
           {/* PIX */}
@@ -452,6 +485,17 @@ export const SubscriptionFlow = () => {
               <p className="text-sm text-gray-500 mt-2">
                 Seu plano <strong>{result.planType}</strong> já está ativo.
               </p>
+              <p className="text-xs text-gray-400 mt-3">
+                Redirecionando para o dashboard em <strong>{countdown}s</strong>...
+              </p>
+              <Button
+                type="button"
+                size="sm"
+                className="mt-4 bg-brand-500 hover:bg-brand-600"
+                onClick={() => router.push("/dashboard")}
+              >
+                Ir para o dashboard agora →
+              </Button>
             </div>
           )}
 
@@ -460,6 +504,16 @@ export const SubscriptionFlow = () => {
               Após a confirmação do pagamento, seu plano será ativado automaticamente.
               Em caso de dúvidas, entre em contato com o suporte.
             </p>
+            {(result.billingType === "PIX" || result.billingType === "BOLETO") && (
+              <Button
+                type="button"
+                size="sm"
+                className="mt-4 w-full bg-brand-500 hover:bg-brand-600"
+                onClick={() => router.push("/dashboard")}
+              >
+                Ir para o dashboard →
+              </Button>
+            )}
           </div>
         </div>
       </div>

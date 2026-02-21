@@ -72,6 +72,7 @@ export default function ServiceOrderForm({ id }: TProp) {
 
   const saveEquipment = async () => {
     const body = getValues();
+
     try {
       setIsLoading(true);
       if (!isEdit) {
@@ -92,13 +93,13 @@ export default function ServiceOrderForm({ id }: TProp) {
           physicalCondition: body.device?.physicalCondition,
           notes: body.notes,
           createdBy: userId,
+          priority: body.priority,
         };
         const { data } = await api.post("/serviceOrders", payload, configApi());
         const result = data.result;
         resolveResponse({ status: 201, message: result.message });
         router.push(`/order-services/manages/${result.data.id}`);
       } else {
-        const userId = localStorage.getItem("userId") || "";
         const payload = {
           id: body.id,
           customerId: body.customerId,
@@ -120,7 +121,7 @@ export default function ServiceOrderForm({ id }: TProp) {
           repairStatus: body.laudo?.repairStatus,
           discountValue: body.discountValue,
           discountType: body.discountType,
-          updatedBy: userId,
+          priority: body.priority,
         };
         const { data } = await api.put("/serviceOrders", payload, configApi());
         const result = data.result;
@@ -157,31 +158,48 @@ export default function ServiceOrderForm({ id }: TProp) {
         )
       }
       {isEdit && (
-        <div className="flex flex-wrap items-center gap-3 mb-4 p-3 rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
-          <div className="flex items-center gap-3 flex-1">
-            <span className="font-semibold text-gray-800 dark:text-white/90">
+        <div className="flex flex-col lg:flex-row gap-3 mb-3 p-3 rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
+          <div className="flex items-center flex-wrap gap-3 flex-1">
+            <span className="w-4/12 lg:w-28 font-semibold text-gray-800 dark:text-white/90">
               OS #{watch("code")}
             </span>
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.color}`}>
+            <span className={`w-3/12 lg:hidden inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.color}`}>
               {statusInfo.label}
             </span>
-            <span className="font-semibold text-gray-800 dark:text-white/90">
+
+            <span className={`hidden lg:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.color}`}>
+              {statusInfo.label}
+            </span>
+            
+            <span className="hidden lg:block font-semibold text-gray-800 dark:text-white/90">
               -
             </span>
             
-            <span className="font-semibold text-gray-800 dark:text-white/90">
+            <span className="w-12/12 lg:hidden text-sm font-semibold text-gray-800 dark:text-white/90">
               CLIENTE: <span className="text-brand-400">{watch("customerName")}</span>
             </span>
             
-            <span className="font-semibold text-gray-800 dark:text-white/90">|</span>
+            <span className="hidden lg:block text-sm font-semibold text-gray-800 dark:text-white/90">
+              CLIENTE: <span className="text-brand-400">{watch("customerName")}</span>
+            </span>
             
-            <span className="font-semibold text-gray-800 dark:text-white/90">
+            <span className="hidden lg:block text-sm font-semibold text-gray-800 dark:text-white/90">|</span>
+            
+            <span className="w-12/12 lg:hidden text-sm font-semibold text-gray-800 dark:text-white/90">
+              TEL: <span className="text-brand-400">{watch("customerPhone")}</span>
+            </span>
+            
+            <span className="hidden lg:block text-sm font-semibold text-gray-800 dark:text-white/90">
               TEL: <span className="text-brand-400">{watch("customerPhone")}</span>
             </span>
 
-            <span className="font-semibold text-gray-800 dark:text-white/90">|</span>
+            <span className="hidden lg:block text-sm font-semibold text-gray-800 dark:text-white/90">|</span>
             
-            <span className="font-semibold text-gray-800 dark:text-white/90">
+            <span className="w-12/12 lg:hidden text-sm font-semibold text-gray-800 dark:text-white/90">
+              E-MAIL: <span className="text-brand-400">{watch("customerEmail")}</span>
+            </span>
+
+            <span className="hidden lg:block text-sm font-semibold text-gray-800 dark:text-white/90">
               E-MAIL: <span className="text-brand-400">{watch("customerEmail")}</span>
             </span>
 
@@ -191,23 +209,25 @@ export default function ServiceOrderForm({ id }: TProp) {
               </span>
             )}
           </div>
-          <div className="flex items-center gap-2">
+
+          <div className="grid grid-cols-4 gap-4">
             {!isClosed && (
               <select
                 value={status}
                 onChange={(e) => handleStatusChange(e.target.value)}
-                className="h-9 rounded-lg border border-gray-300 bg-transparent px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 text-gray-800"
+                className="col-span-4 lg:col-span-2 h-9 rounded-lg border border-gray-300 bg-transparent px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 text-gray-800"
               >
                 {Object.entries(STATUS_LABELS).map(([k, v]) => (
                   <option key={k} value={k} className="dark:bg-gray-900">{v.label}</option>
                 ))}
               </select>
             )}
+
             {!isClosed && (
-              <Button onClick={() => setShowCloseModal(true)} type="submit" variant="primary" size="sm">Fechar OS</Button>
+              <Button className="col-span-2 lg:col-span-1" onClick={() => setShowCloseModal(true)} type="submit" variant="primary" size="sm">Fechar OS</Button>
             )}
-            <Link href="/order-services/manages">
-              <Button type="submit" variant="outline" size="sm">Voltar</Button>
+            <Link className="col-span-2 lg:col-span-1" href="/order-services/manages">
+              <Button className="w-full" type="submit" variant="outline" size="sm">Voltar</Button>
             </Link>
           </div>
         </div>
