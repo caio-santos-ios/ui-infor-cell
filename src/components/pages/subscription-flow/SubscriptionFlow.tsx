@@ -294,7 +294,7 @@ export const SubscriptionFlow = () => {
                 { id: "PIX", label: "PIX", icon: <FaQrcode size={16} /> },
                 { id: "BOLETO", label: "Boleto", icon: <FaBarcode size={16} /> },
                 { id: "CREDIT_CARD", label: "Crédito", icon: <FaCreditCard size={16} /> },
-                { id: "DEBIT_CARD", label: "Débito", icon: <FaCreditCard size={16} /> },
+                // { id: "DEBIT_CARD", label: "Débito", icon: <FaCreditCard size={16} /> },
               ] as { id: BillingType; label: string; icon: React.ReactNode }[]
             ).map((b) => (
               <button
@@ -402,7 +402,7 @@ export const SubscriptionFlow = () => {
               Plano <strong>{result.planType}</strong> — aguardando pagamento
             </p>
             {/* Indicador de escuta SSE para PIX e Boleto */}
-            {(result.billingType === "PIX" || result.billingType === "BOLETO") && (
+            {(result.billingType === "PIX" || result.billingType === "BOLETO" || result.billingType === "CREDIT_CARD" ) && (
               <div className="flex items-center justify-center gap-2 mt-3 text-xs text-brand-500 dark:text-brand-400">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75" />
@@ -479,14 +479,14 @@ export const SubscriptionFlow = () => {
           {/* CARTÃO */}
           {(result.billingType === "CREDIT_CARD" || result.billingType === "DEBIT_CARD") && (
             <div className="text-center py-4">
-              <div className="text-green-600 dark:text-green-400 font-semibold text-lg">
-                Pagamento aprovado!
-              </div>
+              {/* <div className="text-yellow-600 dark:text-yellow-400 font-semibold text-lg">
+                Aguardando confirmação
+              </div> */}
               <p className="text-sm text-gray-500 mt-2">
-                Seu plano <strong>{result.planType}</strong> já está ativo.
+                {/* Seu plano <strong>{result.planType}</strong> já está ativo. */}
               </p>
               <p className="text-xs text-gray-400 mt-3">
-                Redirecionando para o dashboard em <strong>{countdown}s</strong>...
+                Redirecionando para o dashboard
               </p>
               <Button
                 type="button"
