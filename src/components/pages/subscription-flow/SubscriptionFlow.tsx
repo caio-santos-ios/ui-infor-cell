@@ -38,7 +38,7 @@ interface SubscriptionResult {
 const PLANS: PlanOption[] = [
   {
     name: "Platina",
-    price: "R$ 379,00/mês",
+    price: "R$ 5,00/mês",
     value: 379,
     discount: "R$ 583,08",
     items: [
@@ -51,7 +51,7 @@ const PLANS: PlanOption[] = [
   },
   {
     name: "Ouro",
-    price: "R$ 289,00/mês",
+    price: "R$ 5,00/mês",
     value: 289,
     discount: "R$ 444,62",
     items: [
@@ -64,7 +64,7 @@ const PLANS: PlanOption[] = [
   },
   {
     name: "Prata",
-    price: "R$ 199,00/mês",
+    price: "R$ 5,00/mês",
     value: 199,
     discount: "R$ 306,15",
     items: [
@@ -77,7 +77,7 @@ const PLANS: PlanOption[] = [
   },
   {
     name: "Bronze",
-    price: "R$ 119,00/mês",
+    price: "R$ 5,00/mês",
     value: 119,
     discount: "R$ 183,08",
     items: [
