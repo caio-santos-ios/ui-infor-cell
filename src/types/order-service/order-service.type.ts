@@ -157,7 +157,8 @@ export const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 
 export type TServiceOrderSearch = {
   code: "",
-  openedAt: any;
+  gte$openedAt: any;
+  lte$openedAt: any;
   device: {
     serialImei: string;
     brandId: string;
@@ -171,7 +172,8 @@ export type TServiceOrderSearch = {
 
 export const ResetServiceOrderSearch: TServiceOrderSearch = {
   code: "",
-  openedAt: null,
+  gte$openedAt: null,
+  lte$openedAt: null,
   device: {
     serialImei: "",
     brandId: "",

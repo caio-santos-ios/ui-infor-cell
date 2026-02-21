@@ -117,7 +117,7 @@ export default function ServiceOrderModalSearch() {
                 <form className="flex flex-col">
                     <div className={`max-h-[70dvh] custom-scrollbar overflow-y-auto px-2 pb-3`}>
                         <div className="grid grid-cols-6 gap-4">
-                            <div className="col-span-6 md:col-span-4">
+                            <div className="col-span-6 md:col-span-3">
                                 <Label title="Loja" required={false}/>
                                 <select {...register("store")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
                                     <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Todas</option>
@@ -126,20 +126,33 @@ export default function ServiceOrderModalSearch() {
                                     ))}
                                 </select>
                             </div>
-
+                            <div className="col-span-6 md:col-span-3">
+                                <Label title="Status" required={false}/>
+                                <select {...register("status")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
+                                    <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Todos</option>
+                                    {statusOptions.map((o) => (
+                                        <option key={o.value} value={o.value} className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">{o.label}</option>
+                                    ))}
+                                </select>
+                            </div>
                             <div className="col-span-6 md:col-span-2">
-                                <Label title="Data de Abertura" required={false}/>
-                                <input placeholder="Data de Abertura" type="date" className="input-erp-primary input-erp-default"/>
+                                <Label title="De Data de Abertura" required={false}/>
+                                <input {...register("gte$openedAt")} placeholder="Data de Abertura" type="date" className="input-erp-primary input-erp-default"/>
                             </div>
                             
-                            <div className="col-span-6 md:col-span-4">
-                                <Label title="IMEI" required={false}/>
-                                <input placeholder="Digite" {...register("device.serialImei")} type="text" className="input-erp-primary input-erp-default"/>
+                            <div className="col-span-6 md:col-span-2">
+                                <Label title="Até Data de Abertura" required={false}/>
+                                <input {...register("lte$openedAt")} placeholder="Data de Abertura" type="date" className="input-erp-primary input-erp-default"/>
                             </div>
-
+                            
                             <div className="col-span-6 md:col-span-2">
                                 <Label title="Nº O.S" required={false}/>
                                 <input maxLength={6} placeholder="Digite" {...register("code")} type="text" className="input-erp-primary input-erp-default"/>
+                            </div>
+                            
+                            <div className="col-span-6 md:col-span-6">
+                                <Label title="IMEI" required={false}/>
+                                <input placeholder="Digite" {...register("device.serialImei")} type="text" className="input-erp-primary input-erp-default"/>
                             </div>
         
                             <div className="col-span-6">
@@ -162,15 +175,7 @@ export default function ServiceOrderModalSearch() {
                                 <input {...register("device.modelName")} placeholder="Digite" type="text" className="input-erp-primary input-erp-default" />
                             </div>
                             
-                            <div className="col-span-6 md:col-span-3">
-                                <Label title="Status" required={false}/>
-                                <select {...register("status")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
-                                    <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Todos</option>
-                                    {statusOptions.map((o) => (
-                                        <option key={o.value} value={o.value} className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">{o.label}</option>
-                                    ))}
-                                </select>
-                            </div>
+                            
                         </div>
                     </div>
                     
