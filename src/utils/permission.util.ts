@@ -1,9 +1,9 @@
 export const permissionRead = (module: string, subModule: string) => {
-    const adminStr = localStorage.getItem("admin");
+    const adminStr = localStorage.getItem("telemovviAdmin");
 
     if(adminStr == "true") return true;
 
-    const modulesStr = localStorage.getItem("modules");
+    const modulesStr = localStorage.getItem("telemovviModules");
     if(modulesStr) {
         const modules = JSON.parse(modulesStr)
         const currentModule = modules.findIndex((m: any) => m.code == module);
@@ -21,11 +21,11 @@ export const permissionRead = (module: string, subModule: string) => {
 };
 
 export const permissionCreate = (module: string, subModule: string) => {
-    const adminStr = localStorage.getItem("admin");
+    const adminStr = localStorage.getItem("telemovviAdmin");
 
     if(adminStr == "true") return true;
 
-    const modulesStr = localStorage.getItem("modules");
+    const modulesStr = localStorage.getItem("telemovviModules");
     if(modulesStr) {
         const modules = JSON.parse(modulesStr)
         const currentModule = modules.findIndex((m: any) => m.code == module);
@@ -43,11 +43,11 @@ export const permissionCreate = (module: string, subModule: string) => {
 };
 
 export const permissionUpdate = (module: string, subModule: string) => {
-    const adminStr = localStorage.getItem("admin");
+    const adminStr = localStorage.getItem("telemovviAdmin");
 
     if(adminStr == "true") return true;
     
-    const modulesStr = localStorage.getItem("modules");
+    const modulesStr = localStorage.getItem("telemovviModules");
     if(modulesStr) {
         const modules = JSON.parse(modulesStr)
         const currentModule = modules.findIndex((m: any) => m.code == module);
@@ -65,11 +65,11 @@ export const permissionUpdate = (module: string, subModule: string) => {
 };
 
 export const permissionDelete = (module: string, subModule: string) => {
-    const adminStr = localStorage.getItem("admin");
+    const adminStr = localStorage.getItem("telemovviAdmin");
 
     if(adminStr == "true") return true;
 
-    const modulesStr = localStorage.getItem("modules");
+    const modulesStr = localStorage.getItem("telemovviModules");
     if(modulesStr) {
         const modules = JSON.parse(modulesStr)
         const currentModule = modules.findIndex((m: any) => m.code == module);

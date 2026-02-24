@@ -57,7 +57,7 @@ const staticNavItems: NavItem[] = [
     code: "D",
     subItems: [
       {name: "Gerenciar O.S.", path: "/order-services/manages", code: "D1", pro: false, authorized: false },
-      {name: "Painel", path: "/order-services/panel", code: "D2", pro: false, authorized: false },
+      {name: "Situações de O.S.", path: "/order-services/situations", code: "D2", pro: false, authorized: false },
     ]
   },
   {
@@ -116,8 +116,8 @@ const AppSidebar: React.FC = () => {
   const getAuthorizedMenu = useCallback(() => {
     if (typeof window === "undefined") return [];
 
-    const modulesStr = localStorage.getItem("modules");
-    const masterStr = localStorage.getItem("master");
+    const modulesStr = localStorage.getItem("telemovviModules");
+    const masterStr = localStorage.getItem("telemovviMaster");
     const isMaster = masterStr ? masterStr == "true" : false;
 
     if (!modulesStr) return staticNavItems;

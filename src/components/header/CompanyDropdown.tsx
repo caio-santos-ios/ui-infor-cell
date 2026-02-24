@@ -65,12 +65,12 @@ export default function CompanyDropdown() {
   };
   
   const refreshToken = async () => {
-    const refreshToken = localStorage.getItem("refreshToken");
+    const refreshToken = localStorage.getItem("telemovviRefreshToken");
     if(refreshToken) {
       const {data} = await api.post(`/auth/refresh-token`, {}, { headers: { Authorization: `Bearer ${refreshToken}`, 'Content-Type': 'application/json'}});
       const result = data.result.data;
-      localStorage.setItem("token", result.token);
-      localStorage.setItem("refreshToken", result.refreshToken);
+      localStorage.setItem("telemovviToken", result.token);
+      localStorage.setItem("telemovviRefreshToken", result.refreshToken);
       setStoreLogged(!storeLogged);
     }
   };

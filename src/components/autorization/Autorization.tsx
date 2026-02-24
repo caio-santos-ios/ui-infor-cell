@@ -16,7 +16,7 @@ export const Autorization = () => {
     const pathname = usePathname();
 
     useEffect(() => {
-        const localToken = localStorage.getItem("token");
+        const localToken = localStorage.getItem("telemovviToken");
         const token = localToken ? localToken : "";
 
         if(!token) {
@@ -29,13 +29,13 @@ export const Autorization = () => {
                 setIsAdmin(false);
             };
         } else {
-            const admin = localStorage.getItem("admin");
-            const name = localStorage.getItem("name");
-            const email = localStorage.getItem("email");
-            const photo = localStorage.getItem("photo");
-            const nameCompany = localStorage.getItem("nameCompany");
-            const nameStore = localStorage.getItem("nameStore");
-            const typeUser = localStorage.getItem("typeUser");
+            const admin = localStorage.getItem("telemovviAdmin");
+            const name = localStorage.getItem("telemovviName");
+            const email = localStorage.getItem("telemovviEmail");
+            const photo = localStorage.getItem("telemovviPhoto");
+            const nameCompany = localStorage.getItem("telemovviNameCompany");
+            const nameStore = localStorage.getItem("telemovviNameStore");
+            const typeUser = localStorage.getItem("telemovviTypeUser");
 
             setUserLogger({
                 name: name ? name : "",

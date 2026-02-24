@@ -15,6 +15,7 @@ import { IconDelete } from "@/components/iconDelete/IconDelete";
 import Button from "@/components/ui/button/Button";
 import AutocompletePlus from "@/components/form/AutocompletePlus";
 import { supplierModalCreateAtom } from "@/jotai/masterData/supplier.jotai";
+import { currentMomentServiceOrderAtom } from "@/jotai/serviceOrder/manege.jotai";
 
 type TProp = {
   serviceOrderId: string;
@@ -32,6 +33,7 @@ export default function ServiceOrderItemsTab({ serviceOrderId, isWarranty, isClo
   const [employees, setEmployees] = useState<any[]>([]);
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [__, setSupplierModalCreate] = useAtom(supplierModalCreateAtom);
+  const [___, setCurrentMoment] = useAtom(currentMomentServiceOrderAtom);
 
   const fetchItems = async () => {
     try {
@@ -39,6 +41,7 @@ export default function ServiceOrderItemsTab({ serviceOrderId, isWarranty, isClo
       const { data } = await api.get(`/serviceOrderItems?deleted=false&serviceOrderId=${serviceOrderId}&pageSize=50&pageNumber=1`, configApi());
       const result = data.result;
       setItems(result.data || []);
+      if(items.length > 0) setCurrentMoment("quite");
     } catch (error) {
       resolveResponse(error);
     } finally {
@@ -249,17 +252,9 @@ export default function ServiceOrderItemsTab({ serviceOrderId, isWarranty, isClo
             {form.itemType === "part" && (
               <div className="col-span-6 xl:col-span-3">
                 <Label title="Fornecedor" required={false} />
-                {/* <input
-                  type="text"
-                  placeholder="Nome do fornecedor"
-                  value={form.supplierName}
-                  onChange={(e) => setForm((p) => ({ ...p, supplierName: e.target.value }))}
-                  className="input-erp-primary input-erp-default"
-                /> */}
                 <AutocompletePlus onAddClick={() => {
                   setSupplierModalCreate(true);
                 }} placeholder="Buscar fornecedor..." defaultValue={form.supplierName} objKey="id" objValue="tradeName" onSearch={(value: string) => getAutocompleSupplier(value)} onSelect={(opt) => {
-                    // setValue("supplierId", opt.id);
                   setForm((p) => ({ ...p, supplierName: opt.tradeName, supplierId: opt.id}))
                 }} options={suppliers}/>
               </div>
@@ -288,13 +283,6 @@ export default function ServiceOrderItemsTab({ serviceOrderId, isWarranty, isClo
         }}>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3.333v9.334M3.333 8h9.334" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
           Adicionar Item</Button>
-        // <button
-        //   onClick={() => { setForm(emptyItem()); setShowForm(true); }}
-        //   className="flex items-center gap-2 text-sm text-brand-500 hover:text-brand-600 font-medium transition-colors"
-        // >
-        //   <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3.333v9.334M3.333 8h9.334" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
-        //   Adicionar Item
-        // </button>
       )}
     </ComponentCard>
   );

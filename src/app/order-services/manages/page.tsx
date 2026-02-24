@@ -1,6 +1,6 @@
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
-import { ServiceOrderButtonSearch } from "@/components/pages/service-order/ServiceOrderButtonSearch";
-import ServiceOrderTable from "@/components/pages/service-order/ServiceOrderTable";
+import { ServiceOrderButtonSearch } from "@/components/pages/service-order/manage/ServiceOrderButtonSearch";
+import ServiceOrderTable from "@/components/pages/service-order/manage/ServiceOrderTable";
 import Button from "@/components/ui/button/Button";
 import { Metadata } from "next";
 import Link from "next/link";

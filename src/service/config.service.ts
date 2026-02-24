@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 const store = getDefaultStore();
 
 export const configApi = (contentTypeJson: boolean = true) => {
-  const localToken = localStorage.getItem("token");
+  const localToken = localStorage.getItem("telemovviToken");
   const token = localToken ? localToken : "";
   
   return {
@@ -89,42 +89,42 @@ const handleApiErrors = (error: any) => {
 
 export const saveLocalStorage = (data: TDataLocal, hasToken: boolean = false) => {
   if(hasToken) {
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("refreshToken", data.refreshToken);
+    localStorage.setItem("telemovviToken", data.token);
+    localStorage.setItem("telemovviRefreshToken", data.refreshToken);
   };
 
   if(data.master) {
-    localStorage.setItem("master", data.master);
+    localStorage.setItem("telemovviMaster", data.master);
   };
 
-  localStorage.setItem("expirationDate", data.expirationDate);
-  localStorage.setItem("typePlan", data.typePlan);
-  localStorage.setItem("subscriberPlan", data.subscriberPlan);
-  localStorage.setItem("name", data.name);
-  localStorage.setItem("email", data.email);
-  localStorage.setItem("admin", data.admin);
-  localStorage.setItem("photo", data.photo);
-  localStorage.setItem("logoCompany", data.logoCompany);
-  localStorage.setItem("nameCompany", data.nameCompany);
-  localStorage.setItem("nameStore", data.nameStore);
-  localStorage.setItem("modules", JSON.stringify(data.modules));
+  localStorage.setItem("telemovviExpirationDate", data.expirationDate);
+  localStorage.setItem("telemovviTypePlan", data.typePlan);
+  localStorage.setItem("telemovviSubscriberPlan", data.subscriberPlan);
+  localStorage.setItem("telemovviName", data.name);
+  localStorage.setItem("telemovviEmail", data.email);
+  localStorage.setItem("telemovviAdmin", data.admin);
+  localStorage.setItem("telemovviPhoto", data.photo);
+  localStorage.setItem("telemovviLogoCompany", data.logoCompany);
+  localStorage.setItem("telemovviNameCompany", data.nameCompany);
+  localStorage.setItem("telemovviNameStore", data.nameStore);
+  localStorage.setItem("telemovviModules", JSON.stringify(data.modules));
 };
 
 export const removeLocalStorage = () => { 
-  localStorage.removeItem("master");
-  localStorage.removeItem("expirationDate");
-  localStorage.removeItem("typePlan");
-  localStorage.removeItem("subscriberPlan");
-  localStorage.removeItem("token");
-  localStorage.removeItem("refreshToken");
-  localStorage.removeItem("name");
-  localStorage.removeItem("email");
-  localStorage.removeItem("admin");
-  localStorage.removeItem("photo");
-  localStorage.removeItem("logoCompany");
-  localStorage.removeItem("nameCompany");
-  localStorage.removeItem("nameStore");
-  localStorage.removeItem("modules");
+  localStorage.removeItem("telemovviMaster");
+  localStorage.removeItem("telemovviExpirationDate");
+  localStorage.removeItem("telemovviTypePlan");
+  localStorage.removeItem("telemovviSubscriberPlan");
+  localStorage.removeItem("telemovviToken");
+  localStorage.removeItem("telemovviRefreshToken");
+  localStorage.removeItem("telemovviName");
+  localStorage.removeItem("telemovviEmail");
+  localStorage.removeItem("telemovviAdmin");
+  localStorage.removeItem("telemovviPhoto");
+  localStorage.removeItem("telemovviLogoCompany");
+  localStorage.removeItem("telemovviNameCompany");
+  localStorage.removeItem("telemovviNameStore");
+  localStorage.removeItem("telemovviModules");
 };
 
 export const resolveParamsRequest = (params: any, prefix = '') => {

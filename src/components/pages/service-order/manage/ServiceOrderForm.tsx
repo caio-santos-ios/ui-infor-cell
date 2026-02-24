@@ -16,6 +16,8 @@ import CustomerModalCreate from "@/components/master-data/customer/CustomerModal
 import Link from "next/link";
 import Button from "@/components/ui/button/Button";
 import SupplierModalCreate from "@/components/master-data/supplier/SupplierModalCreate";
+import { currentMomentServiceOrderAtom } from "@/jotai/serviceOrder/manege.jotai";
+import { TSituation } from "@/types/order-service/situation.type";
 
 type TProp = { id?: string };
 
@@ -30,6 +32,8 @@ export default function ServiceOrderForm({ id }: TProp) {
   const [currentTab, setCurrentTab] = useState("device");
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [warrantyInfo, setWarrantyInfo] = useState<any>(null);
+  const [currentMoment, setCurrentMoment] = useAtom(currentMomentServiceOrderAtom);
+  const [situations, setSituations] = useState<TSituation[]>([]);
   const router = useRouter();
 
   const { reset, watch, getValues, setValue, register } = useForm<TServiceOrder>({
@@ -53,6 +57,19 @@ export default function ServiceOrderForm({ id }: TProp) {
       setIsLoading(false);
     }
   };
+  
+  const getSelectSituations = async () => {
+    try {
+      setIsLoading(true);
+      const { data } = await api.get(`/situations/select?deleted=false&${currentMoment}=true`, configApi());
+      const result = data.result.data;
+      setSituations(result)
+    } catch (error) {
+      resolveResponse(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const checkWarranty = async (customerId: string, serialImei: string) => {
     try {
@@ -65,9 +82,7 @@ export default function ServiceOrderForm({ id }: TProp) {
         setWarrantyInfo(data.result.data);
         setValue("isWarrantyInternal", true);
       }
-    } catch {
-      // no warranty found
-    }
+    } catch {}
   };
 
   const saveEquipment = async () => {
@@ -141,6 +156,7 @@ export default function ServiceOrderForm({ id }: TProp) {
   };
 
   useEffect(() => {
+    getSelectSituations();
     if (isEdit) getById(id!);
   }, []);
 
@@ -211,7 +227,7 @@ export default function ServiceOrderForm({ id }: TProp) {
           </div>
 
           <div className="grid grid-cols-4 gap-4">
-            {!isClosed && (
+            {/* {!isClosed && (
               <select
                 value={status}
                 onChange={(e) => handleStatusChange(e.target.value)}
@@ -219,6 +235,17 @@ export default function ServiceOrderForm({ id }: TProp) {
               >
                 {Object.entries(STATUS_LABELS).map(([k, v]) => (
                   <option key={k} value={k} className="dark:bg-gray-900">{v.label}</option>
+                ))}
+              </select>
+            )} */}
+            
+            {!isClosed && (
+              <select
+                value={status}
+                onChange={(e) => handleStatusChange(e.target.value)}
+                className="col-span-4 lg:col-span-2 h-9 rounded-lg border border-gray-300 bg-transparent px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 text-gray-800">
+                {situations.map((x) => (
+                  <option key={x.id} value={x.id} className="dark:bg-gray-900">{x.name}</option>
                 ))}
               </select>
             )}

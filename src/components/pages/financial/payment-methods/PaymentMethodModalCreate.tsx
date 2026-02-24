@@ -6,21 +6,27 @@ import { configApi, resolveResponse } from "@/service/config.service";
 import { useAtom } from "jotai";
 import Button from "@/components/ui/button/Button";
 import { Modal } from "@/components/ui/modal";
-import { useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import Label from "@/components/form/Label";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ResetPaymentMethod, TPaymentMethod } from "@/types/payment-method/payment-method.type";
 import { paymentMethodIdAtom, paymentMethodModalAtom } from "@/jotai/financial/payment-methods/paymentMethod.jotai";
+import { NumericFormat } from "react-number-format";
 
 export default function PaymentMethodModalCreate() {
   const [_, setIsLoading] = useAtom(loadingAtom);
   const [modalCreate, setModalCreate] = useAtom(paymentMethodModalAtom);
   const [paymentMethodId, setPaymentMethodId] = useAtom(paymentMethodIdAtom);
 
-  const { getValues, setValue, register, reset, control } = useForm<TPaymentMethod>({
+  const { getValues, setValue, register, reset, watch, control } = useForm<TPaymentMethod>({
     defaultValues: ResetPaymentMethod
   });
   
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "interest",
+  });
+
   const create = async () => {
     try {
       setIsLoading(true);
@@ -67,6 +73,15 @@ export default function PaymentMethodModalCreate() {
     setPaymentMethodId("");
     reset(ResetPaymentMethod);
   };
+
+  useEffect(() => {
+    setValue("interest", []);
+    const array: {installment: number; value: number;}[] = [];
+    for (let index = 0; index < watch("numberOfInstallments"); index++) {
+      array.push({installment: index + 1, value: 0});
+    };
+    setValue("interest", array);
+  }, [watch("numberOfInstallments")]);
   
   useEffect(() => {
     const intial = async () => {
@@ -106,6 +121,29 @@ export default function PaymentMethodModalCreate() {
                 <Label title="Nº máximo de parcelas" />
                 <input maxLength={50} placeholder="Nº máximo de parcelas" {...register("numberOfInstallments")} type="number" className="input-erp-primary input-erp-default no-spinner"/>
               </div>
+
+              {fields.map((field, index) => (
+                <React.Fragment key={field.id}>
+                  <div className="col-span-4 xl:col-span-2">
+                    <Label title={`${index + 1}º Parcela`} required={false}/>
+                    <Controller
+                      name={`interest.${index}.value`}
+                      control={control}
+                      render={({ field: { onChange, value } }) => (
+                        <NumericFormat
+                          className="input-erp-primary input-erp-default w-full"
+                          value={value}
+                          onValueChange={(v) => onChange(v.floatValue)}
+                          suffix=" %"
+                          decimalScale={2}
+                          fixedDecimalScale
+                          placeholder="Juros"
+                        />
+                      )}
+                    />
+                  </div>
+                </React.Fragment>
+              ))}
             </div>
           </div>
           

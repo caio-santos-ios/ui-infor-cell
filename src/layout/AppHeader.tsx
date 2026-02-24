@@ -35,7 +35,7 @@ const AppHeader: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const storedDate = localStorage.getItem("expirationDate");
+    const storedDate = localStorage.getItem("telemovviExpirationDate");
 
     if (!storedDate) return;
 
@@ -47,7 +47,7 @@ const AppHeader: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const typePlan = localStorage.getItem("typePlan");
+    const typePlan = localStorage.getItem("telemovviTypePlan");
     if(typePlan) setTypePlan(typePlan);
 
     const handleKeyDown = (event: KeyboardEvent) => {

@@ -1,5 +1,5 @@
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
-import ServiceOrderForm from "@/components/pages/service-order/ServiceOrderForm";
+import ServiceOrderForm from "@/components/pages/service-order/manage/ServiceOrderForm";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

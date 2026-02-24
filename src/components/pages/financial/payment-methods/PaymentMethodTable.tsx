@@ -86,9 +86,7 @@ export default function PaymentMethodTable() {
       openModal();
     };
   };
-  useEffect(() => {
-    console.log(paymentMethodId)
-  }, [paymentMethodId])
+  
   useEffect(() => {
     if(permissionRead("F", "F1")) {
       getAll(1);

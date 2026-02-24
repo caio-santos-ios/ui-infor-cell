@@ -18,17 +18,22 @@ import { ModalDelete } from "@/components/modalDelete/ModalDelete";
 import { NotData } from "@/components/not-data/NotData";
 import { ResetServiceOrder, STATUS_LABELS, TServiceOrder } from "@/types/order-service/order-service.type";
 import { IconView } from "@/components/iconView/IconView";
-import Label from "@/components/form/Label";
-import Button from "@/components/ui/button/Button";
-import ServiceOrderModalSearch from "./modals/ServiceOrderModalSearch";
+import { serviceOrderIdAtom, serviceOrderModalViewAtom } from "@/jotai/serviceOrder/manege.jotai";
+import { FaEye } from "react-icons/fa";
+import SituationModalCreate from "./SituationModalCreate";
+import { situationIdAtom, situationModalAtom } from "@/jotai/serviceOrder/situation.jotai";
 
-export default function ServiceOrderTable() {
+export default function SituationTable() {
   const [_, setLoading] = useAtom(loadingAtom);
   const [pagination, setPagination] = useAtom(paginationAtom);
   const { isOpen, openModal, closeModal } = useModal();
   const [selected, setSelected] = useState<TServiceOrder>(ResetServiceOrder);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [__, setModalView] = useAtom(serviceOrderModalViewAtom);
+  const [___, setServiceOrderId] = useAtom(serviceOrderIdAtom);
+  const [modal, setModal] = useAtom(situationModalAtom);
+  const [_____, setSituationId] = useAtom(situationIdAtom);
   const router = useRouter();
 
   const getAll = async (page: number) => {
@@ -42,7 +47,7 @@ export default function ServiceOrderTable() {
         strSearch += `&status=${statusFilter}`;
       };
 
-      const { data } = await api.get(`/serviceOrders?${strSearch}&orderBy=createdAt&sort=desc&pageSize=10&pageNumber=${page}`, configApi());
+      const { data } = await api.get(`/situations?${strSearch}&orderBy=createdAt&sort=desc&pageSize=10&pageNumber=${page}`, configApi());
       const result = data.result;
       
       setPagination({
@@ -62,7 +67,7 @@ export default function ServiceOrderTable() {
   const destroy = async () => {
     try {
       setLoading(true);
-      await api.delete(`/serviceOrders/${selected.id}`, configApi());
+      await api.delete(`/situations/${selected.id}`, configApi());
       resolveResponse({ status: 204, message: "Excluído com sucesso" });
       closeModal();
       await getAll(pagination.currentPage);
@@ -75,13 +80,23 @@ export default function ServiceOrderTable() {
 
   const getObj = (obj: any, action: string) => {
     setSelected(obj);
-    if (action === "edit" || action === "view") router.push(`/order-services/manages/${obj.id}`);
+    if (action === "edit") {
+      setModal(true);
+      setSituationId(obj.id);
+    };
+
     if (action === "delete") openModal();
   };
 
   const changePage = async (page: number) => {
     setPagination((prev) => ({ ...prev, currentPage: page }));
     await getAll(page);
+  };
+
+  const modalDetails = (id: string) => {
+    console.log(id)
+    setModalView(true);
+    setServiceOrderId(id);
   };
 
   useEffect(() => {
@@ -92,32 +107,10 @@ export default function ServiceOrderTable() {
     setLoading(true);
     if (permissionRead("A", "A4")) getAll(1);
     setLoading(false);
-  }, []);
-
-
+  }, [modal]);
 
   return (
     <div className="">
-      <div className="grid grid-cols-4 md:grid-cols-4 gap-3 mb-4">
-        {[
-          { label: "Abertas", status: "open", color: "text-blue-600 dark:text-blue-400" },
-          { label: "Em Reparo", status: "in_repair", color: "text-indigo-600 dark:text-indigo-400" },
-          { label: "Prontas", status: "ready", color: "text-green-600 dark:text-green-400" },
-          { label: "Aguardando Peça", status: "waiting_part", color: "text-purple-600 dark:text-purple-400" },
-        ].map((card) => {
-          const count = pagination.data.filter((x: any) => x.status === card.status).length;
-          return (
-            <button
-              key={card.status}
-              onClick={() => { setStatusFilter(card.status); getAll(1); }}
-              className={`rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3 p-2 lg:p-4 text-left hover:border-brand-300 transition-colors cursor-pointer`}>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{card.label}</p>
-              <p className={`text-2xl font-bold ${card.color}`}>{count}</p>
-            </button>
-          );
-        })}
-      </div>
-
       {pagination.data.length > 0 ? (
         <>
           <div className="max-h-[calc(100dvh-30rem)] lg:max-h-[calc(100dvh-24rem)] overflow-y-auto rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3 mb-3">
@@ -126,7 +119,7 @@ export default function ServiceOrderTable() {
                 <Table className="divide-y">
                   <TableHeader className="border-b border-gray-100 dark:border-white/5 tele-table-thead">
                     <TableRow>
-                      {["Situação", "Nº OS", "Abertura", "Cliente", "Equipamento", "Últ. Atualização", "Ações"].map((h) => (
+                      {["Nome", "Aparece na abertura?", "Aparece no intermédio?", "Aparece no encerramento?", "Gera Financeiro?", "Filtro no Painel?", "Ações"].map((h) => (
                         <TableCell key={h} isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
                           {h}
                         </TableCell>
@@ -135,49 +128,23 @@ export default function ServiceOrderTable() {
                   </TableHeader>
                   <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
                     {pagination.data.map((x: any) => {
-                      const statusInfo = STATUS_LABELS[x.status] ?? { label: x.status, color: "bg-gray-100 text-gray-600" };
                       return (
                         <TableRow key={x.id} className="hover:bg-gray-50 dark:hover:bg-white/3 transition-colors">
-                          <TableCell className="px-5 py-4 sm:px-6 text-start">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.color}`}>
-                              {statusInfo.label}
+                          <TableCell className="px-5 py-4 sm:px-6 text-start text-sm">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${x.style.bg} ${x.style.text} ${x.style.border}`}>
+                              {x.name}
                             </span>
                           </TableCell>
-                          <TableCell className="px-5 py-4 sm:px-6 text-start">
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium text-gray-800 dark:text-white/90 text-sm">
-                                {x.code}
-                              </span>
-                              {x.isWarrantyInternal && (
-                                <span className="text-xs bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-2 py-0.5 rounded-full font-medium">
-                                  Garantia
-                                </span>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">
-                            {maskDate(x.openedAt)}
-                          </TableCell>
-                          <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">
-                            {x.customerName}
-                          </TableCell>
-                          <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">
-                            <div>
-                              <span>{x.device?.brandName} {x.device?.modelName}</span>
-                              {x.device?.serialImei && (
-                                <p className="text-xs text-gray-400 dark:text-gray-500">IMEI: {x.device.serialImei}</p>
-                              )}
-                            </div>
-                          </TableCell>
+                          <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">{x.start ? "Sim" : "Não"}</TableCell>
+                          <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">{x.quite ? "Sim" : "Não"}</TableCell>
+                          <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">{x.end ? "Sim" : "Não"}</TableCell>
+                          <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">{x.generateFinancial ? "Sim" : "Não"}</TableCell>
+                          <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">{x.appearsOnPanel ? "Sim" : "Não"}</TableCell>
                           
-                          <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">
-                            {maskDate(x.updatedAt)}
-                          </TableCell>
                           <TableCell className="px-5 py-4 sm:px-6 text-start">
                             <div className="flex gap-3">
-                              {permissionUpdate("A", "A4") && x.status != 'closed' && <IconEdit action="edit" obj={x} getObj={getObj} />}
-                              {permissionDelete("A", "A4") && x.status != 'closed' && <IconDelete action="delete" obj={x} getObj={getObj} />}
-                              {permissionDelete("A", "A4") && x.status == 'closed' && <IconView action="view" obj={x} getObj={getObj} />}
+                              {permissionUpdate("A", "A4") && <IconEdit action="edit" obj={x} getObj={getObj} />}
+                              {permissionDelete("A", "A4") && <IconDelete action="delete" obj={x} getObj={getObj} />}
                             </div>
                           </TableCell>
                         </TableRow>
@@ -196,12 +163,12 @@ export default function ServiceOrderTable() {
             totalPages={pagination.totalPages}
             onPageChange={changePage}
           />
-          <ModalDelete confirm={destroy} isOpen={isOpen} closeModal={closeModal} title="Excluir Ordem de Serviço" />
+          <ModalDelete confirm={destroy} isOpen={isOpen} closeModal={closeModal} title="Excluir Situação" />
         </>
       ) : (
         <NotData h="3rem" />
       )}
-      <ServiceOrderModalSearch />
+      <SituationModalCreate />
     </div>
   );
 }
