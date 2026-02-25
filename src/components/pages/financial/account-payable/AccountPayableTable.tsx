@@ -30,7 +30,7 @@ import {
 import AccountPayableModalCreate from "./AccountPayableModalCreate";
 import AccountPayableModalPay from "./AccountPayableModalPay";
 import { IconView } from "@/components/iconView/IconView";
-import SupplierModalCreate from "@/components/master-data/supplier/SupplierModalCreate";
+import SupplierModalCreate from "@/components/pages/master-data/supplier/SupplierModalCreate";
 
 export default function AccountPayableTable() {
     const [_, setLoading] = useAtom(loadingAtom);

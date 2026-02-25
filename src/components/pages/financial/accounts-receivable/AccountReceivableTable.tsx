@@ -22,7 +22,7 @@ import AccountReceivableModalPay from "./AccountReceivableModalPay";
 import { accountReceivableIdAtom, accountReceivableModalAtom, accountReceivablePayModalAtom } from "@/jotai/financial/accounts-receivable/accountsReceivable.jotai";
 import { MdPayment } from "react-icons/md";
 import { IconView } from "@/components/iconView/IconView";
-import CustomerModalCreate from "@/components/master-data/customer/CustomerModalCreate";
+import CustomerModalCreate from "@/components/pages/master-data/customer/CustomerModalCreate";
 
 export default function AccountReceivableTable() {
   const [_, setLoading] = useAtom(loadingAtom);
