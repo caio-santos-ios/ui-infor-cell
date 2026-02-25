@@ -1,4 +1,4 @@
-import StoreTable from "@/components/master-data/store/StoreTable";
+import StoreTable from "@/components/pages/master-data/store/StoreTable";
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
 import Button from "@/components/ui/button/Button";
 import { Metadata } from "next";

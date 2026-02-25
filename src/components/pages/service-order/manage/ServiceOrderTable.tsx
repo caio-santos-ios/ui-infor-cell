@@ -96,14 +96,11 @@ export default function ServiceOrderTable() {
 
   const getSelectSituations = async () => {
     try {
-      setLoading(true);
-      const { data } = await api.get(`/situations/select?deleted=false&appearsOnPanel=true`, configApi());
+      const { data } = await api.get(`/situations/select?deleted=false&appearsOnPanel=true&orderBy=sequence&sort=asc`, configApi());
       const result = data.result.data;
       setSituations(result);
     } catch (error) {
       resolveResponse(error);
-    } finally {
-      setLoading(false);
     }
   };
 

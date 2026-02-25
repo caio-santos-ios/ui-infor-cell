@@ -1,4 +1,4 @@
-import CustomerTable from "@/components/master-data/customer/CustomerTable";
+import CustomerTable from "@/components/pages/master-data/customer/CustomerTable";
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
 import Button from "@/components/ui/button/Button";
 import { Metadata } from "next";

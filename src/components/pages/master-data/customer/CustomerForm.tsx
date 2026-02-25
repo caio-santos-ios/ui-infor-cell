@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { ResetEmployee, TEmployee } from "@/types/master-data/employee/employee.type";
 import CustomerDataForm from "./CustomerDataForm";
 import CustomerAddressForm from "./CustomerAddressForm";
+import CustomerCashbackTab from "./CustomerCashbackTab";
 
 type TProp = {
   id?: string;
@@ -18,7 +19,8 @@ export default function CustomerForm({id}: TProp) {
   const [_, setIsLoading] = useAtom(loadingAtom);
   const [tabs] = useState<{key: string; title: string;}[]>([
     {key: 'data', title: 'Dados Gerais'},
-    {key: 'address', title: 'Endereço'}
+    {key: 'address', title: 'Endereço'},
+    {key: 'cashback', title: 'Cashback'},
   ]);
   const [currentTab, setCurrentTab] = useState<any>({key: 'data', title: 'Dados Gerais'});
 
@@ -58,6 +60,7 @@ export default function CustomerForm({id}: TProp) {
       <div className="mb-2">
         {currentTab.key == "data" && <CustomerDataForm id={id} />}
         {currentTab.key == "address" && <CustomerAddressForm parentId={id} address={watch("address")} />}
+        {currentTab.key == "cashback" && <CustomerCashbackTab id={id} />}
       </div>     
     </>
   );

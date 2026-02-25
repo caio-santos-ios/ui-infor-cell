@@ -1,4 +1,4 @@
-import CompanyTable from "@/components/master-data/company/CompanyTable";
+import CompanyTable from "@/components/pages/master-data/company/CompanyTable";
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
 import Button from "@/components/ui/button/Button";
 import { Metadata } from "next";

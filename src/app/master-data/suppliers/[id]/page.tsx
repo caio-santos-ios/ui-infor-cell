@@ -1,4 +1,4 @@
-import SupplierForm from "@/components/master-data/supplier/SupplierForm";
+import SupplierForm from "@/components/pages/master-data/supplier/SupplierForm";
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
 import Button from "@/components/ui/button/Button";
 import { Metadata } from "next";

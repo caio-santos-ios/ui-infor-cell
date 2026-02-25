@@ -131,7 +131,7 @@ export default function SituationTable() {
                       return (
                         <TableRow key={x.id} className="hover:bg-gray-50 dark:hover:bg-white/3 transition-colors">
                           <TableCell className="px-5 py-4 sm:px-6 text-start text-sm">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${x.style.bg} ${x.style.text} ${x.style.border}`}>
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${x?.style?.bg} ${x?.style?.text} ${x?.style?.border}`}>
                               {x.name}
                             </span>
                           </TableCell>

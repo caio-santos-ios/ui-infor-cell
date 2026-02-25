@@ -1,4 +1,4 @@
-import EmployeeForm from "@/components/master-data/employee/EmployeeForm";
+import EmployeeForm from "@/components/pages/master-data/employee/EmployeeForm";
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
 import Button from "@/components/ui/button/Button";
 import { Metadata } from "next";

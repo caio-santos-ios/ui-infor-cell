@@ -124,23 +124,46 @@ export default function PaymentMethodModalCreate() {
 
               {fields.map((field, index) => (
                 <React.Fragment key={field.id}>
-                  <div className="col-span-4 xl:col-span-2">
-                    <Label title={`${index + 1}º Parcela`} required={false}/>
-                    <Controller
-                      name={`interest.${index}.value`}
-                      control={control}
-                      render={({ field: { onChange, value } }) => (
-                        <NumericFormat
-                          className="input-erp-primary input-erp-default w-full"
-                          value={value}
-                          onValueChange={(v) => onChange(v.floatValue)}
-                          suffix=" %"
-                          decimalScale={2}
-                          fixedDecimalScale
-                          placeholder="Juros"
+                  <div className="col-span-6 lg:col-span-3">
+                    <Label className="font-bold" title={`${index + 1}º Parcela`} required={false}/>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="col-span-1">
+                        <Label title="Taxa de transação" required={false}/>
+                        <Controller
+                          name={`interest.${index}.value`}
+                          control={control}
+                          render={({ field: { onChange, value } }) => (
+                            <NumericFormat
+                              className="input-erp-primary input-erp-default w-full"
+                              value={value}
+                              onValueChange={(v) => onChange(v.floatValue)}
+                              suffix=" %"
+                              decimalScale={2}
+                              fixedDecimalScale
+                              placeholder="Juros"
+                            />
+                          )}
                         />
-                      )}
-                    />
+                      </div>
+                      <div className="col-span-1">
+                        <Label title="Acréscimo" required={false}/>
+                        <Controller
+                          name={`interest.${index}.value`}
+                          control={control}
+                          render={({ field: { onChange, value } }) => (
+                            <NumericFormat
+                              className="input-erp-primary input-erp-default w-full"
+                              value={value}
+                              onValueChange={(v) => onChange(v.floatValue)}
+                              suffix=" %"
+                              decimalScale={2}
+                              fixedDecimalScale
+                              placeholder="Juros"
+                            />
+                          )}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </React.Fragment>
               ))}

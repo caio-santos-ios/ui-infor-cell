@@ -1,4 +1,4 @@
-import EmployeeTable from "@/components/master-data/employee/EmployeeTable";
+import EmployeeTable from "@/components/pages/master-data/employee/EmployeeTable";
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
 import Button from "@/components/ui/button/Button";
 import { Metadata } from "next";

@@ -115,7 +115,7 @@ export default function SituationModalCreate() {
   }, [modalCreate]);
 
   return (
-    <Modal isOpen={modalCreate} onClose={close} className={`m-4 w-[80dvw] max-w-200 bg-red-400`}>
+    <Modal isOpen={modalCreate} onClose={close} className={`m-4 w-[80dvw] max-w-220 bg-red-400`}>
       <div className={`no-scrollbar relative overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11`}>
         <div className="px-2 pr-14">
           <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">Situação O.S.</h4>
@@ -160,6 +160,17 @@ export default function SituationModalCreate() {
               <div className="col-span-12 lg:col-span-2">
                 <Label title="Filtro no Painel?" required={false}/>
                 <Checkbox checked={watch("appearsOnPanel")} onChange={(e) => {setValue("appearsOnPanel", e)}} />
+              </div>
+
+              <div className="col-span-12 lg:col-span-2 mb-2">
+                <Label title="Sequencia do Filtro" required={false}/>
+                <select {...register("sequence")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 text-gray-800">
+                  <option value={0}>Selecionar</option>
+                  <option value={1}>1º filtro</option>
+                  <option value={2}>2º filtro</option>
+                  <option value={3}>3º filtro</option>
+                  <option value={4}>4º filtro</option>
+                </select>
               </div>
 
               <div className="col-span-12 mb-0">

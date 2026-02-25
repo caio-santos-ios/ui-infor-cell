@@ -12,10 +12,10 @@ import ServiceOrderItemsTab from "./tabs/ServiceOrderItemsTab";
 import ServiceOrderLaudoTab from "./tabs/ServiceOrderLaudoTab";
 import ServiceOrderCloseModal from "./modals/ServiceOrderCloseModal";
 import { useRouter } from "next/navigation";
-import CustomerModalCreate from "@/components/master-data/customer/CustomerModalCreate";
+import CustomerModalCreate from "@/components/pages/master-data/customer/CustomerModalCreate";
 import Link from "next/link";
 import Button from "@/components/ui/button/Button";
-import SupplierModalCreate from "@/components/master-data/supplier/SupplierModalCreate";
+import SupplierModalCreate from "@/components/pages/master-data/supplier/SupplierModalCreate";
 import { currentMomentServiceOrderAtom } from "@/jotai/serviceOrder/manege.jotai";
 import { TSituation } from "@/types/order-service/situation.type";
 
@@ -304,6 +304,7 @@ export default function ServiceOrderForm({ id }: TProp) {
         )}
         {currentTab === "laudo" && isEdit && (
           <ServiceOrderLaudoTab
+            setValue={setValue}
             register={register}
             watch={watch}
             onSave={saveEquipment}

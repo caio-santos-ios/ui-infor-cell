@@ -1,4 +1,4 @@
-import StoreForm from "@/components/master-data/store/StoreForm";
+import StoreForm from "@/components/pages/master-data/store/StoreForm";
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
 import Button from "@/components/ui/button/Button";
 import { Metadata } from "next";

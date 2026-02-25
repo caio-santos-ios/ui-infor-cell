@@ -1,4 +1,4 @@
-import SupplierTable from "@/components/master-data/supplier/SupplierTable";
+import SupplierTable from "@/components/pages/master-data/supplier/SupplierTable";
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
 import Button from "@/components/ui/button/Button";
 import { Metadata } from "next";

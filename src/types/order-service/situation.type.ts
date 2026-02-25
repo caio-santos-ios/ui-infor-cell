@@ -12,6 +12,7 @@ export type TSituation = {
     end: boolean;
     generateFinancial: boolean;
     appearsOnPanel: boolean;
+    sequence: number;
 }
 
 export const ResetSituation: TSituation = {
@@ -27,5 +28,6 @@ export const ResetSituation: TSituation = {
     quite: false,
     end: false,
     generateFinancial: false,
-    appearsOnPanel: false
+    appearsOnPanel: false,
+    sequence: 0
 }
