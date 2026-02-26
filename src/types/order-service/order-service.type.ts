@@ -1,3 +1,5 @@
+import { ResetSituationStyle, TSituation, TSituationStyle } from "./situation.type";
+
 export type TServiceOrderDevice = {
   type: string;
   brandId: string;
@@ -38,6 +40,8 @@ export type TServiceOrder = {
   closedAt?: string;
   closedByUserId: string;
   status: string;
+  statusName: string;
+  situationStyle: TSituationStyle
   isWarrantyInternal: boolean;
   warrantyUntil?: string;
   warrantyDays: number;
@@ -56,6 +60,7 @@ export type TServiceOrder = {
   company: string;
   priority: string;
   model: string;
+  isClosed: boolean;
 };
 
 export type TServiceOrderItem = {
@@ -100,7 +105,9 @@ export const ResetServiceOrder: TServiceOrder = {
   openedByUserId: "",
   openedAt: "",
   closedByUserId: "",
-  status: "open",
+  status: "",
+  statusName: "",
+  situationStyle: ResetSituationStyle,
   isWarrantyInternal: false,
   warrantyDays: 90,
   totalAmount: 0,
@@ -120,7 +127,8 @@ export const ResetServiceOrder: TServiceOrder = {
   customerPhone: "",
   customerEmail: "",
   priority: "baixa",
-  model: ""
+  model: "",
+  isClosed: false
 };
 
 export const ResetServiceOrderItem: TServiceOrderItem = {

@@ -42,7 +42,7 @@ export default function EmployeeDataForm({id}: TProp) {
   const create: SubmitHandler<TEmployee> = async (body: TEmployee) => {
     try {
       setIsLoading(true);
-      const {data} = await api.post(`/employees`, body, configApi());
+      const {data} = await api.post(`/users/employee`, body, configApi());
       const result = data.result;
       resolveResponse({status: 201, message: result.message});
       router.push(`/master-data/employees/${result.data.id}`)
@@ -69,7 +69,7 @@ export default function EmployeeDataForm({id}: TProp) {
   const getById = async (id: string) => {
     try {
       setIsLoading(true);
-      const {data} = await api.get(`/employees/${id}`, configApi());
+      const {data} = await api.get(`/users/employee/${id}`, configApi());
       const result = data.result.data;
       setMyStore(result.stores);
       reset(result);
@@ -102,7 +102,6 @@ export default function EmployeeDataForm({id}: TProp) {
       setIsLoading(true);
       const {data} = await api.get(`/profile-permissions/select?deleted=false&active=true`, configApi());
       const result = data.result.data;
-      console.log(result[0])
       setProfilePermission(result);
     } catch (error) {
       resolveResponse(error);

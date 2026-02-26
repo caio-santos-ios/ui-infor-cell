@@ -6,19 +6,21 @@ import { configApi, resolveResponse } from "@/service/config.service";
 import { useAtom } from "jotai";
 import Button from "@/components/ui/button/Button";
 import { Modal } from "@/components/ui/modal";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import Label from "@/components/form/Label";
 import React, { useEffect, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { ResetCustomerCashback, TCustomerCashback } from "@/types/master-data/customer/customer.type";
 import { customerCashbackIdModalAtom, customerCashbackModalCreateAtom } from "@/jotai/masterData/customerCashback.jotai";
-import { customerAtom, customerIdModalAtom } from "@/jotai/masterData/customer.jotai";
+import { customerAtom } from "@/jotai/masterData/customer.jotai";
+import Autocomplete from "@/components/form/Autocomplete";
 
 export default function CustomerCashbackModalCreate() {
   const [_, setIsLoading] = useAtom(loadingAtom);
   const [modalCreate, setModalCreate] = useAtom(customerCashbackModalCreateAtom);
   const [customerCashbackId, setCustomerCashbackId] = useAtom(customerCashbackIdModalAtom);
   const [cashbacks, setCashbacks] = useState<TCustomerCashback[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [customer] = useAtom(customerAtom);
   
   const { getValues, setValue, register, reset, watch, control } = useForm<TCustomerCashback>({
@@ -44,7 +46,7 @@ export default function CustomerCashbackModalCreate() {
       };
 
       setIsLoading(true);
-      const {data} = await api.put(`/customers/cashbacks`, {cashbacks: list, id: customer.id}, configApi());
+      const {data} = await api.put(`/customers/cashbacks`, {cashbacks: list, id: customer.id, productId: watch("productId")}, configApi());
       const result = data.result;
       resolveResponse({status: 201, message: result.message});
       close();
@@ -61,6 +63,19 @@ export default function CustomerCashbackModalCreate() {
     reset(ResetCustomerCashback);
   };
 
+  const getAutocompleProduct = async (value: string) => {
+    try {
+      if(!value) return setProducts([]);
+      
+      const {data} = await api.get(`/products/autocomplete?deleted=false&orderBy=name&sort=desc&pageSize=10&pageNumber=1&regex$or$name=${value}&regex$or$code=${value}`, configApi());
+      const result = data.result;
+      const list = result.data.map((x: any) => ({...x, isOutOfStock: x.stock.length == 0}));
+      setProducts(list);
+    } catch (error) {
+      resolveResponse(error);
+    }
+  };
+
   return (
     <Modal isOpen={modalCreate} onClose={close} className={`m-4 w-[80dvw] max-w-160 bg-red-400`}>
       <div className={`no-scrollbar relative overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11`}>
@@ -75,6 +90,13 @@ export default function CustomerCashbackModalCreate() {
               <div className="col-span-6">
                 <Label title="Descrição" />
                 <input maxLength={50} placeholder="Descrição" {...register("description")} type="text" className="input-erp-primary input-erp-default"/>
+              </div>
+              <div className="col-span-6">
+                <Label title="Reservar Produto" />
+                <Autocomplete placeholder="Buscar produto...." defaultValue={watch("productName")} objKey="id" objValue="productName" onSearch={(value: string) => getAutocompleProduct(value)} onSelect={(opt) => {
+                  setValue("productId", opt.id);
+                  setValue("productName", opt.productName);
+                }} options={products}/>
               </div>
               <div className="col-span-6 lg:col-span-2">
                 <Label title="Valor" />

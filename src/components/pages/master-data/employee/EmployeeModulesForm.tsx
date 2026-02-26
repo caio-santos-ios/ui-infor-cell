@@ -26,7 +26,6 @@ export default function EmployeeModulesForm({id, modules}: TProp) {
   const [menus] = useAtom(menuRoutinesAtom);
   const [routines, setRoutine] = useState([]);
   const [myRoutines, setMyRoutine] = useState([]);
-  const [selectedValues, setSelectedValues] = useState<string[]>([]);
 
   const router = useRouter();
 

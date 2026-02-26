@@ -79,7 +79,7 @@ export default function SalesOrderModalCreate() {
         productId: watchSalesOrder("productId"),
         sellerId: watchSalesOrder("sellerId"),
         variationId: watchSalesOrder("variationId"),
-        barcode: watchSalesOrder("barcode"),
+        codeVariation: watchSalesOrder("codeVariation"),
         total: watchSalesOrder("total"),
         subTotal: watchSalesOrder("subTotal"),
         value: watchSalesOrder("value"),
@@ -89,14 +89,15 @@ export default function SalesOrderModalCreate() {
         stockId: watchSalesOrder("stockId"),
         serial: watchSalesOrder("serial")
       };
+      console.log(body)
 
-      setIsLoading(true);
-      const {data} = await api.post(`/sales-orders-items`, body, configApi());
-      const result = data.result;
-      resolveResponse({status: 201, message: result.message});
-      cleanItem();
+      // setIsLoading(true);
+      // const {data} = await api.post(`/sales-orders-items`, body, configApi());
+      // const result = data.result;
+      // resolveResponse({status: 201, message: result.message});
+      // cleanItem();
 
-      await getSalesOrderItems(salesOrderId);
+      // await getSalesOrderItems(salesOrderId);
     } catch (error) {
       resolveResponse(error);
     } finally {
@@ -119,7 +120,7 @@ export default function SalesOrderModalCreate() {
         quantity: watchSalesOrder("quantity"),
         discountType: watchSalesOrder("discountType"),
         discountValue: watchSalesOrder("discountValue"),
-        barcode: watchSalesOrder("barcode"),
+        codeVariation: watchSalesOrder("codeVariation"),
         stockId: watchSalesOrder("stockId"),
         serial: watchSalesOrder("serial")
       };
@@ -180,6 +181,9 @@ export default function SalesOrderModalCreate() {
       setModal(false);
       setModalCreate(false);
       setModalBoxCreate(false);
+      setModalCreateFinish(false);
+      resetSalesOrder(ResetSalesOrder);
+      resetSalesOrderFinish(ResetSalesOrderFinish);
     } catch (error) {
       resolveResponse(error);
     } finally {
@@ -286,7 +290,8 @@ export default function SalesOrderModalCreate() {
       
       const {data} = await api.get(`/products/autocomplete?deleted=false&orderBy=name&sort=desc&pageSize=10&pageNumber=1&regex$or$name=${value}&regex$or$code=${value}`, configApi());
       const result = data.result;
-      const list = result.data.map((x: any) => ({...x, isOutOfStock: x.stock.length == 0}));
+      console.log(result.data)
+      const list = result.data.map((x: any) => ({...x, isOutOfStock: x.stock.filter((s: any) => s.quantity > 0).length == 0}));
       setProducts(list);
     } catch (error) {
       resolveResponse(error);
@@ -354,7 +359,7 @@ export default function SalesOrderModalCreate() {
       setTimeout(() => {
         setValueSalesOrder("productHasVariations", obj.productHasVariations);
         setValueSalesOrder("productHasSerial", obj.productHasSerial);
-        setValueSalesOrder("barcode", obj.barcode);
+        setValueSalesOrder("codeVariation", obj.codeVariation);
         setValueSalesOrder("quantity", parseFloat(obj.quantity));
         setValueSalesOrder("productId", obj.productId);
         setValueSalesOrder("productName", obj.productName);
@@ -363,7 +368,6 @@ export default function SalesOrderModalCreate() {
         setValueSalesOrder("discountType", obj.discountType);
         setValueSalesOrder("discountValue", obj.discountValue);
         setValueSalesOrder("serial", obj.serial);
-        console.log(obj.serial)
         
         if(obj.image) {
           setValueSalesOrder("image", obj.image);
@@ -474,24 +478,25 @@ export default function SalesOrderModalCreate() {
   }, [watchSalesOrder("serial")]);
 
   useEffect(() => {
-    if(watchSalesOrder("barcode")) {
-      const variation = variations.find(x => x.barcode == watchSalesOrder("barcode"));
-      
+    if(watchSalesOrder("codeVariation")) {
+      const variation = variations.find(x => x.code == watchSalesOrder("codeVariation"));
       if(variation) {
         setQuantityVariation(variation.stock);
+
         setValueSalesOrder("variationId", variation.variationId);
-        if(watchSalesOrder("productHasSerial") == "yes") {
-          
-          if(!salesOrderItem.id) {
-            const newSerials = variation.serials.filter((s: TSerial) => s.hasAvailable);~
-            setSerial(newSerials);
-          };
+        if(watchSalesOrder("productHasSerial") == "yes") {  
+          const newSerials = variation.serials.filter((s: TSerial) => s.hasAvailable);
+          setSerial(newSerials);
+          if(salesOrderItem) {
+            if(!salesOrderItem.id) {
+            };
+          }  
         };
       };
     };
 
     calculated();
-  }, [watchSalesOrder("barcode"), watchSalesOrder("quantity"), watchSalesOrder("value"), watchSalesOrder("discountValue"), watchSalesOrder("discountType")]);
+  }, [watchSalesOrder("codeVariation"), watchSalesOrder("quantity"), watchSalesOrder("value"), watchSalesOrder("discountValue"), watchSalesOrder("discountType")]);
 
   useEffect(() => {
     const intial = async () => {
@@ -747,8 +752,9 @@ export default function SalesOrderModalCreate() {
                                 if(opt.hasSerial == "no") {
                                   setValueSalesOrder("value", parseFloat(stock.price));
                                 };
+
                                 setValueSalesOrder("stockId", stock.id);
-                                setVariation(stock.variations);
+                                setVariation(stock.variations.filter((x: any) => parseInt(x.stock) > 0));
                                 setQuantityVariation(stock.quantity);
                               };
 
@@ -773,13 +779,13 @@ export default function SalesOrderModalCreate() {
                                 watchSalesOrder("productHasVariations") == "yes" &&
                                 <div className="col-span-6 xl:col-span-4">
                                   <Label title="Variação" />
-                                  <select {...registerSalesOrder("barcode")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
+                                  <select {...registerSalesOrder("codeVariation")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
                                     <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Selecione</option>
                                     {
                                       variations.map((x: any, index: number) => {
                                         return (
                                           normalizeValueSelect(x).length > 0 &&
-                                          <option key={x.barcode} value={x.barcode} className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">{normalizeValueSelect(x)}</option>
+                                          <option key={x.code} value={x.code} className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">{normalizeValueSelect(x)}</option>
                                         ) 
                                       })
                                     }

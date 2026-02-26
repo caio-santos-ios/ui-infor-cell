@@ -14,6 +14,7 @@ import { NotData } from "@/components/not-data/NotData";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { maskDate } from "@/utils/mask.util";
 import { variationCurrentAtom } from "@/jotai/product/variation/variation.jotai";
+import { TSerial } from "@/types/product/serial/serial.type";
 
 export default function SerialModalViewStock() {
   const [_, setIsLoading] = useAtom(loadingAtom);
@@ -47,14 +48,28 @@ export default function SerialModalViewStock() {
             
             itemFilted.forEach((varia: any) => {
               if(hasSerial) {
-                console.log("teste")
+                let variation = varia.attributes.map((a: any) => (`${a.key}: ${a.value}`));
+                variation = variation.join(" / ");
+                const serialList = varia.serials.filter((x: any) => x.hasAvailable);
+
+                serialList.forEach((serial: TSerial) => {
+                  listStock.push({
+                    storeName: res.storeName,
+                    productName: res.productName,
+                    serial: serial.code,
+                    quantity: parseFloat(varia.stock),
+                    createdAt: res.createdAt,
+                    variation,
+                    originDescription: res.originDescription
+                  });
+                });
               } else {
                 let variation = varia.attributes.map((a: any) => (`${a.key}: ${a.value}`));
                 variation = variation.join(" / ");
                 
                 const existedIndex = listStock.findIndex((x: any) => x.variation == variation);
                 if(existedIndex >= 0) {
-                  listStock[existedIndex].quantity += parseFloat(varia.stock);
+                  listStock[existedIndex].quantityAvailable += parseFloat(varia.stock);
                 } else {
                   listStock.push({
                     storeName: res.storeName,
@@ -62,55 +77,18 @@ export default function SerialModalViewStock() {
                     serial: "",
                     quantity: parseFloat(varia.stock),
                     createdAt: res.createdAt,
-                    variation
+                    variation,
+                    originDescription: res.originDescription
                   });
                 }
               }
             });
-            // if (item && item.variations) {
-            //   const idx = parseInt(currentVariation) || 0;
-            //   const variation = item.variations[idx];
-              
-            //   if (variation && apiHasSerial) {
-            //     item.variations.forEach((v: any) => {
-            //       let variationList = v.attributes.map((a: any) => (`${a.key}: ${a.value}`));
-            //       variationList = variationList.join(" / ");
-  
-            //       const serialList = variation.serials.filter((x: any) => x.hasAvailable);
-            //       serialList.forEach((serial: TSerial) => {
-            //       listStock.push({
-            //         storeName: item.storeName,
-            //         productName: item.productName,
-            //         serial: serial.code,
-            //         quantity: 1,
-            //         createdAt: item.createdAt,
-            //         variation: variationList
-            //       });
-            //     });
-            //   });
-            //   } else if (variation) {
-            //     item.variations.forEach((v: any) => {
-            //       console.log(v)
-            //       let variation = v.attributes.map((a: any) => (`${a.key}: ${a.value}`));
-            //       variation = variation.join(" / ");
-  
-            //       listStock.push({
-            //         storeName: item.storeName,
-            //         productName: item.productName,
-            //         serial: "",
-            //         quantity: v.stock,
-            //         createdAt: item.createdAt,
-            //         variation
-            //       });
-            //     });
-            //   };
-            // };
           });
         });        
 
         setStock(listStock);
       } else {
-        setStock(result);
+        setStock(result.filter((x: any) => x.quantityAvailable > 0));
       }
     } else {
       setStock([]);
@@ -137,7 +115,7 @@ export default function SerialModalViewStock() {
   }, [modal, product.id]);
 
   return (
-    <Modal isOpen={modal} onClose={() => close()} className={`m-4 w-[80dvw] bg-red-400`}>
+    <Modal isOpen={modal} onClose={close} className={`m-4 w-[80dvw] bg-red-400`}>
       <div className={`no-scrollbar relative overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11`}>
         <div className="px-2 pr-14">
           <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">Estoque do Produto</h4>
@@ -165,6 +143,7 @@ export default function SerialModalViewStock() {
                               <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Serial</TableCell>
                             }
                             <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Quantidade</TableCell>
+                            <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Origem</TableCell>
                             <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Data de Entrada</TableCell>
                           </TableRow>
                         </TableHeader>
@@ -183,6 +162,7 @@ export default function SerialModalViewStock() {
                                 <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.serial}</TableCell>
                               }
                               <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.quantity}</TableCell>
+                              <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.originDescription}</TableCell>
                               <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{maskDate(x.createdAt)}</TableCell>
                             </TableRow>
                           ))}
@@ -200,7 +180,7 @@ export default function SerialModalViewStock() {
           </div>
           
           <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
-            <Button size="sm" variant="outline" onClick={() => close()}>Cancelar</Button>
+            <Button size="sm" variant="outline" onClick={close}>Cancelar</Button>
           </div>
         </form>
       </div>

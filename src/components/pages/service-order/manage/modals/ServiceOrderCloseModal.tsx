@@ -6,6 +6,7 @@ import { configApi, resolveResponse } from "@/service/config.service";
 import { formattedMoney } from "@/utils/mask.util";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 type TProp = {
   serviceOrderId: string;
@@ -22,7 +23,11 @@ export default function ServiceOrderCloseModal({ serviceOrderId, isWarranty, onC
   const [installments, setInstallments] = useState(1);
   const [quantityInstallment, setQuantityInstallment] = useState(0);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
-  const [orderTotal, setOrderTotal] = useState(0);
+  const [listOfParcels, setListOfParcels] = useState<any[]>([]);
+  const [subTotal, setSubtotal] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [surcharge, setSurcharge] = useState(0);
+  const [transactionFee, setTransactionFee] = useState(0);
 
   const fetchPaymentMethods = async () => {
     try {
@@ -36,7 +41,7 @@ export default function ServiceOrderCloseModal({ serviceOrderId, isWarranty, onC
       const { data } = await api.get(`/serviceOrderItems?deleted=false&serviceOrderId=${serviceOrderId}&pageSize=100&pageNumber=1`, configApi());
       const items = data.result.data || [];
       const total = items.reduce((acc: number, item: any) => acc + (item.quantity * item.price), 0);
-      setOrderTotal(total);
+      setSubtotal(total);
     } catch {}
   };
 
@@ -49,19 +54,22 @@ export default function ServiceOrderCloseModal({ serviceOrderId, isWarranty, onC
 
   const handleClose = async () => {
     if (!isWarranty && !paymentMethodId) {
-      alert("Selecione a forma de pagamento para encerrar a OS.");
+      toast.warn("Selecione a forma de pagamento para encerrar a O.S.", { theme: 'colored' })
       return;
-    }
+    };
+
     try {
       setLoading(true);
-      const userId = localStorage.getItem("userId") || "";
+
+      const valueParcels = listOfParcels.find(x => x.installment == installments);
+
       const payload = {
         id: serviceOrderId,
-        closedByUserId: userId,
         warrantyDays,
         paymentMethodId: isWarranty ? "" : paymentMethodId,
         paymentMethodName: isWarranty ? "" : paymentMethodName,
         numberOfInstallments: installments,
+        value: valueParcels ? valueParcels.value : 0
       };
 
       const { data } = await api.put("/serviceOrders/close", payload, configApi());
@@ -76,10 +84,40 @@ export default function ServiceOrderCloseModal({ serviceOrderId, isWarranty, onC
 
   useEffect(() => {
     setQuantityInstallment(0);
+    setSurcharge(0);
+    setTransactionFee(0);
+    setTotal(0);
 
     if(paymentMethodId) {
       const payment = paymentMethods.find((p: any) => p.id === paymentMethodId);
       if(payment) {
+        const list: any[] = [];
+
+        let valueTotal = subTotal;
+        let valueSurcharge = 0;
+        let valueTransactionFee = 0;
+
+        payment.interest.map((item: any) => {
+          const parcel = subTotal / item.installment;
+
+          const surcharge = (parcel * parseFloat(item.surcharge)) / 100;
+          const transactionFee = (parcel * parseFloat(item.transactionFee)) / 100;
+
+          valueSurcharge += surcharge;
+          valueTransactionFee += transactionFee;
+          valueTotal += surcharge + transactionFee;
+
+          list.push({
+            label: `${item.installment}x de ${formattedMoney(parcel + surcharge + transactionFee)}`,
+            installment: item.installment,
+            value: parcel + surcharge + transactionFee
+          });
+        });
+
+        setSurcharge(valueSurcharge);
+        setTransactionFee(valueTransactionFee);
+        setTotal(valueTotal);
+        setListOfParcels(list);
         setQuantityInstallment(payment.numberOfInstallments);
       };
     };
@@ -136,10 +174,23 @@ export default function ServiceOrderCloseModal({ serviceOrderId, isWarranty, onC
           {!isWarranty && (
             <>
               <div className="border-t border-gray-100 dark:border-white/10 pt-4 mb-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Pagamento</h4>
-                  <span className="text-lg font-bold text-gray-800 dark:text-white/90">{formattedMoney(orderTotal)}</span>
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-normal text-gray-700 dark:text-gray-300">Subtotal</h4>
+                  <span className="text-md font-bold text-gray-800 dark:text-white/90">{formattedMoney(subTotal)}</span>
                 </div>
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-normal text-gray-700 dark:text-gray-300">Taxa de transação</h4>
+                  <span className="text-sm font-bold text-gray-800 dark:text-white/90">{formattedMoney(transactionFee)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-normal text-gray-700 dark:text-gray-300">Acréscimo</h4>
+                  <span className="text-sm font-bold text-gray-800 dark:text-white/90">{formattedMoney(surcharge)}</span>
+                </div>
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Total</h4>
+                  <span className="text-md font-bold text-gray-800 dark:text-white/90">{formattedMoney(total)}</span>
+                </div>
+
                 <div className="mb-3">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Forma de Pagamento</label>
                   <select
@@ -165,9 +216,9 @@ export default function ServiceOrderCloseModal({ serviceOrderId, isWarranty, onC
                         value={installments}
                         onChange={(e) => setInstallments(Number(e.target.value))}
                         className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 text-gray-800">
-                        {Array.from({ length: quantityInstallment }, (_, i) => i + 1).map((n) => (
-                          <option key={n} value={n} className="dark:bg-gray-900">
-                            {n}x de {formattedMoney(orderTotal / n)}
+                        {listOfParcels.map((n, i) => (
+                          <option key={i} value={n.installment} className="dark:bg-gray-900">
+                            {n.label}
                           </option>
                         ))}
                       </select>

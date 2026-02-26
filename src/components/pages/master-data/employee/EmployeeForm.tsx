@@ -35,7 +35,7 @@ export default function EmployeeForm({id}: TProp) {
   const getById = async (id: string) => {
     try {
       setIsLoading(true);
-      const {data} = await api.get(`/employees/${id}`, configApi());
+      const {data} = await api.get(`/users/employees/${id}`, configApi());
       const result = data.result.data;
       reset(result);
     } catch (error) {
@@ -47,7 +47,7 @@ export default function EmployeeForm({id}: TProp) {
 
   useEffect(() => {
     if(id != "create") {
-      getById(id!);
+      // getById(id!);
     };
   }, []);
 

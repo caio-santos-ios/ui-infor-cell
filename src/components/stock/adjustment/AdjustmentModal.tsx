@@ -44,10 +44,7 @@ export const AdjustmentModal = () => {
 
     const isVariation = watch("hasProductVariations") == "yes";
 
-    const confirm = async (body: any) => {
-        // if(watch("cost") == 0) return toast.warn("Custo é obrigatório", {theme: 'colored'});
-        // if(hasSerial && !watch("serial")) return toast.warn("Serial é obrigatório", {theme: 'colored'});
-        
+    const confirm = async (body: any) => {        
         if(body.hasProductVariations == "yes" || body.hasProductSerial == "yes") {
             if(body.hasProductSerial == "yes") {
                 let cost = 0;
@@ -60,19 +57,18 @@ export const AdjustmentModal = () => {
                     price += v.serials.reduce((value: number, serial: any) => value + parseFloat(serial.price), 0);
                     totalSerials += v.serials.length;
                 });
+
                 body.cost = cost / totalSerials;
                 body.price = price / totalSerials;
             } else {
                 const codes = quantity.filter((_, index) => index < parseFloat(body.code));
                 body.codes = codes;
-                body.quantity = codes.length;
+                body.quantity = body.variations.reduce((acc: number, item: any) => acc + item.stock, 0);
             };
         };
 
         const form = {...getValues(), ...body};
         form.origin = `adjustment`;
-        console.log(form)
-        // form.originDescription = `Ajuste de Estoque - nº ${salesOrderCode}`;
         await create(form);
     };
 
@@ -149,7 +145,7 @@ export const AdjustmentModal = () => {
     }, [modal]);
 
     return (
-        <Modal isOpen={modal} onClose={() => setModal(false)} className={`w-[90dvw] ${isVariation ? 'max-w-[80rem]' : 'max-w-180'} m-4`}>
+        <Modal isOpen={modal} onClose={() => setModal(false)} className={`w-[90dvw] ${isVariation ? 'max-w-7xl' : 'max-w-180'} m-4`}>
             <div className="no-scrollbar relative overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
                 <div className="mb-8 px-2 pr-14">
                     <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">Ajustes</h4>
@@ -338,6 +334,12 @@ export const AdjustmentModal = () => {
                                                 />
                                                 )}
                                             />
+                                        </div>
+                                        <div className="col-span-12">
+                                            <Button className="me-2" size="sm" variant="outline" onClick={() => {
+                                            setModal(true);
+                                        }}>Cancelar</Button>
+                                        <Button size="sm" variant="primary" onClick={() => confirm({...getValues()})}>Salvar</Button>
                                         </div>
                                     </>
                                 }  

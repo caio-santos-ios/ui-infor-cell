@@ -6,17 +6,18 @@ import { configApi, resolveResponse } from "@/service/config.service";
 import { useAtom } from "jotai";
 import Button from "@/components/ui/button/Button";
 import { Modal } from "@/components/ui/modal";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import Label from "@/components/form/Label";
 import { TPayAccountReceivable } from "@/types/financial/accounts-receivable/accounts-receivable.type";
 import { accountReceivableIdAtom, accountReceivablePayModalAtom } from "@/jotai/financial/accounts-receivable/accountsReceivable.jotai";
+import { NumericFormat } from "react-number-format";
 
 export default function AccountReceivableModalPay() {
   const [_, setIsLoading] = useAtom(loadingAtom);
   const [payModal, setPayModal] = useAtom(accountReceivablePayModalAtom);
   const [accountReceivableId, setAccountReceivableId] = useAtom(accountReceivableIdAtom);
 
-  const { getValues, register, reset } = useForm<TPayAccountReceivable>({
+  const { getValues, register, reset, control } = useForm<TPayAccountReceivable>({
     defaultValues: {
       id: "",
       amountPaid: 0,
@@ -60,7 +61,25 @@ export default function AccountReceivableModalPay() {
 
               <div className="col-span-6 lg:col-span-3">
                 <Label title="Valor Recebido (R$)" />
-                <input placeholder="0,00" {...register("amountPaid", { valueAsNumber: true })} type="number" step="0.01" min="0" className="input-erp-primary input-erp-default no-spinner" />
+                <Controller
+                  name="amountPaid"
+                  control={control}
+                  defaultValue={0}
+                  render={({ field: { onChange, value } }) => (
+                    <NumericFormat
+                      className="input-erp-primary input-erp-default" 
+                      value={value}
+                      onValueChange={(v) => onChange(v.floatValue)}
+                      thousandSeparator="."
+                      decimalSeparator=","
+                      prefix="R$ "
+                      decimalScale={2}
+                      fixedDecimalScale
+                      allowNegative={false}
+                      placeholder="Custo Atual"
+                    />
+                  )}
+                />
               </div>
 
               <div className="col-span-6 lg:col-span-3">

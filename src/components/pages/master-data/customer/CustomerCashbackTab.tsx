@@ -89,7 +89,7 @@ export default function CustomerCashbackTab({id}: TProp) {
           author: { image: "", name: x.responsible },
           accentColor: "",
         }));
-        setCashbacks(list);
+        setCashbacks(list.reverse());
       } else {
         setCustomer({...result, cashbacks: []});
       }

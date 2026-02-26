@@ -32,16 +32,10 @@ export default function ServiceOrderModalView() {
     const [modalView, setModalView] = useAtom(serviceOrderModalViewAtom);
     const [serviceOrderId, setServiceOrderId] = useAtom(serviceOrderIdAtom);
     const [items, setItems] = useState<TServiceOrderItem[]>([]);
-
-
-
-    const [__, setPagination] = useAtom(paginationAtom);
-    const [___, setSearch] = useAtom(serviceOrderSearchAtom);
-    const [customers, setCustomers] = useState<any[]>([]);
-    const [stores, setStore] = useState<TStore[]>([]);
+    const [customers] = useState<any[]>([]);
     const [brands, setBrands] = useState<any[]>([]);
 
-    const { register, getValues, setValue, reset, watch } = useForm<TServiceOrder>();
+    const { register, setValue, reset, watch } = useForm<TServiceOrder>();
 
     const fetchItems = async () => {
         try {
@@ -126,13 +120,8 @@ export default function ServiceOrderModalView() {
                                 </div>
                                 )}
                             <div className="col-span-6 md:col-span-2">
-                                <Label title="Status" required={false}/>
-                                <select disabled {...register("status")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
-                                    <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Todos</option>
-                                    {statusOptions.map((o) => (
-                                        <option key={o.value} value={o.value} className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">{o.label}</option>
-                                    ))}
-                                </select>
+                                <Label title="Situação" required={false}/>
+                                <input disabled placeholder="Digite" {...register("statusName")} type="text" className="input-erp-primary input-erp-default"/>
                             </div>                            
                             <div className="col-span-6 md:col-span-4">
                                 <Label title="IMEI" required={false}/>

@@ -70,7 +70,6 @@ export default function AccountPayableModalPay() {
                     <div className="px-2 pb-3">
                         <div className="grid grid-cols-6 gap-4">
 
-                            {/* Valor Pago */}
                             <div className="col-span-6 lg:col-span-3">
                                 <Label title="Valor Pago" />
                                 <Controller

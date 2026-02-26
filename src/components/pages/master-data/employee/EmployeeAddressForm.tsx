@@ -20,8 +20,6 @@ type TProp = {
 
 export default function EmployeeAddressForm({address, parentId}: TProp) {
   const [_, setIsLoading] = useAtom(loadingAtom);
-  const [logoCompany, setLogoCompany] = useState<string>("");
-  const router = useRouter();
 
   const { register, handleSubmit, reset, setValue, watch, getValues, formState: { errors }} = useForm<TAddress>({
     defaultValues: ResetAddress
@@ -29,7 +27,6 @@ export default function EmployeeAddressForm({address, parentId}: TProp) {
 
   const save = async (body: TAddress) => {
     if(!body.id) {
-      console.log(body)
       await create(body);
     } else {
       await update(body);

@@ -18,6 +18,9 @@ import Button from "@/components/ui/button/Button";
 import SupplierModalCreate from "@/components/pages/master-data/supplier/SupplierModalCreate";
 import { currentMomentServiceOrderAtom } from "@/jotai/serviceOrder/manege.jotai";
 import { TSituation } from "@/types/order-service/situation.type";
+import { customerAtom } from "@/jotai/masterData/customer.jotai";
+import { ResetCustomer } from "@/types/master-data/customer/customer.type";
+import { situationsAtom } from "@/jotai/serviceOrder/situation.jotai";
 
 type TProp = { id?: string };
 
@@ -33,7 +36,8 @@ export default function ServiceOrderForm({ id }: TProp) {
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [warrantyInfo, setWarrantyInfo] = useState<any>(null);
   const [currentMoment, setCurrentMoment] = useAtom(currentMomentServiceOrderAtom);
-  const [situations, setSituations] = useState<TSituation[]>([]);
+  const [situations, setSituations] = useAtom(situationsAtom);
+  const [__, setCustomer] = useAtom(customerAtom);
   const router = useRouter();
 
   const { reset, watch, getValues, setValue, register } = useForm<TServiceOrder>({
@@ -43,7 +47,7 @@ export default function ServiceOrderForm({ id }: TProp) {
   const isEdit = id && id !== "create";
   const isWarranty = watch("isWarrantyInternal");
   const status = watch("status");
-  const isClosed = status === "closed" || status === "cancelled";
+  const isClosed = watch("isClosed");
 
   const getById = async (id: string) => {
     try {
@@ -51,6 +55,19 @@ export default function ServiceOrderForm({ id }: TProp) {
       const { data } = await api.get(`/serviceOrders/${id}`, configApi());
       const result = data.result.data;
       reset(result);
+
+      if(result.isClosed) {
+        setCurrentMoment("end");
+        getSelectSituations("end");
+      } else {
+        if(result.items.length > 0) {
+          setCurrentMoment("quite");
+          getSelectSituations("quite");
+        } else {
+          setCurrentMoment("start");
+          getSelectSituations("start");
+        }
+      }
     } catch (error) {
       resolveResponse(error);
     } finally {
@@ -58,10 +75,10 @@ export default function ServiceOrderForm({ id }: TProp) {
     }
   };
   
-  const getSelectSituations = async () => {
+  const getSelectSituations = async (moment: "start" | "quite" | "end") => {
     try {
       setIsLoading(true);
-      const { data } = await api.get(`/situations/select?deleted=false&${currentMoment}=true`, configApi());
+      const { data } = await api.get(`/situations/select?deleted=false&${moment}=true`, configApi());
       const result = data.result.data;
       setSituations(result)
     } catch (error) {
@@ -153,14 +170,14 @@ export default function ServiceOrderForm({ id }: TProp) {
     if (!isEdit) return;
     setValue("status", newStatus);
     await saveEquipment();
+    await getById(id);
   };
 
   useEffect(() => {
-    getSelectSituations();
+    setCurrentMoment("start");
+    setCustomer(ResetCustomer);
     if (isEdit) getById(id!);
   }, []);
-
-  const statusInfo = STATUS_LABELS[status] ?? STATUS_LABELS["open"];
 
   return (
     <>
@@ -179,12 +196,12 @@ export default function ServiceOrderForm({ id }: TProp) {
             <span className="w-4/12 lg:w-28 font-semibold text-gray-800 dark:text-white/90">
               OS #{watch("code")}
             </span>
-            <span className={`w-3/12 lg:hidden inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.color}`}>
-              {statusInfo.label}
+            <span className={`w-3/12 lg:hidden inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${watch("situationStyle.bg")} ${watch("situationStyle.border")} ${watch("situationStyle.text")}`}>
+              {watch("statusName")}
             </span>
 
-            <span className={`hidden lg:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.color}`}>
-              {statusInfo.label}
+            <span className={`hidden lg:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${watch("situationStyle.bg")} ${watch("situationStyle.border")} ${watch("situationStyle.text")}`}>
+              {watch("statusName")}
             </span>
             
             <span className="hidden lg:block font-semibold text-gray-800 dark:text-white/90">
@@ -227,18 +244,6 @@ export default function ServiceOrderForm({ id }: TProp) {
           </div>
 
           <div className="grid grid-cols-4 gap-4">
-            {/* {!isClosed && (
-              <select
-                value={status}
-                onChange={(e) => handleStatusChange(e.target.value)}
-                className="col-span-4 lg:col-span-2 h-9 rounded-lg border border-gray-300 bg-transparent px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 text-gray-800"
-              >
-                {Object.entries(STATUS_LABELS).map(([k, v]) => (
-                  <option key={k} value={k} className="dark:bg-gray-900">{v.label}</option>
-                ))}
-              </select>
-            )} */}
-            
             {!isClosed && (
               <select
                 value={status}
@@ -253,10 +258,31 @@ export default function ServiceOrderForm({ id }: TProp) {
             {!isClosed && (
               <Button className="col-span-2 lg:col-span-1" onClick={() => setShowCloseModal(true)} type="submit" variant="primary" size="sm">Fechar OS</Button>
             )}
-            <Link className="col-span-2 lg:col-span-1" href="/order-services/manages">
-              <Button className="w-full" type="submit" variant="outline" size="sm">Voltar</Button>
-            </Link>
+            {
+              !isClosed && (
+                <Link className="col-span-2 lg:col-span-1" href="/order-services/manages">
+                  <Button className="w-full" type="submit" variant="outline" size="sm">Voltar</Button>
+                </Link>
+              )
+            }
           </div>
+          {
+            isClosed && (
+              <>
+                <select
+                  value={status}
+                  onChange={(e) => handleStatusChange(e.target.value)}
+                  className="col-span-4 lg:col-span-2 h-9 rounded-lg border border-gray-300 bg-transparent px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 text-gray-800">
+                  {situations.map((x) => (
+                    <option key={x.id} value={x.id} className="dark:bg-gray-900">{x.name}</option>
+                  ))}
+                </select>
+                <Link className="col-span-2 lg:col-span-1" href="/order-services/manages">
+                  <Button className="w-full" type="submit" variant="outline" size="sm">Voltar</Button>
+                </Link>
+              </>
+            )
+          }
         </div>
       )}
 

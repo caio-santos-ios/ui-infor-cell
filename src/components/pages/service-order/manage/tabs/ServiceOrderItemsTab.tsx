@@ -16,6 +16,7 @@ import Button from "@/components/ui/button/Button";
 import AutocompletePlus from "@/components/form/AutocompletePlus";
 import { supplierModalCreateAtom } from "@/jotai/masterData/supplier.jotai";
 import { currentMomentServiceOrderAtom } from "@/jotai/serviceOrder/manege.jotai";
+import { situationsAtom } from "@/jotai/serviceOrder/situation.jotai";
 
 type TProp = {
   serviceOrderId: string;
@@ -32,6 +33,7 @@ export default function ServiceOrderItemsTab({ serviceOrderId, isWarranty, isClo
   const [form, setForm] = useState<TServiceOrderItem>(emptyItem());
   const [employees, setEmployees] = useState<any[]>([]);
   const [suppliers, setSuppliers] = useState<any[]>([]);
+  const [____, setSituations] = useAtom(situationsAtom);
   const [__, setSupplierModalCreate] = useAtom(supplierModalCreateAtom);
   const [___, setCurrentMoment] = useAtom(currentMomentServiceOrderAtom);
 
@@ -41,7 +43,11 @@ export default function ServiceOrderItemsTab({ serviceOrderId, isWarranty, isClo
       const { data } = await api.get(`/serviceOrderItems?deleted=false&serviceOrderId=${serviceOrderId}&pageSize=50&pageNumber=1`, configApi());
       const result = data.result;
       setItems(result.data || []);
-      if(items.length > 0) setCurrentMoment("quite");
+
+      if(result.data.length > 0) {
+        setCurrentMoment("quite");
+        getSelectSituations("quite");
+      } 
     } catch (error) {
       resolveResponse(error);
     } finally {
@@ -53,9 +59,21 @@ export default function ServiceOrderItemsTab({ serviceOrderId, isWarranty, isClo
     try {
       const { data } = await api.get("/employees/select/technicians", configApi());
       setEmployees(data.result.data || []);
-    } catch { /* skip */ }
+    } catch {}
   };
 
+  const getSelectSituations = async (moment: "start" | "quite" | "end") => {
+    try {
+      setLoading(true);
+      const { data } = await api.get(`/situations/select?deleted=false&${moment}=true`, configApi());
+      const result = data.result.data;
+      setSituations(result)
+    } catch (error) {
+      resolveResponse(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getAutocompleSupplier = async (value: string) => {
     try {

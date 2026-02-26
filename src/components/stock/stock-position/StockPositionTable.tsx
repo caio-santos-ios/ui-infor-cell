@@ -28,6 +28,7 @@ import { ResetProduct } from "@/types/product/product/product.type";
 import { productAtom } from "@/jotai/product/product.jotai";
 import { serialModalViewStockAtom } from "@/jotai/product/serial.jotai";
 import SerialModalViewStock from "@/components/product/serial/SerialModalViewStock";
+import { GoAlert } from "react-icons/go";
 
 export default function StockPositionTable() {
   const [_, setLoading] = useAtom(loadingAtom);
@@ -51,7 +52,6 @@ export default function StockPositionTable() {
       setLoading(true);
       const {data} = await api.get(`/stocks?deleted=false&gt$quantity=0&orderBy=createdAt&sort=desc&pageSize=10&pageNumber=${page}`, configApi());
       const result = data.result;
-
       setPagination({
         currentPage: result.currentPage,
         data: result.data ?? [],
@@ -130,6 +130,21 @@ export default function StockPositionTable() {
     return variationStr.join(" / ");
   };
 
+  const normalizeQuantityReseved = (customerIdReserved: string[][]) => {
+    if(!customerIdReserved) return 0;
+    
+    let quantity = 0;
+    customerIdReserved?.forEach((x: string[]) => {
+      quantity += x.length;
+    });
+    
+    return quantity;
+  };
+
+  const normalizeStockMinimum = (stock: any) => {
+    return stock.quantityAvailable < parseFloat(stock.productMinimumStock);
+  }
+
   useEffect(() => {
     const item: any = variations.find(v => v.barcode == watch("barcode"));
     if(item) {
@@ -156,10 +171,10 @@ export default function StockPositionTable() {
               <TableHeader className="border-b border-gray-100 dark:border-white/5 tele-table-thead">
                 <TableRow>
                   <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Produto</TableCell>
-                  {/* <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Fornecedor</TableCell> */}
-                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Quantidade</TableCell>
+                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Qtd Disponível</TableCell>
+                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Qtd Reservada</TableCell>
+                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Estoque mínimo</TableCell>
                   <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Data da Entrada</TableCell>
-                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Origem</TableCell>
                   <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Ações</TableCell>
                 </TableRow>
               </TableHeader>
@@ -168,11 +183,20 @@ export default function StockPositionTable() {
                 {pagination.data.map((x: any) => (
                   <TableRow key={x.id}>
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.productName}</TableCell>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.quantityAvailable}</TableCell>
+                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{normalizeQuantityReseved(x?.customerIdReserved)}</TableCell>
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
-                      {x.quantity}
+                      <span className="flex items-center gap-1">
+                        {x.productMinimumStock}
+                        {
+                          normalizeStockMinimum(x) && 
+                          (
+                            <GoAlert title="Produto abaixo do estoque minimo" className="text-red-500" size={20} />
+                          )
+                        }
+                      </span>
                     </TableCell>
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{maskDate(x.createdAt)}</TableCell>
-                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.originDescription}</TableCell>
                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
                       <div className="flex gap-3">    
                         {

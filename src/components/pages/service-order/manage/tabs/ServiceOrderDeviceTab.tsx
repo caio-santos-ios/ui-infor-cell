@@ -1,6 +1,7 @@
 "use client";
 
 import ComponentCard from "@/components/common/ComponentCard";
+import Autocomplete from "@/components/form/Autocomplete";
 import AutocompletePlus from "@/components/form/AutocompletePlus";
 import TextArea from "@/components/form/input/TextArea";
 import Label from "@/components/form/Label";
@@ -23,30 +24,21 @@ type TProp = {
 
 export default function ServiceOrderDeviceTab({ register, watch, setValue, onSave, onWarrantyCheck, isEdit, isClosed }: TProp) {
   const [customers, setCustomers] = useState<any[]>([]);
-  const [customerSearch, setCustomerSearch] = useState("");
   const [brands, setBrands] = useState<any[]>([]);
-  const [models, setModels] = useState<any[]>([]);
-  const [__, setCustomerModalCreate] = useAtom(customerModalCreateAtom);
+  const [_, setCustomerModalCreate] = useAtom(customerModalCreateAtom);
   const [___, setCustomerIdModal] = useAtom(customerIdModalAtom);
   const [customer, setCustomer] = useAtom(customerAtom);
 
   const customerId = watch("customerId");
-  const brandId = watch("device.brandId");
 
   const fetchBrands = async () => {
     try {
       const { data } = await api.get("/brands?deleted=false&pageSize=100&pageNumber=1", configApi());
       setBrands(data.result.data || []);
-    } catch { /* skip */ }
+    } catch (error) {
+      resolveResponse(error);
+    }
   };
-
-  // const fetchModels = async (brandId: string) => {
-  //   if (!brandId) return;
-  //   try {
-  //     const { data } = await api.get(`/groups?deleted=false&pageSize=100&pageNumber=1&brandId=${brandId}`, configApi());
-  //     setModels(data.result.data || []);
-  //   } catch { /* skip */ }
-  // };
 
   const getAutocompleCustomer = async (value: string) => {
     try {
@@ -60,19 +52,12 @@ export default function ServiceOrderDeviceTab({ register, watch, setValue, onSav
   };
 
   useEffect(() => { fetchBrands(); }, []);
-  // useEffect(() => { if (brandId) fetchModels(brandId); }, [brandId]);
 
   const handleSerialBlur = () => {
     const serialImei = watch("device.serialImei");
     if (serialImei || customerId) {
-      // onWarrantyCheck(customerId, serialImei);
+      onWarrantyCheck(customerId, serialImei);
     }
-  };
-
-  const selectCustomer = (customer: any) => {
-    // setValue("customerId", customer.id);
-    // setCustomerSearch(customer.corporateName);
-    // setCustomers([]);
   };
 
   const selectBrand = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -82,9 +67,9 @@ export default function ServiceOrderDeviceTab({ register, watch, setValue, onSav
   };
 
   useEffect(() => {
-    if (customer) {
+    if (customer.corporateName) {
       setValue("customerId", customer.id);
-      setValue("customerName", customer.corporateName);
+      setValue("customerName", customer.tradeName);
     };
   }, [customer]);
 
@@ -94,29 +79,27 @@ export default function ServiceOrderDeviceTab({ register, watch, setValue, onSav
 
         <div className="col-span-12 xl:col-span-6 relative">
           <Label title="Cliente" />
-          <AutocompletePlus disabled={isClosed} onEditClick={() => {
-            setCustomerModalCreate(true);
-            setCustomerIdModal(watch("customerId"));
-            setCustomer((e: any) => ({...e, id: watch("customerId")}));
-          }} onAddClick={() => {setCustomerModalCreate(true)}} 
-            placeholder="Buscar cliente..." defaultValue={watch("customerName")} objKey="id" objValue="tradeName" onSearch={(value: string) => getAutocompleCustomer(value)} onSelect={(opt) => {
-            setValue("customerId", opt.id);
-            setCustomers([]);
-          }} options={customers}/>
-          {customers.length > 0 && (
-            <div className="absolute top-full left-0 right-0 z-10 mt-1 rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 shadow-lg max-h-48 overflow-y-auto">
-              {customers.map((c: any) => (
-                <button
-                  key={c.id}
-                  onClick={() => selectCustomer(c)}
-                  className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex flex-col"
-                >
-                  <span className="font-medium">{c.corporateName}</span>
-                  {c.phone && <span className="text-xs text-gray-400">{c.phone}</span>}
-                </button>
-              ))}
-            </div>
-          )}
+          {
+            isClosed ?
+            (
+              <Autocomplete disabled={isClosed} 
+                placeholder="Buscar cliente..." defaultValue={watch("customerName")} objKey="id" objValue="tradeName" onSearch={(value: string) => getAutocompleCustomer(value)} onSelect={(opt) => {
+                setValue("customerId", opt.id);
+                setCustomers([]);
+              }} options={customers}/>
+            ) : 
+            (
+              <AutocompletePlus disabled={isClosed} onEditClick={() => {
+                setCustomerModalCreate(true);
+                setCustomerIdModal(watch("customerId"));
+                setCustomer((e: any) => ({...e, id: watch("customerId")}));
+              }} onAddClick={() => {setCustomerModalCreate(true)}} 
+                placeholder="Buscar cliente..." defaultValue={watch("customerName")} objKey="id" objValue="tradeName" onSearch={(value: string) => getAutocompleCustomer(value)} onSelect={(opt) => {
+                setValue("customerId", opt.id);
+                setCustomers([]);
+              }} options={customers}/>
+            )
+          }
         </div>
 
         <div className="col-span-12 xl:col-span-3">

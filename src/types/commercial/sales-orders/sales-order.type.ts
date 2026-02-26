@@ -22,6 +22,7 @@ export type TSalesOrder = {
     productHasVariations: string;
     serial: string;
     stockId: string;
+    codeVariation: string;
 }
 export const ResetSalesOrder: TSalesOrder = {
     id: "",
@@ -46,7 +47,8 @@ export const ResetSalesOrder: TSalesOrder = {
     productHasSerial: "no",
     productHasVariations: "no",
     serial: "",
-    stockId: ""
+    stockId: "",
+    codeVariation: ""
 }
 
 export type TSalesOrderFinish = {

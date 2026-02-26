@@ -22,7 +22,7 @@ export default function PaymentMethodModalCreate() {
     defaultValues: ResetPaymentMethod
   });
   
-  const { fields, append, remove } = useFieldArray({
+  const { fields } = useFieldArray({
     control,
     name: "interest",
   });
@@ -75,12 +75,16 @@ export default function PaymentMethodModalCreate() {
   };
 
   useEffect(() => {
-    setValue("interest", []);
-    const array: {installment: number; value: number;}[] = [];
-    for (let index = 0; index < watch("numberOfInstallments"); index++) {
-      array.push({installment: index + 1, value: 0});
+    if(!paymentMethodId) {
+      setValue("interest", []);
+      const array: {installment: number, value: number, transactionFee: number, surcharge: number}[] = [];
+      
+      for (let index = 0; index < watch("numberOfInstallments"); index++) {
+        array.push({installment: index + 1, value: 0, transactionFee: 0, surcharge: 0});
+      };
+  
+      setValue("interest", array);
     };
-    setValue("interest", array);
   }, [watch("numberOfInstallments")]);
   
   useEffect(() => {
@@ -130,7 +134,7 @@ export default function PaymentMethodModalCreate() {
                       <div className="col-span-1">
                         <Label title="Taxa de transação" required={false}/>
                         <Controller
-                          name={`interest.${index}.value`}
+                          name={`interest.${index}.transactionFee`}
                           control={control}
                           render={({ field: { onChange, value } }) => (
                             <NumericFormat
@@ -148,7 +152,7 @@ export default function PaymentMethodModalCreate() {
                       <div className="col-span-1">
                         <Label title="Acréscimo" required={false}/>
                         <Controller
-                          name={`interest.${index}.value`}
+                          name={`interest.${index}.surcharge`}
                           control={control}
                           render={({ field: { onChange, value } }) => (
                             <NumericFormat

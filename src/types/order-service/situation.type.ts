@@ -1,12 +1,20 @@
+export type TSituationStyle = {
+    bg: string;
+    border: string;
+    text: string;
+}
+
+export const ResetSituationStyle: TSituationStyle = {
+    bg: "",
+    border: "",
+    text: ""
+}
+
 export type TSituation = {
     id?: string;
     name: string;
     currentColor: string;
-    style: {
-        bg: string;
-        border: string;
-        text: string;
-    };
+    style: TSituationStyle
     start: boolean;
     quite: boolean;
     end: boolean;
@@ -18,11 +26,7 @@ export type TSituation = {
 export const ResetSituation: TSituation = {
     id: "",
     currentColor: "",
-    style: {
-        bg: "",
-        border: "",
-        text: ""
-    },
+    style: ResetSituationStyle,
     name: "",
     start: false,
     quite: false,

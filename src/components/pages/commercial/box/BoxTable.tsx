@@ -20,9 +20,7 @@ export default function BoxTable() {
   const [_, setLoading] = useAtom(loadingAtom);
   const [pagination, setPagination] = useAtom(paginationAtom); 
   const [storeLogged] = useAtom(storeLoggedAtom);
-  const { isOpen, openModal, closeModal } = useModal();
-  const [salesOrder, setSalesOrder] = useState<TSalesOrder>(ResetSalesOrder);
-  const [modalCreate, setModalCreate] = useAtom(salesOrderModalAtom); 
+  const [modalCreate] = useAtom(salesOrderModalAtom); 
 
   const getAll = async (page: number) => {
     try {
@@ -53,38 +51,6 @@ export default function BoxTable() {
     await getAll(page);
   };
 
-  const destroy = async () => {
-    try {
-      setLoading(true);
-      await api.delete(`/sales-orders/${salesOrder.id}`, configApi());
-      resolveResponse({status: 204, message: "Excluído com sucesso"});
-      closeModal();
-      await getAll(pagination.currentPage);
-    } catch (error) {
-      resolveResponse(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getObj = (obj: any, action: string) => {
-    setSalesOrder(obj);
-    // setSalesOrderId(obj.id);
-    // setSalesOrderStatus(obj.status);
-    
-    if(action == "edit") {
-      setModalCreate(true);
-    };
-    
-    if(action == "view") {
-      setModalCreate(true);
-    };
-
-    if(action == "delete") {
-      openModal();
-    };
-  };
-
   useEffect(() => {
     if(permissionRead("F", "F1")) {
       getAll(1);
@@ -104,10 +70,9 @@ export default function BoxTable() {
                     <TableHeader className="border-b border-gray-100 dark:border-white/5 tele-table-thead">
                       <TableRow>
                         <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Operador</TableCell>
-                        <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Valor atual</TableCell>
+                        <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Valor Abertura</TableCell>
                         <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Valor atual</TableCell>
                         <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Data da abertura</TableCell>
-                        {/* <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Ações</TableCell> */}
                       </TableRow>
                     </TableHeader>
 
@@ -115,24 +80,9 @@ export default function BoxTable() {
                       {pagination.data.map((x: any) => (
                         <TableRow key={x.id}>
                           <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.user}</TableCell>
+                          <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{formattedMoney(x.openingValue)}</TableCell>
                           <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{formattedMoney(x.value)}</TableCell>
                           <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{maskDate(x.createdAt)}</TableCell>
-                          {/* <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
-                            <div className="flex gap-3">       
-                              {
-                                permissionUpdate("A", "A3") && x.status == "Finalizado" &&
-                                <IconView action="view" obj={x} getObj={getObj}/>
-                              }   
-                              {
-                                permissionUpdate("A", "A3") && x.status == "Em Aberto" &&
-                                <IconEdit action="edit" obj={x} getObj={getObj}/>
-                              }   
-                              {
-                                permissionDelete("A", "A3") && x.status == "Em Aberto" &&
-                                <IconDelete action="delete" obj={x} getObj={getObj}/>                                                   
-                              }                                          
-                            </div>
-                          </TableCell> */}
                         </TableRow>
                       ))}
                     </TableBody>
@@ -141,7 +91,6 @@ export default function BoxTable() {
               </div>
             </div>
             <Pagination currentPage={pagination.currentPage} totalCount={pagination.totalCount} totalData={pagination.data.length} totalPages={pagination.totalPages} onPageChange={changePage} />        
-            {/* <ModalDelete confirm={destroy} isOpen={isOpen} closeModal={closeModal} title="Excluir Pedido de Venda" />           */}
           </>
           :
           <NotData />

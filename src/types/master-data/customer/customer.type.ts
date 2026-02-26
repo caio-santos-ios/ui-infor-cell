@@ -10,6 +10,8 @@ export type TCustomerCashback = {
     currentValue: number;
     available: boolean;
     date: any;
+    productId: string;
+    productName: string;
 };
 
 export const ResetCustomerCashback: TCustomerCashback = {
@@ -21,7 +23,9 @@ export const ResetCustomerCashback: TCustomerCashback = {
     value: 0,
     currentValue: 0,
     available: true,
-    date: new Date()
+    date: new Date(),
+    productId: "",
+    productName: ""
 };
 
 export type TCustomer = {

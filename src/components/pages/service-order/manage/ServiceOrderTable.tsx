@@ -193,9 +193,9 @@ export default function ServiceOrderTable() {
                           </TableCell>
                           <TableCell className="px-5 py-4 sm:px-6 text-start">
                             <div className="flex gap-3">
-                              {permissionUpdate("A", "A4") && x.status != 'closed' && <IconEdit action="edit" obj={x} getObj={getObj} />}
-                              {permissionDelete("A", "A4") && x.status != 'closed' && <IconDelete action="delete" obj={x} getObj={getObj} />}
-                              {permissionDelete("A", "A4") && x.status == 'closed' && <IconView action="view" obj={x} getObj={getObj} />}
+                              {permissionUpdate("A", "A4") && !x.isClosed && <IconEdit action="edit" obj={x} getObj={getObj} />}
+                              {permissionDelete("A", "A4") && !x.isClosed && <IconDelete action="delete" obj={x} getObj={getObj} />}
+                              {permissionDelete("A", "A4") && x.isClosed && <IconView action="view" obj={x} getObj={getObj} />}
                             </div>
                           </TableCell>
                         </TableRow>

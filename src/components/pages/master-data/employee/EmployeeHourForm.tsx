@@ -43,14 +43,9 @@ export default function EmployeeHourForm({id, calendar}: TProp) {
   
   const update: SubmitHandler<TEmployeeCalendar> = async (body: any) => {
     try {
-      setIsLoading(true);
-      const {data} = await api.put(`/employees/calendar`, body, configApi());
-      const result = data.result;
-      resolveResponse({status: 200, message: result.message});
+      await api.put(`/employees/calendar`, body, configApi());
     } catch (error) {
       resolveResponse(error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -117,7 +112,7 @@ export default function EmployeeHourForm({id, calendar}: TProp) {
                   {HOURS.map((hour) => {
                     const active = isSelected(day.key, hour);
                     return (
-                      <button key={`${day}-${hour}`} onClick={() => toggleSlot(day, hour)} className={`w-full h-10 rounded-lg transition-all duration-200 ${active ? "bg-brand-500 hover:bg-brand-600 shadow-sm" : "bg-gray-300 dark:bg-gray-800 hover:bg-gray-400 dark:hover:bg-gray-700"}`} title={`${day} às ${hour}`} />
+                      <button key={`${day}-${hour}`} onClick={() => toggleSlot(day, hour)} className={`w-full h-10 rounded-lg transition-all duration-200 ${active ? "bg-brand-500 hover:bg-brand-600 shadow-sm" : "bg-gray-300 dark:bg-gray-800 hover:bg-gray-400 dark:hover:bg-gray-700"}`} title={`${day.title} às ${hour}`} />
                     );
                   })}
                 </div>
