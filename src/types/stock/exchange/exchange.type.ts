@@ -25,6 +25,7 @@ export type TExchange = {
     productName: string;
     quantity: number;
     cost: number;
+    price: number;
     productHasSerial: string;
     serial: string;
     forSale: string;
@@ -32,6 +33,8 @@ export type TExchange = {
     origin: string;
     variations: TVariationExchange[]
     variationsCode: string[];
+    type: "exchange" | "return",
+    generateCashback: boolean;
 }
 
 export const ResetExchange: TExchange = {
@@ -45,5 +48,8 @@ export const ResetExchange: TExchange = {
     productId: "",
     origin: "",
     variations: [],
-    variationsCode: []
+    variationsCode: [],
+    type: "exchange",
+    generateCashback: false,
+    price: 0
 }

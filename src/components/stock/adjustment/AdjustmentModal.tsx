@@ -28,14 +28,7 @@ export const AdjustmentModal = () => {
     const [adjuntmentId, setAdjuntmentId] = useAtom(adjustmentIdAtom);
     const [stocks, setStock] = useState<any[]>([]);
     const [quantity, setQuantity] = useState<string[]>([]);
-
-
-    const [product, setProduct] = useAtom(productAtom);
     const [products, setProducts] = useState<any[]>([]);
-    const [hasSerial, setHasSerial] = useState<boolean>(false);
-    const [hasVariations, setHasVariations] = useState<boolean>(false);
-    const [salesOrderCode] = useAtom(salesOrderCodeAtom);
-    const [salesOrderItemId] = useAtom(salesOrderItemIdAtom);
 
     
     const { register, setValue, getValues, reset, watch, control } = useForm<TAdjustment>({
@@ -124,6 +117,12 @@ export const AdjustmentModal = () => {
         }
     };
 
+    const close = () => {
+        reset(ResetAdjustment);
+        setModal(false);
+        setAdjuntmentId("");
+    };
+
     useEffect(() => {
         if(watch("codeVariation")) {
             const variation = stocks.find((_, index) => index.toString() == watch("codeVariation"));
@@ -145,7 +144,7 @@ export const AdjustmentModal = () => {
     }, [modal]);
 
     return (
-        <Modal isOpen={modal} onClose={() => setModal(false)} className={`w-[90dvw] ${isVariation ? 'max-w-7xl' : 'max-w-180'} m-4`}>
+        <Modal isOpen={modal} onClose={close} className={`w-[90dvw] ${isVariation ? 'max-w-7xl' : 'max-w-180'} m-4`}>
             <div className="no-scrollbar relative overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
                 <div className="mb-8 px-2 pr-14">
                     <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">Ajustes</h4>
@@ -239,11 +238,7 @@ export const AdjustmentModal = () => {
                                         </select>
                                     </div>
                                     <div className="col-span-12 flex justify-end">
-                                        <Button onClick={() => {
-                                            setModal(false);
-                                            reset(ResetAdjustment);
-                                        }} type="button" variant="outline" size="sm" className="mr-2">Cancelar</Button>
-
+                                        <Button onClick={close} type="button" variant="outline" size="sm" className="mr-2">Cancelar</Button>
                                         <Button onClick={() => confirm({...getValues()})} type="button" className="w-full md:max-w-20" size="sm">Salvar</Button>
                                     </div> 
                                 </>
@@ -311,7 +306,7 @@ export const AdjustmentModal = () => {
                                                 )}
                                             />
                                         </div>          
-                                        <div className="col-span-12 md:col-span-6 lg:col-span-3">
+                                        {/* <div className="col-span-12 md:col-span-6 lg:col-span-3">
                                             <Label title="Desconto de Venda" required={false}/>
                                             <Controller
                                                 name="priceDiscount"
@@ -334,12 +329,10 @@ export const AdjustmentModal = () => {
                                                 />
                                                 )}
                                             />
-                                        </div>
+                                        </div> */}
                                         <div className="col-span-12">
-                                            <Button className="me-2" size="sm" variant="outline" onClick={() => {
-                                            setModal(true);
-                                        }}>Cancelar</Button>
-                                        <Button size="sm" variant="primary" onClick={() => confirm({...getValues()})}>Salvar</Button>
+                                            <Button className="me-2" size="sm" variant="outline" onClick={close}>Cancelar</Button>
+                                            <Button size="sm" variant="primary" onClick={() => confirm({...getValues()})}>Salvar</Button>
                                         </div>
                                     </>
                                 }  

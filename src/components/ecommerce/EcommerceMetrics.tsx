@@ -7,6 +7,7 @@ import { configApi } from "@/service/config.service";
 import { TDashboardCards } from "@/types/dashboard/dashboard-card.type";
 import { useAtom } from "jotai";
 import { loadingAtom } from "@/jotai/global/loading.jotai";
+import { selectedStoreAtom } from "@/jotai/dashboard/dashboard.jotai";
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat("pt-BR", {
@@ -23,12 +24,12 @@ function formatNumber(value: number): string {
 export const EcommerceMetrics = () => {
   const [data, setData] = useState<TDashboardCards | null>(null);
   const [loading, setLoading] = useAtom(loadingAtom);
+  const [selectedStore] = useAtom(selectedStoreAtom);
 
   useEffect(() => {
     api
-      .get("/dashboard/cards", configApi())
+      .get(`/dashboard/cards?selectedStore=${selectedStore}`, configApi())
       .then((res) => {
-        
         setData(res.data?.result?.data ?? null);
       })
       .catch(() => {
@@ -37,7 +38,7 @@ export const EcommerceMetrics = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, []);
+  }, [selectedStore]);
 
   if (loading) {
     return (

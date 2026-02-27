@@ -1,4 +1,5 @@
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
+import { PurchaseOrderButtonCreate } from "@/components/purchase/purchase-order/PurchaseOrderButtonCreate";
 import PurchaseOrderTable from "@/components/purchase/purchase-order/PurchaseOrderTable";
 import Button from "@/components/ui/button/Button";
 import { Metadata } from "next";
@@ -15,9 +16,7 @@ export default function PurchaseOrder() {
     <div>
       <PageBreadcrumb pageIcon="MdOutlineShoppingCart" pageTitle="Pedidos de Compra" pageSubTitle="Compras" />
       <div className="flex justify-end mb-2">
-        <Link href="purchase-order/create">
-          <Button type="submit" className="" size="sm">Adicionar</Button>
-        </Link>
+        <PurchaseOrderButtonCreate />
       </div>
       <PurchaseOrderTable />
     </div>

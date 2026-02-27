@@ -4,6 +4,7 @@ import MonthlyTarget from "@/components/ecommerce/MonthlyTarget";
 import MonthlySalesChart from "@/components/ecommerce/MonthlySalesChart";
 import StatisticsChart from "@/components/ecommerce/StatisticsChart";
 import RecentOrders from "@/components/ecommerce/RecentOrders";
+import { Filter } from "@/components/pages/dashboard/filter/Filter";
 
 export const metadata: Metadata = {
   title:"Telemovvi | Dashboard",
@@ -13,6 +14,9 @@ export const metadata: Metadata = {
 export default function Ecommerce() {
   return (
     <div className="grid grid-cols-12 gap-4">
+      <div className="col-span-12">
+        <Filter />
+      </div>
       <div className="col-span-12 xl:col-span-6">
         <EcommerceMetrics />
       </div>

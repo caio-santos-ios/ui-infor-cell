@@ -35,6 +35,7 @@ import Autocomplete from "@/components/form/Autocomplete";
 import VariationsForm from "@/components/product/product/VariationsForm";
 import { MdOutlineQrCodeScanner } from "react-icons/md";
 import { productAtom } from "@/jotai/product/product.jotai";
+import { purchaseOrderItemsAtom } from "@/jotai/purchaseOrder/purchaseOrderItem.jotai";
 
 type TProp = {
   id?: string;
@@ -46,11 +47,12 @@ export default function PurchaseOrderIemsForm({id}: TProp) {
   const [suppliers, setSuppliers] = useState<TSupplier[]>([]);
   const [variations, setVariation] = useState<any[]>([]);
   const [selectedValues, setSelectedValues] = useState<any[]>([]);
-  const [items, setItem] = useState<TPurchaseOrderItem[]>([]);
+  // const [items, setItem] = useState<TPurchaseOrderItem[]>([]);
   const [status, setStatus] = useAtom(purchaseOrderStatusAtom);
   const { isOpen, openModal, closeModal } = useModal();
   const [__, setModalViewStock] = useAtom(serialModalViewStockAtom);
   const [___, setProduct] = useAtom(productAtom);
+  const [items, setItems] = useAtom(purchaseOrderItemsAtom);
 
   const { control, getValues, reset, register, setValue, watch } = useForm<TPurchaseOrderItem>({
     defaultValues: ResetPurchaseOrderItem
@@ -140,8 +142,8 @@ export default function PurchaseOrderIemsForm({id}: TProp) {
     try {
       setIsLoading(true);
       const {data} = await api.get(`/purchase-order-items?deleted=false&purchaseOrderId=${id}&orderBy=createdAt&sort=desc&pageSize=100&pageNumber=1`, configApi());
-      const result = data.result.data;
-      setItem(result);
+      const result = data?.result?.data ?? [];
+      setItems(result);
     } catch (error) {
       resolveResponse(error);
     } finally {

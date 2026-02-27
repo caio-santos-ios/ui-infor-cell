@@ -190,11 +190,11 @@ export default function SalesOrderTable() {
                           <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
                             <div className="flex gap-3">       
                               {
-                                permissionUpdate("A", "A3") && x.status == "Finalizado" &&
-                                <IoReceipt onClick={() => printReceipt(x.id)} className="text-green-500"/>
+                                permissionUpdate("A", "A3") && x.status != "Em Aberto" &&
+                                <IoReceipt onClick={() => printReceipt(x.id)} className="text-green-500 cursor-pointer"/>
                               }   
                               {
-                                permissionUpdate("A", "A3") && x.status == "Finalizado" &&
+                                permissionUpdate("A", "A3") && x.status != "Em Aberto" &&
                                 <IconView action="view" obj={x} getObj={getObj}/>
                               }   
                               {

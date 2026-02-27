@@ -7,6 +7,7 @@ import { configApi } from "@/service/config.service";
 import { TDashboardMonthlyTarget } from "@/types/dashboard/dashboard-card.type";
 import { loadingAtom } from "@/jotai/global/loading.jotai";
 import { useAtom } from "jotai";
+import { selectedStoreAtom } from "@/jotai/dashboard/dashboard.jotai";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
@@ -22,10 +23,11 @@ function formatCurrency(value: number): string {
 export default function MonthlyTarget() {
   const [data, setData] = useState<TDashboardMonthlyTarget | null>(null);
   const [loading, setLoading] = useAtom(loadingAtom);
+  const [selectedStore] = useAtom(selectedStoreAtom);
 
   useEffect(() => {
     api
-      .get("/dashboard/monthly-target", configApi())
+      .get(`/dashboard/monthly-target?selectedStore=${selectedStore}`, configApi())
       .then((res) => setData(res.data?.result?.data ?? null))
       .catch(() => setData(null))
       .finally(() => setLoading(false));

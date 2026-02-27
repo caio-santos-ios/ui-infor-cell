@@ -1,5 +1,5 @@
 export type TVariationProduct = {
-    code: string;
+    code: any;
     barcode: string;
     variationId: string;
     variationItemId: string;
@@ -8,7 +8,7 @@ export type TVariationProduct = {
 }
 
 export const ResetVariationProduct: TVariationProduct = {
-    code: "",
+    code: null,
     barcode: "",
     variationId: "",
     variationItemId: "",
@@ -118,7 +118,7 @@ export const ResetProduct: TProduct = {
     priceTotal: 0,
     costPrice: 0,
     expenseCostPrice: 0,
-    variations: [ResetVariationProduct],
+    variations: [],
     serials: [ResetProductSerial],
     sku: "",
     ean: "",

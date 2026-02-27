@@ -23,10 +23,10 @@ export default function PurchaseOrderForm({id}: TProp) {
   const [modalApproval] = useAtom(purchaseOrderModalAtom);
   const [__, setApprovalId] = useAtom(purchaseOrderIdAtom);
   const [tabs] = useState<{key: string; title: string;}[]>([
-    {key: 'data', title: 'Dados Gerais'},
+    // {key: 'data', title: 'Dados Gerais'},
     {key: 'items', title: 'Itens'},
   ]);
-  const [currentTab, setCurrentTab] = useState<any>({key: 'data', title: 'Dados Gerais'});
+  const [currentTab, setCurrentTab] = useState<any>({key: 'items', title: 'Itens'});
 
   const { reset } = useForm<TPurchaseOrder>({
     defaultValues: ResetEmployee
@@ -53,7 +53,7 @@ export default function PurchaseOrderForm({id}: TProp) {
           modalApproval &&
           <PurchaseOrderModalApprove />
         }
-        {currentTab.key == "data" && <PurchaseOrderDataForm id={id} />}
+        {/* {currentTab.key == "data" && <PurchaseOrderDataForm id={id} />} */}
         {currentTab.key == "items" && <PurchaseOrderIemsForm id={id} />}
       </div>     
     </>

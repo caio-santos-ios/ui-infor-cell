@@ -5,7 +5,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Telemovvi | Transferências",
+  title: "Telemovvi | Histórico Transferências",
   description:
     "This is Next.js Form Elements page for TailAdmin - Next.js Tailwind CSS Admin Dashboard Template",
 };
@@ -15,7 +15,7 @@ export default async function PanelDetail({ params }: { params: Promise<{ id: st
 
   return (
     <div>
-      <PageBreadcrumb pageIcon="FaExchangeAlt" pageTitle="Transferências" pageSubTitle="Estoque" />
+      <PageBreadcrumb pageIcon="FaExchangeAlt" pageTitle="Histórico Transferências" pageSubTitle="Estoque" />
       <div className="flex justify-end mb-2">
         <Link href="/stock/panel">
           <Button type="submit" variant="outline" size="sm">Voltar</Button>

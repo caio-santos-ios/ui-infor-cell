@@ -16,6 +16,7 @@ import { IconEdit } from "@/components/iconEdit/IconEdit";
 import { IconDelete } from "@/components/iconDelete/IconDelete";
 import { useModal } from "@/hooks/useModal";
 import { ModalDelete } from "@/components/modalDelete/ModalDelete";
+import { Instalation } from "@/components/instalation/Instalation";
 
 
 export default function CompanyTable() {

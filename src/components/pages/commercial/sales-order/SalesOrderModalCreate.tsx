@@ -56,7 +56,7 @@ export default function SalesOrderModalCreate() {
   const [___, setProduct] = useAtom(productAtom);
   const [____, setSalesOrderCode] = useAtom(salesOrderCodeAtom);
   const [_____, setSalesOrderItemId] = useAtom(salesOrderItemIdAtom);
-  const [salesOrderStatus] = useAtom(salesOrderStatusAtom);
+  const [salesOrderStatus, setSalesOrderStatus] = useAtom(salesOrderStatusAtom);
   const [______, setBoxId] = useAtom(boxIdAtom);
   
   const { getValues: getValuesBox, register: RegisterBox, control: controlBox, reset: ResetBoxing, setValue: SetValueBox } = useForm<TBox>({
@@ -89,15 +89,14 @@ export default function SalesOrderModalCreate() {
         stockId: watchSalesOrder("stockId"),
         serial: watchSalesOrder("serial")
       };
-      console.log(body)
 
-      // setIsLoading(true);
-      // const {data} = await api.post(`/sales-orders-items`, body, configApi());
-      // const result = data.result;
-      // resolveResponse({status: 201, message: result.message});
-      // cleanItem();
+      setIsLoading(true);
+      const {data} = await api.post(`/sales-orders-items`, body, configApi());
+      const result = data.result;
+      resolveResponse({status: 201, message: result.message});
+      cleanItem();
 
-      // await getSalesOrderItems(salesOrderId);
+      await getSalesOrderItems(salesOrderId);
     } catch (error) {
       resolveResponse(error);
     } finally {
@@ -184,6 +183,7 @@ export default function SalesOrderModalCreate() {
       setModalCreateFinish(false);
       resetSalesOrder(ResetSalesOrder);
       resetSalesOrderFinish(ResetSalesOrderFinish);
+      close();
     } catch (error) {
       resolveResponse(error);
     } finally {
@@ -290,7 +290,6 @@ export default function SalesOrderModalCreate() {
       
       const {data} = await api.get(`/products/autocomplete?deleted=false&orderBy=name&sort=desc&pageSize=10&pageNumber=1&regex$or$name=${value}&regex$or$code=${value}`, configApi());
       const result = data.result;
-      console.log(result.data)
       const list = result.data.map((x: any) => ({...x, isOutOfStock: x.stock.filter((s: any) => s.quantity > 0).length == 0}));
       setProducts(list);
     } catch (error) {
@@ -428,6 +427,7 @@ export default function SalesOrderModalCreate() {
     setModalBoxCreate(false);
     setModalCreate(false);
     setModalCreateFinish(false);
+    setSalesOrderStatus("Em Aberto");
   };
   
   const calculated = () => {
@@ -742,7 +742,7 @@ export default function SalesOrderModalCreate() {
                               setValueSalesOrder("value", opt.price);
                               setValueSalesOrder("productHasSerial", opt.hasSerial);
                               setValueSalesOrder("productHasVariations", opt.hasVariations);
-
+                              console.log(opt)
                               if(opt.hasVariations == "no") {
                                 setValueSalesOrder("value", opt.price);
                               };
@@ -755,7 +755,12 @@ export default function SalesOrderModalCreate() {
 
                                 setValueSalesOrder("stockId", stock.id);
                                 setVariation(stock.variations.filter((x: any) => parseInt(x.stock) > 0));
-                                setQuantityVariation(stock.quantity);
+                                if(opt.hasVariations == "no") {
+                                  const quantityStock = opt.stock.reduce((value: number, item: any) => value + parseFloat(item.quantity), 0);
+                                  setQuantityVariation(quantityStock);
+                                } else {
+                                  setQuantityVariation(stock.quantity);
+                                }
                               };
 
                               calculated();
@@ -968,7 +973,13 @@ export default function SalesOrderModalCreate() {
                                 <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
                                   {salesOrderItems.map((x: any) => (
                                     <TableRow key={x.id}>
-                                      <TableCell className="text-sm px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.productName}</TableCell>
+                                      <TableCell className="text-sm px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
+                                        {x.productName}
+                                        {
+                                          x.status == "Produto Devolvido" &&
+                                          <span className="text-red-500"> - {x.status}</span>
+                                        }
+                                      </TableCell>
                                       <TableCell className="text-sm px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.quantity}</TableCell>
                                       <TableCell className="text-sm px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{formattedMoney(x.value)}</TableCell>
                                       <TableCell className="text-sm px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{formattedMoney(x.total)}</TableCell>

@@ -27,8 +27,6 @@ export default function PurchaseOrderDataForm({id}: TProp) {
     defaultValues: ResetPurchaseOrder
   });
 
-  // const status = watch("status");
-
   const save = async (body: TPurchaseOrder) => {
     if(!body.id) {
       await create(body);
@@ -42,7 +40,7 @@ export default function PurchaseOrderDataForm({id}: TProp) {
       setIsLoading(true);
       const {data} = await api.post(`/purchase-orders`, body, configApi());
       const result = data.result;
-      resolveResponse({status: 201, message: result.message});
+      // resolveResponse({status: 201, message: result.message});
       router.push(`/purchase/purchase-order/${result.data.id}`)
     } catch (error) {
       resolveResponse(error);

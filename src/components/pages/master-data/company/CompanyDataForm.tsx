@@ -109,7 +109,7 @@ export default function CompanyDataForm({id}: TProp) {
     <>
 
       <ComponentCard title="Dados Gerais">
-        <div className="grid grid-cols-6 gap-2 container-form">
+        <div className="grid grid-cols-6 gap-2 px-2 max-h-[calc(100dvh-27rem)] overflow-y-auto">
           <div className="col-span-6 xl:col-span-2">
             <Label title="Razão social"/>
             <input placeholder="Razão social" {...register("corporateName")} type="text" className="input-erp-primary input-erp-default"/>

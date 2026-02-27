@@ -35,7 +35,7 @@ const staticNavItems: NavItem[] = [
       {name: "Produtos", path: "/product/products", code: "B1", pro: false, authorized: false },
       {name: "Categorias", path: "/product/categories", code: "B2", pro: false, authorized: false },
       {name: "Marcas", path: "/product/brands", code: "B4", pro: false, authorized: false },
-      {name: "Grupos de Produtos", path: "/product/models", code: "B3", pro: false, authorized: false },
+      // {name: "Grupos de Produtos", path: "/product/models", code: "B3", pro: false, authorized: false },
       {name: "Variações", path: "/product/variations", code: "B5", pro: false, authorized: false }
     ]
   },
@@ -68,7 +68,7 @@ const staticNavItems: NavItem[] = [
     subItems: [
       {name: "Posição de Estoque", path: "/stock/stock-position", code: "F1", pro: false, authorized: false },
       {name: "Ajustes", path: "/stock/adjustment", code: "F4", pro: false, authorized: false },
-      {name: "Transferências", path: "/stock/transfer", code: "F2", pro: false, authorized: false },
+      {name: "Histórico Transferências", path: "/stock/transfer", code: "F2", pro: false, authorized: false },
       {name: "Trocas e Devoluções", path: "/stock/exchanges", code: "F3", pro: false, authorized: false },
     ]
   },

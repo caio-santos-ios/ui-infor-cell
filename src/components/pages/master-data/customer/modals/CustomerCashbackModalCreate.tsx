@@ -91,13 +91,6 @@ export default function CustomerCashbackModalCreate() {
                 <Label title="Descrição" />
                 <input maxLength={50} placeholder="Descrição" {...register("description")} type="text" className="input-erp-primary input-erp-default"/>
               </div>
-              <div className="col-span-6">
-                <Label title="Reservar Produto" />
-                <Autocomplete placeholder="Buscar produto...." defaultValue={watch("productName")} objKey="id" objValue="productName" onSearch={(value: string) => getAutocompleProduct(value)} onSelect={(opt) => {
-                  setValue("productId", opt.id);
-                  setValue("productName", opt.productName);
-                }} options={products}/>
-              </div>
               <div className="col-span-6 lg:col-span-2">
                 <Label title="Valor" />
                 <Controller
@@ -119,6 +112,13 @@ export default function CustomerCashbackModalCreate() {
                     />
                   )}
                 />
+              </div>
+              <div className="col-span-6">
+                <Label title="Reservar Produto" required={false}/>
+                <Autocomplete placeholder="Buscar produto...." defaultValue={watch("productName")} objKey="id" objValue="productName" onSearch={(value: string) => getAutocompleProduct(value)} onSelect={(opt) => {
+                  setValue("productId", opt.id);
+                  setValue("productName", opt.productName);
+                }} options={products}/>
               </div>
             </div>
           </div>

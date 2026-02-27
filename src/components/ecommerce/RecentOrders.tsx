@@ -13,6 +13,7 @@ import { configApi } from "@/service/config.service";
 import { TDashboardRecentOrder } from "@/types/dashboard/dashboard-card.type";
 import { loadingAtom } from "@/jotai/global/loading.jotai";
 import { useAtom } from "jotai";
+import { selectedStoreAtom } from "@/jotai/dashboard/dashboard.jotai";
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat("pt-BR", {
@@ -40,10 +41,11 @@ function statusColor(status: string): "success" | "warning" | "error" | "info" {
 export default function RecentOrders() {
   const [orders, setOrders] = useState<TDashboardRecentOrder[]>([]);
   const [loading, setLoading] = useAtom(loadingAtom);
+  const [selectedStore] = useAtom(selectedStoreAtom);
 
   useEffect(() => {
     api
-      .get("/dashboard/recent-orders", configApi())
+      .get(`/dashboard/recent-orders?selectedStore=${selectedStore}`, configApi())
       .then((res) => setOrders(res.data?.result?.data ?? []))
       .catch(() => setOrders([]))
       .finally(() => setLoading(false));

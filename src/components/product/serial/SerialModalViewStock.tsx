@@ -88,6 +88,7 @@ export default function SerialModalViewStock() {
 
         setStock(listStock);
       } else {
+        console.log(result)
         setStock(result.filter((x: any) => x.quantityAvailable > 0));
       }
     } else {

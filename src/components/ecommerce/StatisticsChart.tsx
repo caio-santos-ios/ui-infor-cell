@@ -10,6 +10,7 @@ import { configApi } from "@/service/config.service";
 import { TDashboardMonthlySales } from "@/types/dashboard/dashboard-card.type";
 import { loadingAtom } from "@/jotai/global/loading.jotai";
 import { useAtom } from "jotai";
+import { selectedStoreAtom } from "@/jotai/dashboard/dashboard.jotai";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
@@ -28,10 +29,11 @@ export default function StatisticsChart() {
   const datePickerRef = useRef<HTMLInputElement>(null);
   const [data, setData] = useState<TDashboardMonthlySales | null>(null);
   const [loading, setLoading] = useAtom(loadingAtom);
+  const [selectedStore] = useAtom(selectedStoreAtom);
 
   useEffect(() => {
     api
-      .get("/dashboard/monthly-sales", configApi())
+      .get(`/dashboard/monthly-sales?selectedStore=${selectedStore}`, configApi())
       .then((res) => setData(res.data?.result?.data ?? null))
       .catch(() => setData(null))
       .finally(() => setLoading(false));
