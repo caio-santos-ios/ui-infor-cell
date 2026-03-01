@@ -5,12 +5,15 @@ import Autocomplete from "@/components/form/Autocomplete";
 import AutocompletePlus from "@/components/form/AutocompletePlus";
 import TextArea from "@/components/form/input/TextArea";
 import Label from "@/components/form/Label";
+import { SelectPlus } from "@/components/form/SelectPlus";
 import Button from "@/components/ui/button/Button";
 import { customerAtom, customerIdModalAtom, customerModalCreateAtom } from "@/jotai/masterData/customer.jotai";
+import { genericTableModalCreateAtom } from "@/jotai/masterData/genericTable.jotai";
 import { api } from "@/service/api.service";
 import { configApi, resolveResponse } from "@/service/config.service";
+import { TGenericTable } from "@/types/master-data/generic-table/generic-table.type";
 import { useAtom } from "jotai";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 
 type TProp = {
   register: any;
@@ -28,6 +31,9 @@ export default function ServiceOrderDeviceTab({ register, watch, setValue, onSav
   const [_, setCustomerModalCreate] = useAtom(customerModalCreateAtom);
   const [___, setCustomerIdModal] = useAtom(customerIdModalAtom);
   const [customer, setCustomer] = useAtom(customerAtom);
+  const [typeDevice, setTypeDevice] = useState<TGenericTable[]>([]);
+  const [physicalCondition, setPhysicalCondition] = useState<TGenericTable[]>([]);
+  const [typeModal] = useAtom(genericTableModalCreateAtom);
 
   const customerId = watch("customerId");
 
@@ -51,7 +57,29 @@ export default function ServiceOrderDeviceTab({ register, watch, setValue, onSav
     }
   };
 
-  useEffect(() => { fetchBrands(); }, []);
+  const fetchType = async () => {
+    try {
+      const { data } = await api.get(`/generic-tables/table/tipo-equipamentos-ordem-servico`, configApi());
+      setTypeDevice(data?.result?.data || []);
+    } catch (error) {
+      resolveResponse(error);
+    } finally {}
+  };
+
+  const fetchPhysicalCondition = async () => {
+    try {
+      const { data } = await api.get(`/generic-tables/table/estado-fisico-ordem-servico`, configApi());
+      setPhysicalCondition(data?.result?.data || []);
+    } catch (error) {
+      resolveResponse(error);
+    } finally {}
+  };
+
+  useEffect(() => { 
+    fetchBrands(); 
+    fetchType();
+    fetchPhysicalCondition(); 
+  }, []);
 
   const handleSerialBlur = () => {
     const serialImei = watch("device.serialImei");
@@ -65,6 +93,11 @@ export default function ServiceOrderDeviceTab({ register, watch, setValue, onSav
     setValue("device.brandId", e.target.value);
     setValue("device.brandName", brand?.name || "");
   };
+
+  useEffect(() => {
+    fetchType();
+    fetchPhysicalCondition();
+  }, [typeModal]);
 
   useEffect(() => {
     if (customer.corporateName) {
@@ -104,18 +137,11 @@ export default function ServiceOrderDeviceTab({ register, watch, setValue, onSav
 
         <div className="col-span-12 xl:col-span-3">
           <Label title="Tipo de Equipamento" />
-          <select {...register("device.type")} disabled={isClosed} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 text-gray-800">
-            <option value="">Selecione</option>
-            <option value="celular">Celular</option>
-            <option value="computador">Computador</option>
-            <option value="notebook">Notebook</option>
-            <option value="tablet">Tablet</option>
-            <option value="outro">Outro</option>
-          </select>
+          <SelectPlus genericTable="tipo-equipamentos-ordem-servico" code="code" label="description" disabled={isClosed} options={typeDevice} {...register("device.type")}/>
         </div>
 
         <div className="col-span-12 xl:col-span-3">
-          <Label title="Marca"/>
+          <Label title="Marca" required={false}/>
           <select value={watch("device.brandId")} onChange={selectBrand} disabled={isClosed} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 text-gray-800">
             <option value="">Selecione</option>
             {brands.map((b: any) => <option key={b.id} value={b.id} className="dark:bg-gray-900">{b.name}</option>)}
@@ -123,7 +149,7 @@ export default function ServiceOrderDeviceTab({ register, watch, setValue, onSav
         </div>
 
         <div className="col-span-12 xl:col-span-3">
-          <Label title="Modelo"/>
+          <Label title="Modelo" required={false}/>
           <input {...register("device.modelName")} placeholder="Modelo (opcional)" disabled={isClosed} type="text" className="input-erp-primary input-erp-default" />
         </div>
 
@@ -160,14 +186,18 @@ export default function ServiceOrderDeviceTab({ register, watch, setValue, onSav
           <input {...register("device.accessories")} placeholder="Ex: carregador, capa, cabo..." disabled={isClosed} type="text" className="input-erp-primary input-erp-default" />
         </div>
 
-        <div className="col-span-12 xl:col-span-6">
-          <Label title="Estado Físico" required={false} />
+        {/* <div className="col-span-12 xl:col-span-6">
           <select {...register("device.physicalCondition")} disabled={isClosed} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 text-gray-800">
             <option value="000001">Novo</option>
             <option value="000002">Tela com Riscos</option>
             <option value="000003">Carcaça Amassada</option>
             <option value="000004">Outros</option>
           </select>
+        </div> */}
+
+        <div className="col-span-12 xl:col-span-3">
+          <Label title="Estado Físico" required={false} />
+          <SelectPlus genericTable="estado-fisico-ordem-servico" code="code" label="description" disabled={isClosed} options={physicalCondition} {...register("device.physicalCondition")}/>
         </div>
 
         <div className="col-span-12">

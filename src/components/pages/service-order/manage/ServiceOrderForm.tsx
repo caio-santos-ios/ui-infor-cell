@@ -35,7 +35,7 @@ export default function ServiceOrderForm({ id }: TProp) {
   const [currentTab, setCurrentTab] = useState("device");
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [warrantyInfo, setWarrantyInfo] = useState<any>(null);
-  const [currentMoment, setCurrentMoment] = useAtom(currentMomentServiceOrderAtom);
+  const [___, setCurrentMoment] = useAtom(currentMomentServiceOrderAtom);
   const [situations, setSituations] = useAtom(situationsAtom);
   const [__, setCustomer] = useAtom(customerAtom);
   const router = useRouter();
@@ -67,7 +67,9 @@ export default function ServiceOrderForm({ id }: TProp) {
           setCurrentMoment("start");
           getSelectSituations("start");
         }
-      }
+      };
+
+      await checkWarranty(result.customerId, result.device?.serialImei);
     } catch (error) {
       resolveResponse(error);
     } finally {
@@ -90,11 +92,8 @@ export default function ServiceOrderForm({ id }: TProp) {
 
   const checkWarranty = async (customerId: string, serialImei: string) => {
     try {
-      if (!customerId && !serialImei) return;
-      const params = new URLSearchParams();
-      if (serialImei) params.set("serialImei", serialImei);
-      else if (customerId) params.set("customerId", customerId);
-      const { data } = await api.get(`/serviceOrders/warranty-check?${params.toString()}`, configApi());
+      if (!customerId && !serialImei) return;      
+      const { data } = await api.get(`/serviceOrders/warranty-check?customerId=${customerId}&serialImei=${serialImei}`, configApi());
       if (data.result?.data) {
         setWarrantyInfo(data.result.data);
         setValue("isWarrantyInternal", true);
@@ -176,7 +175,9 @@ export default function ServiceOrderForm({ id }: TProp) {
   useEffect(() => {
     setCurrentMoment("start");
     setCustomer(ResetCustomer);
-    if (isEdit) getById(id!);
+    if (isEdit) {
+      getById(id!);
+    } 
   }, []);
 
   return (
@@ -256,7 +257,7 @@ export default function ServiceOrderForm({ id }: TProp) {
             )}
 
             {!isClosed && (
-              <Button className="col-span-2 lg:col-span-1" onClick={() => setShowCloseModal(true)} type="submit" variant="primary" size="sm">Fechar OS</Button>
+              <Button className="col-span-2 lg:col-span-1 h-9" onClick={() => setShowCloseModal(true)} type="submit" variant="primary" size="sm">Fechar OS</Button>
             )}
             {
               !isClosed && (
@@ -292,7 +293,7 @@ export default function ServiceOrderForm({ id }: TProp) {
         </div>
       )}
 
-      <div className="flex items-center font-medium gap-2 rounded-lg transition px-2 py-2 text-sm bg-white text-gray-700 ring-1 ring-inset ring-gray-300 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 w-full mb-3">
+      <div className="flex items-center font-medium gap-2 rounded-lg transition px-2 py-2 text-sm border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/3 mb-3 text-gray-700 dark:text-gray-400">
         {TABS.map((tab) => (
           <button
             key={tab.key}

@@ -11,7 +11,6 @@ import { MdSync } from "react-icons/md";
 import { FaUserEdit } from "react-icons/fa";
 import { configApi, removeLocalStorage, resolveResponse, saveLocalStorage } from "@/service/config.service";
 import { loadingAtom } from "@/jotai/global/loading.jotai";
-import { FaRegBuilding } from "react-icons/fa";
 
 export default function UserDropdown() {
   const [_, setIsLoading] = useAtom(loadingAtom);

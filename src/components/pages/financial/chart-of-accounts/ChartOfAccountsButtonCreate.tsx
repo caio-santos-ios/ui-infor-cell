@@ -6,7 +6,7 @@ export function ChartOfAccountsButtonCreate() {
   const router = useRouter();
 
   const handleClick = () => {
-    router.push("/financial/chart-of-accounts/new");
+    router.push("/financial/chart-of-accounts/create");
   };
 
   return (

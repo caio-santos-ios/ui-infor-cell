@@ -86,7 +86,7 @@ export default function ProductImageForm({id}: TProp) {
               {
                 images.map((image: any) => {
                   return (
-                    <li key={image.id} className="flex flex-wrap items-center font-medium gap-2 rounded-lg transition px-2 py-2 text-sm bg-white text-gray-700 ring-1 ring-inset ring-gray-300 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 w-full mb-3">
+                    <li key={image.id} className="flex flex-wrap items-center font-medium gap-2 rounded-lg transition px-2 py-2 text-sm border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/3 mb-3">
                       <div className="w-36 rounded-lg">
                         <img
                           src={image.image}

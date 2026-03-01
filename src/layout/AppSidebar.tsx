@@ -7,11 +7,26 @@ import { useSidebar } from "../context/SidebarContext";
 import { ChevronDownIcon } from "../icons/index";
 import { useAtom } from "jotai";
 import { iconAtom } from "@/jotai/global/icons.jotai";
-import { syncAtom, userAdmin } from "@/jotai/auth/auth.jotai";
+import { userAdmin } from "@/jotai/auth/auth.jotai";
 import { CompanyLogo } from "@/components/logoCompany/LogoCompany";
 import { NavItem } from "@/types/global/menu.type";
 
 const staticNavItems: NavItem[] = [
+  {
+    icon: "RiSettings3Line",
+    name: "Configurações",
+    authorized: false,
+    code: "00",
+    subItems: [
+      {name: "Configuração Fiscal", path: "/settings/fiscal", code: "001", pro: false, authorized: false },
+      {name: "Minha Conta", path: "/settings/account", code: "002", pro: false, authorized: false },
+      // {name: "Lojas", path: "/master-data/stores", code: "A2", pro: false, authorized: false },
+      // {name: "Profissionais", path: "/master-data/employees", code: "A3", pro: false, authorized: false },
+      // {name: "Clientes", path: "/master-data/customers", code: "A4", pro: false, authorized: false },
+      // {name: "Fornecedores", path: "/master-data/suppliers", code: "A5", pro: false, authorized: false },
+      // {name: "Permissões de Usuário", path: "/master-data/profile-permission", code: "F1", pro: false, authorized: false },
+    ]
+  },
   {
     icon: "FiGrid",
     name: "Cadastros",

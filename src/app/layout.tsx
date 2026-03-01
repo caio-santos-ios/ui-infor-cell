@@ -6,6 +6,7 @@ import { Autorization } from '@/components/autorization/Autorization';
 import { Loading } from '@/components/loading/Loading';
 import { Providers } from "./providers"; 
 import { Modal403 } from '@/components/modal-403/Modal403';
+import { GenericTableModalCreate } from '@/components/pages/master-data/generic-table/GenericTableModalCreate';
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -23,6 +24,7 @@ export default function RootLayout({
           <Loading />
           <Autorization /> 
           <Modal403 />
+          <GenericTableModalCreate />
           {children}
         </Providers>
       </body>

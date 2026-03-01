@@ -1,6 +1,6 @@
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
-import { ChartOfAccountsButtonCreate } from "@/components/pages/chart-of-accounts/ChartOfAccountsButtonCreate";
-import ChartOfAccountsTable from "@/components/pages/chart-of-accounts/ChartOfAccountsTable";
+import { ChartOfAccountsButtonCreate } from "@/components/pages/financial/chart-of-accounts/ChartOfAccountsButtonCreate";
+import ChartOfAccountsTable from "@/components/pages/financial/chart-of-accounts/ChartOfAccountsTable";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
