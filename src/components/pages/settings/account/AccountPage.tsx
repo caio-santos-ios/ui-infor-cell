@@ -255,11 +255,11 @@ function SubscriptionTab() {
   return (
     <div className="flex flex-col gap-3">
       {/* Card plano atual */}
-      <div className={`p-px rounded-2xl bg-gradient-to-r ${gradient}`}>
+      <div className={`p-px rounded-2xl bg-linear-to-r ${gradient}`}>
         <div className="rounded-2xl bg-white dark:bg-gray-900 p-5">
           <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className={`w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br ${gradient} shrink-0`}>
+              <div className={`w-14 h-14 rounded-xl flex items-center justify-center bg-linear-to-br ${gradient} shrink-0`}>
                 <MdDiamond className="text-white text-2xl" />
               </div>
               <div>
