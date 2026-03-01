@@ -187,39 +187,41 @@ function ProfileTab() {
       <Button onClick={save} type="button" className="w-full xl:w-24 mt-2" size="sm">Salvar</Button>
 
       {/* Endereço */}
-      <ComponentCard title="Endereço" className="mt-3">
-        <div className="grid grid-cols-6 gap-2 container-form">
-          <div className="col-span-6 xl:col-span-2">
-            <Label title="CEP" />
-            <input placeholder="00000-000" onInput={lookupZip} {...register("address.zipCode")} type="text" className="input-erp-primary input-erp-default" />
-          </div>
-          <div className="col-span-6 xl:col-span-1">
-            <Label title="Número" />
-            <input placeholder="Nº" {...register("address.number")} type="text" className="input-erp-primary input-erp-default" />
-          </div>
-          <div className="col-span-6 xl:col-span-3">
-            <Label title="Rua" />
-            <input placeholder="Rua / Avenida" {...register("address.street")} type="text" className="input-erp-primary input-erp-default" />
-          </div>
-          <div className="col-span-6 xl:col-span-2">
-            <Label title="Bairro" />
-            <input placeholder="Bairro" {...register("address.neighborhood")} type="text" className="input-erp-primary input-erp-default" />
-          </div>
-          <div className="col-span-6 xl:col-span-2">
-            <Label title="Cidade" />
-            <input placeholder="Cidade" {...register("address.city")} type="text" className="input-erp-primary input-erp-default" />
-          </div>
-          <div className="col-span-6 xl:col-span-1">
-            <Label title="Estado" />
-            <input placeholder="UF" {...register("address.state")} type="text" className="input-erp-primary input-erp-default" />
-          </div>
-          <div className="col-span-6 xl:col-span-3">
-            <Label title="Complemento" required={false} />
-            <input placeholder="Apto, bloco..." {...register("address.complement")} type="text" className="input-erp-primary input-erp-default" />
-          </div>
-        </div>
-      </ComponentCard>
-      <Button onClick={saveAddress} type="button" className="w-full xl:w-24 mt-2" size="sm">Salvar endereço</Button>
+      <div className="hidden">
+        <ComponentCard title="Endereço" className="mt-3">
+            <div className="grid grid-cols-6 gap-2 container-form">
+            <div className="col-span-6 xl:col-span-2">
+                <Label title="CEP" />
+                <input placeholder="00000-000" onInput={lookupZip} {...register("address.zipCode")} type="text" className="input-erp-primary input-erp-default" />
+            </div>
+            <div className="col-span-6 xl:col-span-1">
+                <Label title="Número" />
+                <input placeholder="Nº" {...register("address.number")} type="text" className="input-erp-primary input-erp-default" />
+            </div>
+            <div className="col-span-6 xl:col-span-3">
+                <Label title="Rua" />
+                <input placeholder="Rua / Avenida" {...register("address.street")} type="text" className="input-erp-primary input-erp-default" />
+            </div>
+            <div className="col-span-6 xl:col-span-2">
+                <Label title="Bairro" />
+                <input placeholder="Bairro" {...register("address.neighborhood")} type="text" className="input-erp-primary input-erp-default" />
+            </div>
+            <div className="col-span-6 xl:col-span-2">
+                <Label title="Cidade" />
+                <input placeholder="Cidade" {...register("address.city")} type="text" className="input-erp-primary input-erp-default" />
+            </div>
+            <div className="col-span-6 xl:col-span-1">
+                <Label title="Estado" />
+                <input placeholder="UF" {...register("address.state")} type="text" className="input-erp-primary input-erp-default" />
+            </div>
+            <div className="col-span-6 xl:col-span-3">
+                <Label title="Complemento" required={false} />
+                <input placeholder="Apto, bloco..." {...register("address.complement")} type="text" className="input-erp-primary input-erp-default" />
+            </div>
+            </div>
+        </ComponentCard>
+        <Button onClick={saveAddress} type="button" className="w-full xl:w-24 mt-2" size="sm">Salvar endereço</Button>
+      </div>
     </>
   );
 }
@@ -236,14 +238,13 @@ function SubscriptionTab() {
         setIsLoading(true);
         const [
             subRes, 
-            // histRes
+            histRes
         ] = await Promise.all([
             api.get(`/subscriptions/current`, configApi()),
-            // api.get(`/subscriptions/payments`, configApi()),
+            api.get(`/subscriptions/payments`, configApi()),
         ]);
-        console.log(subRes.data.result.data);
         setSubscription(subRes.data.result?.data ?? null);
-        // setHistory(histRes.data.result?.data ?? []);
+        setHistory(histRes.data.result?.data ?? []);
     } catch (error) { resolveResponse(error); }
     finally { setIsLoading(false); }
   };
@@ -356,21 +357,19 @@ function SubscriptionTab() {
 // ─── ABA: INFORMAÇÕES DA INSTALAÇÃO ───────────────────────────────────────────
 
 function InstallationTab() {
-  const [_, setIsLoading] = useAtom(loadingAtom);
-  const [info, setInfo] = useState<any>(null);
+    const [_, setIsLoading] = useAtom(loadingAtom);
+    const [info, setInfo] = useState<any>(null);
 
-  const load = async () => {
-    try {
-      setIsLoading(true);
-      const typeUser = localStorage.getItem("typeUser") ?? "";
-      const uri = ["technical", "seller"].includes(typeUser) ? "employees" : "users";
-      const { data } = await api.get(`/${uri}/logged`, configApi());
-      setInfo(data.result.data);
-    } catch (error) { resolveResponse(error); }
-    finally { setIsLoading(false); }
-  };
+    const load = async () => {
+        try {
+            setIsLoading(true);
+            const { data } = await api.get(`/users/logged`, configApi());
+            setInfo(data.result.data);
+        } catch (error) { resolveResponse(error); }
+        finally { setIsLoading(false); }
+    };
 
-  useEffect(() => { load(); }, []);
+    useEffect(() => { load(); }, []);
 
   const Row = ({ label, value }: { label: string; value: string }) => (
     <div className="flex items-center justify-between py-2.5 border-b border-gray-100 dark:border-gray-800 last:border-0">
@@ -388,8 +387,8 @@ function InstallationTab() {
           <Row label="E-mail"            value={info?.email} />
           <Row label="Empresa"           value={info?.nameCompany} />
           <Row label="Loja ativa"        value={info?.nameStore} />
-          <Row label="Empresas"          value={`${info?.companies?.length ?? 0} vinculada(s)`} />
-          <Row label="Lojas"             value={`${info?.stores?.length ?? 0} vinculada(s)`} />
+          <Row label="Empresas"          value={`${info?.companiesAll?.length ?? 0} vinculada(s)`} />
+          <Row label="Lojas"             value={`${info?.storesAll?.length ?? 0} vinculada(s)`} />
           <Row label="Membro desde"      value={fDate(info?.createdAt)} />
         </ComponentCard>
       </div>
@@ -398,7 +397,7 @@ function InstallationTab() {
       <div className="col-span-6 xl:col-span-3">
         <ComponentCard title="Plano & Sistema">
           <Row label="Versão"            value="Telemovvi ERP v1.0" />
-          <Row label="Plano contratado"  value={info?.plan ?? "—"} />
+          <Row label="Plano contratado"  value={info?.namePlan ?? "—"} />
           <div className="flex items-center justify-between py-2.5 border-b border-gray-100 dark:border-gray-800">
             <span className="text-sm text-gray-500 dark:text-gray-400">Assinatura</span>
             <span className={`inline-flex items-center gap-1.5 text-sm font-medium ${info?.subscriberPlan ? "text-success-600 dark:text-success-400" : "text-error-500 dark:text-error-400"}`}>
