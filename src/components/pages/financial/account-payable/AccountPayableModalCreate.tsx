@@ -18,7 +18,6 @@ import {
     ResetAccountPayable,
     TAccountPayable,
 } from "@/types/financial/account-payable/account-payable.type";
-import Autocomplete from "@/components/form/Autocomplete";
 import AutocompletePlus from "@/components/form/AutocompletePlus";
 import { supplierAtom, supplierModalCreateAtom } from "@/jotai/masterData/supplier.jotai";
 
@@ -28,9 +27,9 @@ export default function AccountPayableModalCreate() {
     const [accountPayableId, setAccountPayableId] = useAtom(accountPayableIdAtom);
     const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
     const [suppliers, setSuppliers] = useState<any[]>([]);
-    const [numberOfInstallments, setNumberOfInstallments] = useState<number>(0);
     const [__, setSupplierModalCreate] = useAtom(supplierModalCreateAtom);
     const [supplier] = useAtom(supplierAtom);
+    const [chartOfAccounts, setChartOfAccounts] = useState<any[]>([]);
 
     const { getValues, setValue, register, reset, control, watch } = useForm<TAccountPayable>({ defaultValues: ResetAccountPayable });
 
@@ -96,6 +95,16 @@ export default function AccountPayableModalCreate() {
         }
     };
 
+    const getChartOfAccount = async () => {
+        try {
+            const { data } = await api.get(`/chart-of-accounts/select?deleted=false&type=despesa`, configApi());
+            const result = data.result.data;
+            setChartOfAccounts(result ?? []);
+        } catch {
+            setChartOfAccounts([]);
+        }
+    };
+
     const close = () => {
         setModalCreate(false);
         setAccountPayableId("");
@@ -112,6 +121,7 @@ export default function AccountPayableModalCreate() {
     useEffect(() => {
         const initial = async () => {
             await getPaymentMethods();
+            await getChartOfAccount();
             if (accountPayableId) {
                 await getById(accountPayableId);
             }
@@ -194,7 +204,7 @@ export default function AccountPayableModalCreate() {
                                 />
                             </div>
 
-                            <div className="col-span-6 lg:col-span-3">
+                            <div className="col-span-6 lg:col-span-2">
                                 <Label title="Parcela Nº" required={false} />
                                 <input
                                     {...register("installmentNumber", { valueAsNumber: true })}
@@ -205,7 +215,7 @@ export default function AccountPayableModalCreate() {
                                 />
                             </div>
 
-                            <div className="col-span-6 lg:col-span-3">
+                            <div className="col-span-6 lg:col-span-2">
                                 <Label title="Total de Parcelas" required={false} />
                                 <input
                                     {...register("totalInstallments", { valueAsNumber: true })}
@@ -216,7 +226,7 @@ export default function AccountPayableModalCreate() {
                                 />
                             </div>
 
-                            <div className="col-span-6 lg:col-span-3">
+                            <div className="col-span-6 lg:col-span-2">
                                 <Label title="Data de Vencimento" />
                                 <input
                                     {...register("dueDate")}
@@ -224,7 +234,17 @@ export default function AccountPayableModalCreate() {
                                     className="input-erp-primary input-erp-default"
                                 />
                             </div>
-
+                            <div className="col-span-6 lg:col-span-4">
+                                <Label title="Plano de Contas" required={false} />
+                                <select {...register("chartOfAccountId")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800">
+                                    <option value="">Selecione</option>
+                                    {chartOfAccounts.map((p: any) => (
+                                    <option key={p.id} value={p.id}>
+                                        {p.name}
+                                    </option>
+                                    ))}
+                                </select>
+                            </div>
                             <div className="col-span-6">
                                 <Label title="Observações" required={false} />
                                 <textarea

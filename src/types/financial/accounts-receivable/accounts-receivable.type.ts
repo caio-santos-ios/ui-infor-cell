@@ -18,6 +18,8 @@ export type TAccountReceivable = {
     status: string; // "open" | "paid" | "partial" | "overdue" | "cancelled"
     notes: string;
     createdAt: string;
+    chartOfAccountId: string;
+    issueDate: any;
 }
 
 export const ResetAccountReceivable: TAccountReceivable = {
@@ -39,7 +41,9 @@ export const ResetAccountReceivable: TAccountReceivable = {
     paidAt: null,
     status: "open",
     notes: "",
-    createdAt: ""
+    createdAt: "",
+    chartOfAccountId: "",
+    issueDate: new Date().toISOString().split("T")[0],
 }
 
 export type TPayAccountReceivable = {

@@ -38,7 +38,7 @@ export default function AccountReceivableTable() {
     try {
       setLoading(true);
       const today = new Date().toISOString().split('T')[0];;
-      const { data } = await api.get(`/accounts-receivable?deleted=false&lte$issueDate=${today}&orderBy=dueDate&sort=asc&pageSize=10&pageNumber=${page}`, configApi());
+      const { data } = await api.get(`/accounts-receivable?deleted=false&lte$issueDate=${today}&orderBy=issueDate&sort=desc&pageSize=10&pageNumber=${page}`, configApi());
       const result = data.result;
       setPagination({
         currentPage: result.currentPage,
@@ -116,8 +116,9 @@ export default function AccountReceivableTable() {
                       <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Descrição</TableCell>
                       <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Forma Pgto</TableCell>
                       <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Valor</TableCell>
-                      <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Valor a receber</TableCell>
+                      <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Valor Recebido</TableCell>
                       <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Parcela</TableCell>
+                      <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Emissão</TableCell>
                       <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Vencimento</TableCell>
                       <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Status</TableCell>
                       <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Ações</TableCell>
@@ -133,6 +134,7 @@ export default function AccountReceivableTable() {
                         <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-700 dark:text-gray-200 font-medium">{formattedMoney(x.amount)}</TableCell>
                         <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-700 dark:text-gray-200 font-medium">{formattedMoney(x.amountPaid)}</TableCell>
                         <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.installmentNumber}/{x.totalInstallments}</TableCell>
+                        <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{maskDate(x.issueDate)}</TableCell>
                         <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{maskDate(x.dueDate)}</TableCell>
                         <TableCell className="px-5 py-4 sm:px-6 text-start">{getStatusBadge(x.status)}</TableCell>
                         <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">

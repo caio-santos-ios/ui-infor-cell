@@ -45,10 +45,7 @@ export default function AccountPayableTable() {
     const getAll = async (page: number) => {
         try {
             setLoading(true);
-            const { data } = await api.get(
-                `/accounts-payable?deleted=false&orderBy=dueDate&sort=asc&pageSize=10&pageNumber=${page}`,
-                configApi()
-            );
+            const { data } = await api.get(`/accounts-payable?deleted=false&orderBy=issueDate&sort=desc&pageSize=10&pageNumber=${page}`, configApi());
             const result = data.result;
             setPagination({
                 currentPage: result.currentPage,
@@ -95,6 +92,15 @@ export default function AccountPayableTable() {
         if (action === "delete") openModal();
     };
 
+    const getStatusBadge = (status: string) => {
+        const s = statusLabelPayable[status] ?? { label: status, color: "bg-gray-100 text-gray-700" };
+        return (
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${s.color}`}>
+                {s.label}
+            </span>
+        );
+    };
+
     useEffect(() => {
         if (permissionRead("H", "H2")) {
             getAll(1);
@@ -114,12 +120,14 @@ export default function AccountPayableTable() {
                                 <Table className="divide-y">
                                     <TableHeader className="border-b border-gray-100 dark:border-white/5 tele-table-thead">
                                         <TableRow>
-                                            <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Cód.</TableCell>
+                                            {/* <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Cód.</TableCell> */}
                                             <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Fornecedor</TableCell>
                                             <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Descrição</TableCell>
                                             <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Forma Pgto</TableCell>
                                             <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Valor</TableCell>
+                                            <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Valor Pago</TableCell>
                                             <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Parcela</TableCell>
+                                            <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Emissão</TableCell>
                                             <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Vencimento</TableCell>
                                             <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Status</TableCell>
                                             <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Ações</TableCell>
@@ -133,20 +141,17 @@ export default function AccountPayableTable() {
 
                                             return (
                                                 <TableRow key={x.id}>
-                                                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">{x.code}</TableCell>
-                                                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">{x.supplierName || "—"}</TableCell>
+                                                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">{x.supplierName}</TableCell>
                                                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">{x.description}</TableCell>
                                                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">{x.paymentMethodName}</TableCell>
                                                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">{formattedMoney(x.amount)}</TableCell>
+                                                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">{formattedMoney(x.amountPaid)}</TableCell>
                                                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">
                                                         {x.installmentNumber}/{x.totalInstallments}
                                                     </TableCell>
+                                                    <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">{maskDate(x.issueDate)}</TableCell>
                                                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">{maskDate(x.dueDate)}</TableCell>
-                                                    <TableCell className="px-5 py-4 sm:px-6 text-start">
-                                                        <span className={`py-1 px-2 text-xs font-semibold rounded-2xl ${badge.color}`}>
-                                                            {badge.label}
-                                                        </span>
-                                                    </TableCell>
+                                                    <TableCell className="px-5 py-4 sm:px-6 text-start">{getStatusBadge(x.status)}</TableCell>
                                                     <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
                                                         <div className="flex gap-3 items-center">
                                                             {permissionUpdate("H", "H2") && canPay && (

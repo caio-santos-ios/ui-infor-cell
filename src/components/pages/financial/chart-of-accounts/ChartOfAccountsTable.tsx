@@ -14,13 +14,46 @@ import { permissionDelete, permissionUpdate } from "@/utils/permission.util";
 import { IconEdit } from "@/components/iconEdit/IconEdit";
 import { IconDelete } from "@/components/global/iconDelete";
 import { useRouter } from "next/navigation";
+import ChartOfAccountsModalCreate from "./ChartOfAccountsModalCreate";
+import { chartOfAccountIdAtom, chartOfAccountModalAtom } from "@/jotai/financial/chart-of-account.jotai";
 
 export default function ChartOfAccountsTable() {
   const [pagination, setPagination] = useAtom(paginationAtom);
   const [_, setLoading] = useState(true);
   const [chartOfAccount, setChartOfAccount] = useState<any>({});
   const { isOpen, openModal, closeModal } = useModal();
-  const router = useRouter();
+  const [modalCreate, setModalCreate] = useAtom(chartOfAccountModalAtom);
+  const [___, setChartOfAccountId] = useAtom(chartOfAccountIdAtom);
+  const [groupsDespesaDRE] = useState<any[]>([
+    { value: "none", level: 1, label: "Não mostrar no DRE" },    
+    { value: "deducoes", level: 1, label: "Deduções" },
+    { value: "imp_vendas", level: 2, label: "Impostos sobre vendas" },
+    { value: "com_vendas", level: 2, label: "Comissões sobre vendas" },
+    { value: "dev_vendas", level: 2, label: "Devolução de vendas" },    
+    { value: "custos", level: 1, label: "Custos operacionais" },
+    { value: "cpv", level: 2, label: "Custo dos produtos vendidos" },    
+    { value: "desp_op", level: 1, label: "Despesas operacionais" },
+    { value: "desp_adm", level: 2, label: "Despesas administrativas" },
+    { value: "desp_ger", level: 2, label: "Despesas operacionais" },
+    { value: "desp_com", level: 2, label: "Despesas comerciais" },    
+    { value: "desp_fin", level: 1, label: "Despesas financeiras" },
+    { value: "emp_div", level: 2, label: "Empréstimos e dívidas" },
+    { value: "jur_mul", level: 2, label: "Juros/multas pagos" },
+    { value: "desc_conc", level: 2, label: "Descontos concedidos" },
+    { value: "tax_ban", level: 2, label: "Taxas/tarifas bancárias" },    
+    { value: "outras", level: 1, label: "Outras despesas" },
+    { value: "outras_esp", level: 2, label: "Outras despesas" },
+  ]);
+  const [groupsReceitaDRE] = useState<any[]>([
+    { type: "dre", value: "rec_bruta", level: 1, label: "Receita bruta" },
+    { type: "dre", value: "rec_vendas", level: 2, label: "Receitas de vendas" },    
+    { type: "dre", value: "rec_fin", level: 1, label: "Receitas financeiras" },
+    { type: "dre", value: "rend_fin", level: 2, label: "Rendimentos financeiros" },
+    { type: "dre", value: "jur_rec", level: 2, label: "Juros/multas recebidos" },
+    { type: "dre", value: "desc_rec", level: 2, label: "Descontos recebidos" },
+    { type: "dre", value: "rec_outras", level: 1, label: "Outras receitas" },
+    { type: "dre", value: "outras_rec_item", level: 2, label: "Outras receitas" },
+  ]);
 
   const getAll = async (page: number) => {
     try {
@@ -63,22 +96,32 @@ export default function ChartOfAccountsTable() {
   const getObj = (obj: any, action: string) => {
     setChartOfAccount(obj);
 
-    if (action === "edit") router.push(`/financial/chart-of-accounts/${obj.id}`);;
-    // if (action === "view") setModalCreate(true);
-    // if (action === "pay") setModalPay(true);
+    if (action === "edit") {
+      setChartOfAccountId(obj.id);
+      setModalCreate(true);
+    };
     if (action === "delete") openModal();
   };
 
   const getTypeBadge = (type: string) => {
-    if (type === "receita") return <Badge color="success" size="sm">Receita</Badge>;
-    if (type === "despesa") return <Badge color="error" size="sm">Despesa</Badge>;
+    if (type === "receita") return <Badge color="success" size="sm">Recebimento</Badge>;
+    if (type === "despesa") return <Badge color="error" size="sm">Pagamento</Badge>;
     if (type === "custo") return <Badge color="warning" size="sm">Custo</Badge>;
     return <Badge size="sm">{type}</Badge>;
   };
+
+  const getDescriptionGroupDRE = (group: string, type: string) => {
+    if (type === "despesa") {
+      return groupsDespesaDRE.find(g => g.value === group)?.label || group;
+    }
+    if (type === "receita") {
+      return groupsReceitaDRE.find(g => g.value === group)?.label || group;
+    }
+  }
   
   useEffect(() => {
     getAll(1);
-  }, []);
+  }, [modalCreate]);
 
   return (
     // <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/3 sm:px-6">
@@ -168,11 +211,8 @@ export default function ChartOfAccountsTable() {
                   <TableRow>
                     <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Código</TableCell>
                     <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Nome</TableCell>
-                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Conta Pai</TableCell>
                     <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Tipo</TableCell>
-                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Nível</TableCell>
-                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Exibir DRE</TableCell>
-                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Analítica</TableCell>
+                    <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Grupo DRE</TableCell>
                     <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Ações</TableCell>
                   </TableRow>
                 </TableHeader>
@@ -188,20 +228,10 @@ export default function ChartOfAccountsTable() {
                             {x.name}
                           </TableCell>
                           <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">
-                            {x.parentName || "—"}
-                          </TableCell>
-                          <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">
                             {getTypeBadge(x.type)}
                           </TableCell>
                           <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">
-                            Nível {x.level}
-                          </TableCell>
-                          <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">
-                            {x.showInDre ? (
-                              <span className="text-green-600 dark:text-green-400">Sim</span>
-                            ) : (
-                              <span className="text-gray-400">Não</span>
-                            )}
+                            {getDescriptionGroupDRE(x.groupDRE, x.type)}
                           </TableCell>
                           <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400 text-sm">
                             {x.isAnalytical ? (
@@ -218,24 +248,6 @@ export default function ChartOfAccountsTable() {
                               {permissionDelete("H", "H2") && x.status !== "paid" && x.status !== "cancelled" && (
                                 <IconDelete action="delete" obj={x} getObj={getObj} />
                               )}
-                              {/* <button
-                                onClick={() => window.location.href = `/financial/chart-of-accounts/${x.id}`}
-                                className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                                title="Editar"
-                              >
-                                <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
-                                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                                </svg>
-                              </button> */}
-                              {/* <button
-                                onClick={() => handleDelete(account.id)}
-                                className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                                title="Excluir"
-                              >
-                                <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
-                                  <path d="M6 2l2-2h4l2 2m-8 2h12M8 6v8m4-8v8m-7-8h10v12H5V6z" />
-                                </svg>
-                              </button> */}
                             </div>
                           </TableCell>
                         </TableRow>
@@ -248,23 +260,25 @@ export default function ChartOfAccountsTable() {
         </div>
 
         <Pagination
-            currentPage={pagination.currentPage}
-            totalCount={pagination.totalCount}
-            totalData={pagination.data.length}
-            totalPages={pagination.totalPages}
-            onPageChange={changePage}
+          currentPage={pagination.currentPage}
+          totalCount={pagination.totalCount}
+          totalData={pagination.data.length}
+          totalPages={pagination.totalPages}
+          onPageChange={changePage}
         />
 
         <ModalDelete
-            confirm={destroy}
-            isOpen={isOpen}
-            closeModal={closeModal}
-            title="Excluir Conta a Pagar"
+          confirm={destroy}
+          isOpen={isOpen}
+          closeModal={closeModal}
+          title="Excluir Plano de Contas"
         />
       </>
-  ) : (
-      <NotData />
-  )}
+      ) : (
+        <NotData />
+      )}
+
+      <ChartOfAccountsModalCreate />
     </>
   );
 }

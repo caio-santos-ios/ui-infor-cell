@@ -1,5 +1,5 @@
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
-import DreReport from "@/components/pages/dre/DreReport";
+import DreReport from "@/components/pages/financial/dre/DreReport";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

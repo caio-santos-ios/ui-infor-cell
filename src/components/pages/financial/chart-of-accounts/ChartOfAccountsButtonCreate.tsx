@@ -1,15 +1,12 @@
 "use client";
 import Button from "@/components/ui/button/Button";
-import { useRouter } from "next/navigation";
+import { chartOfAccountModalAtom } from "@/jotai/financial/chart-of-account.jotai";
+import { useAtom } from "jotai";
 
 export function ChartOfAccountsButtonCreate() {
-  const router = useRouter();
-
-  const handleClick = () => {
-    router.push("/financial/chart-of-accounts/create");
-  };
+  const [_, setModal] = useAtom(chartOfAccountModalAtom);
 
   return (
-    <Button size="sm" variant="primary" onClick={handleClick}>Adicionar</Button>
+    <Button onClick={() => setModal(true)} type="submit" size="sm">Adicionar</Button>
   );
 }

@@ -2,20 +2,19 @@ export type TChartOfAccounts = {
     id: string;
     code: string;
     name: string;
-    parentId?: string;
-    parentName?: string;
-    type: "receita" | "despesa" | "custo";
-    dreCategory?: string;
-    showInDre: boolean;
-    description: string;
-    level: number;
-    isAnalytical: boolean;
-    plan: string;
-    company: string;
-    createdAt: string;
-    updatedAt?: string;
-    deleted: boolean;
+    type: "receita" | "despesa";
+    groupDRE: string;
+    account: string;
 };
+
+export const ResetChartOfAccounts: TChartOfAccounts = {
+    id: "",
+    code: "",
+    name: "",
+    type: "receita",
+    groupDRE: "",
+    account: ""
+}
 
 export type TDreData = {
     periodo: {

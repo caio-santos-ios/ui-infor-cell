@@ -16,6 +16,8 @@ export type TAccountPayable = {
     paidAt: string;
     status: string;
     notes: string;
+    chartOfAccountId: string;
+    issueDate: any;
 };
 
 export const ResetAccountPayable: TAccountPayable = {
@@ -36,6 +38,8 @@ export const ResetAccountPayable: TAccountPayable = {
     paidAt: "",
     status: "open",
     notes: "",
+    chartOfAccountId: "",
+    issueDate: new Date().toISOString().split("T")[0],
 };
 
 export type TPayAccountPayable = {
@@ -53,9 +57,9 @@ export const ResetPayAccountPayable: TPayAccountPayable = {
 };
 
 export const statusLabelPayable: Record<string, { label: string; color: string }> = {
-    open:      { label: "Em aberto",  color: "text-blue-700 bg-blue-100"   },
-    paid:      { label: "Pago",       color: "text-green-700 bg-green-100" },
-    partial:   { label: "Parcial",    color: "text-yellow-700 bg-yellow-100" },
-    overdue:   { label: "Vencido",    color: "text-red-700 bg-red-100"     },
-    cancelled: { label: "Cancelado",  color: "text-gray-600 bg-gray-100"   },
+    open:      { label: "Em aberto",  color: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"   },
+    paid:      { label: "Pago",       color: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 text-green-700" },
+    partial:   { label: "Parcial",    color: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300 text-yellow-700" },
+    overdue:   { label: "Vencido",    color: "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300 text-red-700"     },
+    cancelled: { label: "Cancelado",  color: "bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300 text-gray-600"   },
 };

@@ -149,7 +149,7 @@ function ProfileTab() {
     <>
       {/* Dados pessoais */}
       <ComponentCard title="Dados Pessoais">
-        <div className="grid grid-cols-6 gap-2 container-form">
+        <div className="grid grid-cols-6 gap-2 max-h-[calc(100dvh-23rem)] overflow-y-auto px-2">
           <div className="col-span-6 xl:col-span-2">
             <Label title="Nome completo" />
             <input placeholder="Nome" {...register("name")} type="text" className="input-erp-primary input-erp-default" />

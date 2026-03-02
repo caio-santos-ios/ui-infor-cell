@@ -23,6 +23,7 @@ export default function AccountReceivableModalCreate() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [__, setCustomerModalCreate] = useAtom(customerModalCreateAtom);
   const [customer, setCustomer] = useAtom(customerAtom);
+  const [chartOfAccounts, setChartOfAccounts] = useState<any[]>([]);
 
   const { getValues, setValue, register, reset, control, watch } = useForm<TAccountReceivable>({
     defaultValues: ResetAccountReceivable
@@ -72,12 +73,20 @@ export default function AccountReceivableModalCreate() {
 
   const getPaymentMethods = async () => {
     try {
-        const { data } = await api.get(`/payment-methods?deleted=false&ne$type=payable&orderBy=name&sort=asc&pageSize=100&pageNumber=1`,
-            configApi()
-        );
-        setPaymentMethods(data.result.data ?? []);
+      const { data } = await api.get(`/payment-methods?deleted=false&ne$type=payable&orderBy=name&sort=asc&pageSize=100&pageNumber=1`, configApi());
+      setPaymentMethods(data.result.data ?? []);
     } catch {
-        setPaymentMethods([]);
+      setPaymentMethods([]);
+    }
+  };
+
+  const getChartOfAccount = async () => {
+    try {
+      const { data } = await api.get(`/chart-of-accounts/select?deleted=false&type=receita`, configApi());
+      const result = data.result.data;
+      setChartOfAccounts(result ?? []);
+    } catch {
+      setChartOfAccounts([]);
     }
   };
 
@@ -108,6 +117,7 @@ export default function AccountReceivableModalCreate() {
   useEffect(() => {
     const initial = async () => {
       await getPaymentMethods();
+      await getChartOfAccount();
 
       if (accountReceivableId) {
         await getById(accountReceivableId);
@@ -175,7 +185,7 @@ export default function AccountReceivableModalCreate() {
                   )}
                 />
               </div>
-              <div className="col-span-6 lg:col-span-3">
+              <div className="col-span-6 lg:col-span-2">
                 <Label title="Parcela Nº" required={false} />
                 <input
                     {...register("installmentNumber", { valueAsNumber: true })}
@@ -185,7 +195,7 @@ export default function AccountReceivableModalCreate() {
                     className="input-erp-primary input-erp-default no-spinner"
                 />
               </div>
-              <div className="col-span-6 lg:col-span-3">
+              <div className="col-span-6 lg:col-span-2">
                 <Label title="Total de Parcelas" required={false} />
                 <input
                   {...register("totalInstallments", { valueAsNumber: true })}
@@ -195,12 +205,23 @@ export default function AccountReceivableModalCreate() {
                   className="input-erp-primary input-erp-default no-spinner"
                 />
               </div>
-              <div className="col-span-6 lg:col-span-3">
+              <div className="col-span-6 lg:col-span-2">
                 <Label title="Data de Vencimento" />
                 <input {...register("dueDate")} type="date" className="input-erp-primary input-erp-default" />
               </div>
+              <div className="col-span-6 lg:col-span-4">
+                <Label title="Plano de Contas" required={false} />
+                <select {...register("chartOfAccountId")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800">
+                    <option value="">Selecione</option>
+                    {chartOfAccounts.map((p: any) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}
+                      </option>
+                    ))}
+                </select>
+              </div>
               <div className="col-span-6">
-                <Label title="Observações" />
+                <Label title="Observações" required={false}/>
                 <textarea maxLength={500} placeholder="Observações" {...register("notes")} rows={3} className="input-erp-primary input-erp-default resize-none" />
               </div>
             </div>
