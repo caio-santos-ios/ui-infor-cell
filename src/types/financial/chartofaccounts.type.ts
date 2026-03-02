@@ -16,30 +16,71 @@ export const ResetChartOfAccounts: TChartOfAccounts = {
     account: ""
 }
 
+// ── DRE Types ─────────────────────────────────────────────────────────────────
+
+export type TDreContaLinha = {
+    id: string;
+    code: string;
+    name: string;
+    valoresMes: Record<string, number>;
+    total: number;
+};
+
+/** Subgrupo filho (ex: "rec_vendas", "imp_vendas") */
+export type TDreSubGrupo = {
+    key: string;
+    label: string;
+    isParent: false;
+    linhas: TDreContaLinha[];
+    totalMes: Record<string, number>;
+    total: number;
+};
+
+/** Grupo pai (ex: "rec_bruta", "deducoes") */
+export type TDreGrupoPai = {
+    key: string;
+    label: string;
+    isParent: true;
+    subGrupos: TDreSubGrupo[];
+    totalMes: Record<string, number>;
+    total: number;
+};
+
+export type TDreTotalizador = {
+    mes: Record<string, number>;
+    total: number;
+};
+
+export type TDreTotalizadores = {
+    receitaBruta:   TDreTotalizador;
+    deducoes:       TDreTotalizador;
+    receitaLiquida: TDreTotalizador;
+    custos:         TDreTotalizador;
+    lucroBruto:     TDreTotalizador;
+    despesasOp:     TDreTotalizador;
+    resultadoOp:    TDreTotalizador;
+    despesasFin:    TDreTotalizador;
+    resultadoFin:   TDreTotalizador;
+    outrasDespesas: TDreTotalizador;
+    outrasReceitas: TDreTotalizador;
+    receitasFinanc: TDreTotalizador;
+    lucroLiquido:   TDreTotalizador;
+};
+
 export type TDreData = {
     periodo: {
         inicio: string;
-        fim: string;
+        fim:    string;
         regime: "caixa" | "competencia";
     };
-    valores: {
-        receitaBruta: number;
-        deducoes: number;
-        receitaLiquida: number;
-        cmv: number;
-        lucroBruto: number;
-        despesasOperacionais: {
-            administrativas: number;
-            comerciais: number;
-            financeiras: number;
-            total: number;
-        };
-        resultadoOperacional: number;
-        impostos: number;
-        lucroLiquido: number;
+    meses: string[];
+    secoes: {
+        receitas: TDreGrupoPai[];
+        despesas: TDreGrupoPai[];
     };
+    totalizadores: TDreTotalizadores;
     indicadores: {
-        margemBruta: number;
+        margemBruta:   number;
         margemLiquida: number;
     };
 };
