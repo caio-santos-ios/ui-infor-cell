@@ -14,7 +14,6 @@ import { useEffect, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { ResetBox, TBox } from "@/types/commercial/box/box.type";
 import Autocomplete from "@/components/form/Autocomplete";
-import { TVariation } from "@/types/product/variation/variation.type";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { formattedMoney } from "@/utils/mask.util";
 import { permissionDelete, permissionUpdate } from "@/utils/permission.util";

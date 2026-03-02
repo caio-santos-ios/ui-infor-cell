@@ -10,6 +10,7 @@ import { ResetEmployee, TEmployee } from "@/types/master-data/employee/employee.
 import CustomerDataForm from "./CustomerDataForm";
 import CustomerAddressForm from "./CustomerAddressForm";
 import CustomerCashbackTab from "./CustomerCashbackTab";
+import CustomerMovementTab from "./tabs/CustomerMovementTab";
 
 type TProp = {
   id?: string;
@@ -21,6 +22,7 @@ export default function CustomerForm({id}: TProp) {
     {key: 'data', title: 'Dados Gerais'},
     {key: 'address', title: 'Endereço'},
     {key: 'cashback', title: 'Cashback'},
+    {key: 'movement', title: 'Movimentação'},
   ]);
   const [currentTab, setCurrentTab] = useState<any>({key: 'data', title: 'Dados Gerais'});
 
@@ -61,6 +63,7 @@ export default function CustomerForm({id}: TProp) {
         {currentTab.key == "data" && <CustomerDataForm id={id} />}
         {currentTab.key == "address" && <CustomerAddressForm parentId={id} address={watch("address")} />}
         {currentTab.key == "cashback" && <CustomerCashbackTab id={id} />}
+        {currentTab.key == "movement" && <CustomerMovementTab id={id} />}
       </div>     
     </>
   );
