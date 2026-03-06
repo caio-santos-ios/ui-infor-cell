@@ -1,7 +1,7 @@
 import { atom } from "jotai";
 
 export const salesOrderModalAtom = atom<boolean>(false);
-export const salesOrderModalStepAtom = atom<"seller" | "box" | "items" | "payment">("seller");
+export const salesOrderModalStepAtom = atom<"seller" | "box" | "items" | "itemsView" | "payment">("seller");
 export const salesOrderSettingModalAtom = atom<boolean>(false);
 export const salesOrderIdAtom = atom<string>("");
 export const salesOrderCodeAtom = atom<string>("");

@@ -10,9 +10,10 @@ type TProp = {
     closeModal: () => void;
     confirm: () => void;
     title: string;
+    description?: string;
 };
 
-export const ModalDelete = ({isOpen, closeModal, confirm, title}: TProp) => {
+export const ModalDelete = ({isOpen, closeModal, confirm, title, description = "Deseja excluir esse registro?"}: TProp) => {
     return (
         <ModalV2 isOpen={isOpen} onClose={closeModal} title={title}>
             <form className="flex flex-col p-6">
@@ -21,7 +22,7 @@ export const ModalDelete = ({isOpen, closeModal, confirm, title}: TProp) => {
                         <div className="grid grid-cols-1 gap-x-6 gap-y-5">
                             <div className="h-full flex col-span-1 justify-center items-center flex-col">
                                 <GoAlert className="text-red-600" size={80} />
-                                <h1 className="font-semibold text-lg text-gray-800 dark:text-white/90">Deseja excluir esse registro?</h1>
+                                <h1 className="font-semibold text-lg text-gray-800 dark:text-white/90">{description}</h1>
                             </div>
                         </div>
                     </div>

@@ -67,7 +67,7 @@ export const SalesOrderModalSeller = () => {
         try {
             setIsLoading(true);
             const {data} = await api.post(`/sales-orders`, {...getValues()}, configApi());
-            const result = data.result;
+            const result = data.result.data;
             setSalesOrderId(result.id);
             setModalStep("items");
         } catch (error) {

@@ -25,9 +25,10 @@ import { permissionDelete, permissionUpdate } from "@/utils/permission.util";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { MdAutorenew } from "react-icons/md";
+import { MdAutorenew, MdPhoneIphone } from "react-icons/md";
 import { NumericFormat } from "react-number-format";
 import BoxModalSettings from "../../box/BoxModalSettings";
+import { SalesOrderTradeInModal, tradeInModalAtom, tradeInRefreshAtom } from "./SalesOrderTradeInModal";
 
 export const SalesOrderModalItems = () => {
     const [_, setIsLoading] = useAtom(loadingAtom);
@@ -52,10 +53,10 @@ export const SalesOrderModalItems = () => {
 
     const [___, setSalesOrderCode] = useAtom(salesOrderCodeAtom);
     const {isOpen, openModal, closeModal } = useModal();
-    const [modalCreateFinish, setModalCreateFinish] = useState(false);
-    const [_____, setSalesOrderItemId] = useAtom(salesOrderItemIdAtom);
-    const [____, setProduct] = useAtom(productAtom);
-    const [modalCreateExchange, setModal] = useAtom(exchangeModalAtom);
+    const [modalCreateFinish] = useState(false);
+    const [_______, setSalesOrderItemId] = useAtom(salesOrderItemIdAtom);
+    const [______, setTradeInModal] = useAtom(tradeInModalAtom);
+    const [tradeInRefresh] = useAtom(tradeInRefreshAtom);
 
     const { getValues, register, control, setValue, watch, reset } = useForm<TSalesOrder>({
         defaultValues: ResetSalesOrder
@@ -75,6 +76,11 @@ export const SalesOrderModalItems = () => {
             setValue("sellerId", result.sellerId);
             setValue("sellerName", sellerName);
             setSalesOrderCode(result.code);
+            setSalesOrderStatus(result.status);
+
+            if(result.status == "Finalizado") {
+                setModalStep("itemsView");
+            };
         } catch (error) {
             resolveResponse(error);
         }
@@ -322,6 +328,10 @@ export const SalesOrderModalItems = () => {
         const variationStr = variation.attributes.map((a: any) => (a.value));
         return variationStr.join(" / ");
     };
+
+    useEffect(() => {
+        if (tradeInRefresh > 0) getSalesOrderItems(salesOrderId);
+    }, [tradeInRefresh]);
 
     useEffect(() => {
         if(customer.id && customer.tradeName) {
@@ -617,10 +627,9 @@ export const SalesOrderModalItems = () => {
                                                             }   
                                                             {
                                                                 permissionUpdate("A", "A3") && salesOrderStatus == "Em Aberto" &&
-                                                                <div title="Trocar" onClick={() => {
+                                                                <div title="Entrada de aparelho" onClick={() => {
                                                                     setSalesOrderItemId(x.id);
-                                                                    setProduct({...x, hasSerial: x.productHasSerial});
-                                                                    setModal(true);
+                                                                    setTradeInModal(true);  
                                                                 }} className="cursor-pointer text-blue-400 hover:text-blue-500">
                                                                     <MdAutorenew />
                                                                 </div>
@@ -653,7 +662,7 @@ export const SalesOrderModalItems = () => {
             </div>
 
             <ModalDelete confirm={destroyItem} isOpen={isOpen} closeModal={closeModal} title="Excluir Item Pedido de Venda" />  
-            {/* <ExchangeModal />  -> Modal antigo de troca */}
+            <SalesOrderTradeInModal />
             <BoxModalSettings />   
         </>
     )

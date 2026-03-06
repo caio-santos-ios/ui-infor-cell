@@ -10,6 +10,7 @@ import ModalV2 from "@/components/ui/modalV2";
 import { SalesOrderModalItems } from "./SalesOrderModalItems";
 import { SalesOrderModalBox } from "./SalesOrderModalBox";
 import { SalesOrderModalPayment } from "./SalesOrderModalPayment";
+import { SalesOrderModalItemsView } from "./SalesOrderModalItemsView";
 
 export const SalesOrderModal = () => {
     const [modalCreate, setModalCreate] = useAtom(salesOrderModalAtom);
@@ -106,6 +107,10 @@ export const SalesOrderModal = () => {
                 {
                     modalStep == "payment" &&
                     <SalesOrderModalPayment />
+                }
+                {
+                    modalStep == "itemsView" &&
+                    <SalesOrderModalItemsView />
                 }
             </div>
         </ModalV2>

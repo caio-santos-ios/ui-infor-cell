@@ -294,7 +294,7 @@ export default function DreReport() {
                                         Receitas
                                     </td>
                                 </tr>
-                                {renderSecao(data.secoes.receitas, false)}
+                                {renderSecao(data?.secoes?.receitas, false)}
 
                                 <TotRow label="(=) RECEITA LÍQUIDA" tot={data.totalizadores.receitaLiquida} meses={data.meses} variant="result" />
 
@@ -303,7 +303,7 @@ export default function DreReport() {
                                         Custos
                                     </td>
                                 </tr>
-                                {renderSecao(data.secoes.despesas.filter(g => g.key === "custos"), true)}
+                                {renderSecao(data?.secoes?.despesas.filter(g => g.key === "custos"), true)}
 
                                 <TotRow label="(=) LUCRO BRUTO" tot={data.totalizadores.lucroBruto} meses={data.meses} variant="result" />
 

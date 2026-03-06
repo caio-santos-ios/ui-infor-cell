@@ -20,11 +20,6 @@ const staticNavItems: NavItem[] = [
     subItems: [
       {name: "Configuração Fiscal", path: "/settings/fiscal", code: "001", pro: false, authorized: false },
       {name: "Minha Conta", path: "/settings/account", code: "002", pro: false, authorized: false },
-      // {name: "Lojas", path: "/master-data/stores", code: "A2", pro: false, authorized: false },
-      // {name: "Profissionais", path: "/master-data/employees", code: "A3", pro: false, authorized: false },
-      // {name: "Clientes", path: "/master-data/customers", code: "A4", pro: false, authorized: false },
-      // {name: "Fornecedores", path: "/master-data/suppliers", code: "A5", pro: false, authorized: false },
-      // {name: "Permissões de Usuário", path: "/master-data/profile-permission", code: "F1", pro: false, authorized: false },
     ]
   },
   {
@@ -61,8 +56,8 @@ const staticNavItems: NavItem[] = [
     code: "C",
     subItems: [
       {name: "Pedidos de Vendas", path: "/commercials/sales-orders", code: "C1", pro: false, authorized: false },
-      {name: "Caixas", path: "/commercials/box", code: "C2", pro: false, authorized: false },
-      // {name: "Orçamentos", path: "/commercials/budgets", code: "C2", pro: false, authorized: false },
+      {name: "Orçamentos", path: "/commercials/budgets", code: "C2", pro: false, authorized: false },
+      {name: "Caixas", path: "/commercials/box", code: "C3", pro: false, authorized: false },
     ]
   },
   {

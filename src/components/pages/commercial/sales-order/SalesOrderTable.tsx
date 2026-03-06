@@ -145,6 +145,14 @@ export default function SalesOrderTable() {
     return item.quantity;
   };
 
+  const normalizeStatus = (status: string) => {
+    switch(status) {
+      case "Finalizado": return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
+      case "Em Aberto": return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400";
+      case "Cancelado - Produto Devolvido": return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
+    }
+  };
+
   useEffect(() => {
     if(permissionRead("F", "F1")) {
       getAll(1);
@@ -187,7 +195,11 @@ export default function SalesOrderTable() {
                           <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.code}</TableCell>
                           <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{!x.customerName ? 'Ao Consumidor' : x.customerName}</TableCell>
                           <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{!x.employeeName ? x.userName : x.employeeName}</TableCell>
-                          <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{x.status}</TableCell>
+                          <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${normalizeStatus(x.status)}`}>
+                              {x.status}
+                            </span>
+                          </TableCell>
                           <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{normalizeQuantity(x)}</TableCell>
                           <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{formattedMoney(x.total)}</TableCell>
                           <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 dark:text-gray-400">{maskDate(x.createdAt)}</TableCell>
