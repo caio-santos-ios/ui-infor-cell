@@ -9,7 +9,7 @@ type TProp = {
 export const IconDelete = ({obj, getObj, action}: TProp) => {
 
     return (
-        <div onClick={() => getObj(obj, action)} className="cursor-pointer text-red-400 hover:text-red-500">
+        <div title="Excluír" onClick={() => getObj(obj, action)} className="cursor-pointer text-red-400 hover:text-red-500">
             <FaTrash />
         </div>
     )

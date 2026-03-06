@@ -13,7 +13,7 @@ import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components
 import { NotData } from "@/components/not-data/NotData";
 import { storeLoggedAtom } from "@/jotai/global/store.jotai";
 import { salesOrderIdAtom, salesOrderModalAtom, salesOrderStatusAtom } from "@/jotai/commercial/sales-order/salesOrder.jotai";
-import SalesOrderModalCreate from "./SalesOrderModalCreate";
+// import SalesOrderModalCreate from "./SalesOrderModalCreate";
 import { IconEdit } from "@/components/iconEdit/IconEdit";
 import { IconDelete } from "@/components/iconDelete/IconDelete";
 import { ModalDelete } from "@/components/modalDelete/ModalDelete";
@@ -25,6 +25,8 @@ import { boxSettingModalAtom } from "@/jotai/commercial/box/box.jotai";
 import { IoReceipt } from "react-icons/io5";
 import ReactDOMServer from "react-dom/server";
 import { SalesOrderReceiptPrint } from "./SalesOrderReceiptPrint";
+import { SalesOrderModal } from "./modal/SalesOrderModal";
+import CustomerModalCreate from "../../master-data/customer/CustomerModalCreate";
 
 export default function SalesOrderTable() {
   const [_, setLoading] = useAtom(loadingAtom);
@@ -36,7 +38,7 @@ export default function SalesOrderTable() {
   const [__, setSalesOrderId] = useAtom(salesOrderIdAtom);
   const [___, setSalesOrderStatus] = useAtom(salesOrderStatusAtom);
   const [boxModalSettings] = useAtom(boxSettingModalAtom);  
-
+  
   const getAll = async (page: number) => {
     try {
       setLoading(true);
@@ -151,7 +153,9 @@ export default function SalesOrderTable() {
 
   return (
     <>
-      <SalesOrderModalCreate />
+      {/* <SalesOrderModalCreate /> */}
+      <SalesOrderModal />
+      <CustomerModalCreate />
       {
         modalCreate && !boxModalSettings &&
         <SalesOrderSettingsButtonCreate />

@@ -45,6 +45,18 @@ export const SalesOrderReceiptPrint = ({ data }: any) => {
       </table>
 
       <div className="border-t border-dashed pt-2">
+        <div className="flex justify-between">
+          <span>FRETE (+):</span>
+          <span>{formattedMoney(data?.payment?.freight)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>TAXA (+):</span>
+          <span>{formattedMoney(data?.payment?.tax)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>DESCONTO (-):</span>
+          <span>{formattedMoney(data?.payment?.discountValue)}</span>
+        </div>
         <div className="flex justify-between font-bold">
           <span>TOTAL:</span>
           <span>{formattedMoney(data.total)}</span>

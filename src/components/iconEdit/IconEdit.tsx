@@ -8,7 +8,7 @@ type TProp = {
 
 export const IconEdit = ({ obj, getObj, action }: TProp) => {
     return (
-        <div onClick={() => getObj(obj, action)} className="cursor-pointer text-yellow-400 hover:text-yellow-500">
+        <div title="Editar" onClick={() => getObj(obj, action)} className="cursor-pointer text-yellow-400 hover:text-yellow-500">
             <MdEdit />
         </div>
     );

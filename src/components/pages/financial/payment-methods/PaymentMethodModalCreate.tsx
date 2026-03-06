@@ -8,7 +8,7 @@ import Button from "@/components/ui/button/Button";
 import { Modal } from "@/components/ui/modal";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import Label from "@/components/form/Label";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { ResetPaymentMethod, TPaymentMethod } from "@/types/payment-method/payment-method.type";
 import { paymentMethodIdAtom, paymentMethodModalAtom } from "@/jotai/financial/payment-methods/paymentMethod.jotai";
 import { NumericFormat } from "react-number-format";
