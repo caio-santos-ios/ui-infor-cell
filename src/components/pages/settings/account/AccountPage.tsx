@@ -455,7 +455,7 @@ export default function AccountPage() {
               tab === t.key ? "bg-brand-500 text-white" : ""
             }`}
           >
-            {t.icon}
+            {/* {t.icon} */}
             {t.label}
           </button>
         ))}
