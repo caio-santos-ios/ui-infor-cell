@@ -1,5 +1,4 @@
 import PageBreadcrumb from "@/components/pageBreadcrumb/PageBreadcrumb";
-import VariationForm from "@/components/product/variation/VariationForm";
 import Button from "@/components/ui/button/Button";
 import { Metadata } from "next";
 import Link from "next/link";
@@ -21,7 +20,7 @@ export default async function VariationsDetail({ params }: { params: Promise<{ i
           <Button type="submit" variant="outline" size="sm">Voltar</Button>
         </Link>
       </div>
-      <VariationForm id={id} />
+      {/* <VariationForm id={id} /> */}
     </div>
   );
 }
