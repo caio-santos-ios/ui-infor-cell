@@ -1,0 +1,57 @@
+export type TBudget = {
+    id: string;
+    code: string;
+    itemId: string;
+    sellerId: string;
+    sellerName: string;
+    customerId: string;
+    customerName: string;
+    productId: string;
+    productName: string;
+    barcode: string;
+    image: string;
+    value: number;
+    total: number;
+    subTotal: number;
+    discountValue: number;
+    discountType: string;
+    variationId: string;
+    quantity: number;
+    createItem: boolean;
+    productHasSerial: string;
+    productHasVariations: string;
+    serial: string;
+    stockId: string;
+    codeVariation: string;
+    validity: any;
+    notes: string;
+}
+
+export const ResetBudget: TBudget = {
+    id: "",
+    code: "",
+    itemId: "",
+    sellerId: "",
+    sellerName: "",
+    customerId: "",
+    customerName: "Ao consumidor",
+    productId: "",
+    productName: "",
+    barcode: "",
+    image: "",
+    value: 0,
+    total: 0,
+    subTotal: 0,
+    discountValue: 0,
+    discountType: "money",
+    quantity: 1,
+    createItem: true,
+    variationId: "",
+    productHasSerial: "no",
+    productHasVariations: "no",
+    serial: "",
+    stockId: "",
+    codeVariation: "",
+    validity: "",
+    notes: "",
+}

@@ -1,0 +1,361 @@
+"use client";
+
+import { loadingAtom } from "@/jotai/global/loading.jotai";
+import { api } from "@/service/api.service";
+import { configApi, resolveResponse } from "@/service/config.service";
+import { useAtom } from "jotai";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { ResetServiceOrder, TServiceOrder, STATUS_LABELS } from "@/types/order-service/order-service.type";
+import ServiceOrderDeviceTab from "./tabs/ServiceOrderDeviceTab";
+import ServiceOrderItemsTab from "./tabs/ServiceOrderItemsTab";
+import ServiceOrderLaudoTab from "./tabs/ServiceOrderLaudoTab";
+import ServiceOrderCloseModal from "./modals/ServiceOrderCloseModal";
+import { useRouter } from "next/navigation";
+import CustomerModalCreate from "@/components/pages/master-data/customer/CustomerModalCreate";
+import Link from "next/link";
+import Button from "@/components/ui/button/Button";
+import SupplierModalCreate from "@/components/pages/master-data/supplier/SupplierModalCreate";
+import { currentMomentServiceOrderAtom } from "@/jotai/serviceOrder/manege.jotai";
+import { TSituation } from "@/types/order-service/situation.type";
+import { customerAtom } from "@/jotai/masterData/customer.jotai";
+import { ResetCustomer } from "@/types/master-data/customer/customer.type";
+import { situationsAtom } from "@/jotai/serviceOrder/situation.jotai";
+
+type TProp = { id?: string };
+
+const TABS = [
+  { key: "device", title: "Equipamento" },
+  { key: "items", title: "Peças e Serviços" },
+  { key: "laudo", title: "Laudo" },
+];
+
+export default function ServiceOrderForm({ id }: TProp) {
+  const [_, setIsLoading] = useAtom(loadingAtom);
+  const [currentTab, setCurrentTab] = useState("device");
+  const [showCloseModal, setShowCloseModal] = useState(false);
+  const [warrantyInfo, setWarrantyInfo] = useState<any>(null);
+  const [___, setCurrentMoment] = useAtom(currentMomentServiceOrderAtom);
+  const [situations, setSituations] = useAtom(situationsAtom);
+  const [__, setCustomer] = useAtom(customerAtom);
+  const router = useRouter();
+
+  const { reset, watch, getValues, setValue, register } = useForm<TServiceOrder>({
+    defaultValues: ResetServiceOrder,
+  });
+
+  const isEdit = id && id !== "create";
+  const isWarranty = watch("isWarrantyInternal");
+  const status = watch("status");
+  const isClosed = watch("isClosed");
+
+  const getById = async (id: string) => {
+    try {
+      setIsLoading(true);
+      const { data } = await api.get(`/serviceOrders/${id}`, configApi());
+      const result = data.result.data;
+      reset(result);
+
+      if(result.isClosed) {
+        setCurrentMoment("end");
+        getSelectSituations("end");
+      } else {
+        if(result.items.length > 0) {
+          setCurrentMoment("quite");
+          getSelectSituations("quite");
+        } else {
+          setCurrentMoment("start");
+          getSelectSituations("start");
+        }
+      };
+
+      await checkWarranty(result.customerId, result.device?.serialImei);
+    } catch (error) {
+      resolveResponse(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const getSelectSituations = async (moment: "start" | "quite" | "end") => {
+    try {
+      setIsLoading(true);
+      const { data } = await api.get(`/situations/select?deleted=false&${moment}=true`, configApi());
+      const result = data.result.data;
+      setSituations(result)
+    } catch (error) {
+      resolveResponse(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const checkWarranty = async (customerId: string, serialImei: string) => {
+    try {
+      if (!customerId && !serialImei) return;      
+      const { data } = await api.get(`/serviceOrders/warranty-check?customerId=${customerId}&serialImei=${serialImei}`, configApi());
+      if (data.result?.data) {
+        setWarrantyInfo(data.result.data);
+        setValue("isWarrantyInternal", true);
+      }
+    } catch {}
+  };
+
+  const saveEquipment = async () => {
+    const body = getValues();
+
+    try {
+      setIsLoading(true);
+      if (!isEdit) {
+        const userId = localStorage.getItem("userId") || "";
+        const payload = {
+          customerId: body.customerId,
+          openedByUserId: userId,
+          deviceType: body.device?.type,
+          brandId: body.device?.brandId,
+          brandName: body.device?.brandName,
+          modelId: body.device?.modelId,
+          modelName: body.device?.modelName,
+          color: body.device?.color,
+          serialImei: body.device?.serialImei,
+          customerReportedIssue: body.device?.customerReportedIssue,
+          unlockPassword: body.device?.unlockPassword,
+          accessories: body.device?.accessories,
+          physicalCondition: body.device?.physicalCondition,
+          notes: body.notes,
+          createdBy: userId,
+          priority: body.priority,
+        };
+        const { data } = await api.post("/serviceOrders", payload, configApi());
+        const result = data.result;
+        resolveResponse({ status: 201, message: result.message });
+        router.push(`/order-services/manages/${result.data.id}`);
+      } else {
+        const payload = {
+          id: body.id,
+          customerId: body.customerId,
+          status: body.status,
+          deviceType: body.device?.type,
+          brandId: body.device?.brandId,
+          brandName: body.device?.brandName,
+          modelId: body.device?.modelId,
+          modelName: body.device?.modelName,
+          color: body.device?.color,
+          serialImei: body.device?.serialImei,
+          customerReportedIssue: body.device?.customerReportedIssue,
+          unlockPassword: body.device?.unlockPassword,
+          accessories: body.device?.accessories,
+          physicalCondition: body.device?.physicalCondition,
+          notes: body.notes,
+          technicalReport: body.laudo?.technicalReport,
+          testsPerformed: body.laudo?.testsPerformed,
+          repairStatus: body.laudo?.repairStatus,
+          discountValue: body.discountValue,
+          discountType: body.discountType,
+          priority: body.priority,
+        };
+        const { data } = await api.put("/serviceOrders", payload, configApi());
+        const result = data.result;
+        resolveResponse({ status: 200, message: result.message });
+      }
+    } catch (error) {
+      resolveResponse(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleStatusChange = async (newStatus: string) => {
+    if (!isEdit) return;
+    setValue("status", newStatus);
+    await saveEquipment();
+    await getById(id);
+  };
+
+  useEffect(() => {
+    setCurrentMoment("start");
+    setCustomer(ResetCustomer);
+    if (isEdit) {
+      getById(id!);
+    } 
+  }, []);
+
+  return (
+    <>
+      {
+        !isEdit && (
+          <div className="flex justify-end mb-3">
+            <Link href="/order-services/manages">
+              <Button type="submit" variant="outline" size="sm">Voltar</Button>
+            </Link>
+          </div>
+        )
+      }
+      {isEdit && (
+        <div className="flex flex-col lg:flex-row gap-3 mb-3 p-3 rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
+          <div className="flex items-center flex-wrap gap-3 flex-1">
+            <span className="w-4/12 lg:w-28 font-semibold text-gray-800 dark:text-white/90">
+              OS #{watch("code")}
+            </span>
+            <span className={`w-3/12 lg:hidden inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${watch("situationStyle.bg")} ${watch("situationStyle.border")} ${watch("situationStyle.text")}`}>
+              {watch("statusName")}
+            </span>
+
+            <span className={`hidden lg:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${watch("situationStyle.bg")} ${watch("situationStyle.border")} ${watch("situationStyle.text")}`}>
+              {watch("statusName")}
+            </span>
+            
+            <span className="hidden lg:block font-semibold text-gray-800 dark:text-white/90">
+              -
+            </span>
+            
+            <span className="w-12/12 lg:hidden text-sm font-semibold text-gray-800 dark:text-white/90">
+              CLIENTE: <span className="text-brand-400">{watch("customerName")}</span>
+            </span>
+            
+            <span className="hidden lg:block text-sm font-semibold text-gray-800 dark:text-white/90">
+              CLIENTE: <span className="text-brand-400">{watch("customerName")}</span>
+            </span>
+            
+            <span className="hidden lg:block text-sm font-semibold text-gray-800 dark:text-white/90">|</span>
+            
+            <span className="w-12/12 lg:hidden text-sm font-semibold text-gray-800 dark:text-white/90">
+              TEL: <span className="text-brand-400">{watch("customerPhone")}</span>
+            </span>
+            
+            <span className="hidden lg:block text-sm font-semibold text-gray-800 dark:text-white/90">
+              TEL: <span className="text-brand-400">{watch("customerPhone")}</span>
+            </span>
+
+            <span className="hidden lg:block text-sm font-semibold text-gray-800 dark:text-white/90">|</span>
+            
+            <span className="w-12/12 lg:hidden text-sm font-semibold text-gray-800 dark:text-white/90">
+              E-MAIL: <span className="text-brand-400">{watch("customerEmail")}</span>
+            </span>
+
+            <span className="hidden lg:block text-sm font-semibold text-gray-800 dark:text-white/90">
+              E-MAIL: <span className="text-brand-400">{watch("customerEmail")}</span>
+            </span>
+
+            {isWarranty && (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                ⚠ GARANTIA INTERNA — financeiro bloqueado
+              </span>
+            )}
+          </div>
+
+          <div className="grid grid-cols-4 gap-4">
+            {!isClosed && (
+              <select
+                value={status}
+                onChange={(e) => handleStatusChange(e.target.value)}
+                className="col-span-4 lg:col-span-2 h-9 rounded-lg border border-gray-300 bg-transparent px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 text-gray-800">
+                {situations.map((x) => (
+                  <option key={x.id} value={x.id} className="dark:bg-gray-900">{x.name}</option>
+                ))}
+              </select>
+            )}
+
+            {!isClosed && (
+              <Button className="col-span-2 lg:col-span-1 h-9" onClick={() => setShowCloseModal(true)} type="submit" variant="primary" size="sm">Fechar OS</Button>
+            )}
+            {
+              !isClosed && (
+                <Link className="col-span-2 lg:col-span-1" href="/order-services/manages">
+                  <Button className="w-full" type="submit" variant="outline" size="sm">Voltar</Button>
+                </Link>
+              )
+            }
+          </div>
+          {
+            isClosed && (
+              <>
+                <select
+                  value={status}
+                  onChange={(e) => handleStatusChange(e.target.value)}
+                  className="col-span-4 lg:col-span-2 h-9 rounded-lg border border-gray-300 bg-transparent px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 text-gray-800">
+                  {situations.map((x) => (
+                    <option key={x.id} value={x.id} className="dark:bg-gray-900">{x.name}</option>
+                  ))}
+                </select>
+                <Link className="col-span-2 lg:col-span-1" href="/order-services/manages">
+                  <Button className="w-full" type="submit" variant="outline" size="sm">Voltar</Button>
+                </Link>
+              </>
+            )
+          }
+        </div>
+      )}
+
+      {warrantyInfo && (
+        <div className="mb-4 p-3 rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-800/50 dark:bg-amber-900/20 text-sm text-amber-800 dark:text-amber-300">
+          ⚠ <strong>OS em Garantia!</strong> Encontrada OS anterior dentro do período de garantia (até {warrantyInfo.warrantyUntil ? new Date(warrantyInfo.warrantyUntil).toLocaleDateString("pt-BR") : "—"}). Financeiro bloqueado automaticamente.
+        </div>
+      )}
+
+      <div className="flex items-center font-medium gap-2 rounded-lg transition px-2 py-2 text-sm border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/3 mb-3 text-gray-700 dark:text-gray-400">
+        {TABS.map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setCurrentTab(tab.key)}
+            className={`${currentTab === tab.key ? "bg-brand-500 text-white" : ""} px-3 py-1 rounded-md transition-colors`}
+          >
+            {tab.title}
+          </button>
+        ))}
+      </div>
+
+      <div className="mb-2">
+        {currentTab === "device" && (
+          <ServiceOrderDeviceTab
+            register={register}
+            watch={watch}
+            setValue={setValue}
+            onSave={saveEquipment}
+            onWarrantyCheck={checkWarranty}
+            isEdit={!!isEdit}
+            isClosed={isClosed}
+          />
+        )}
+        {currentTab === "items" && isEdit && (
+          <ServiceOrderItemsTab
+            serviceOrderId={id!}
+            isWarranty={isWarranty}
+            isClosed={isClosed}
+          />
+        )}
+        {currentTab === "items" && !isEdit && (
+          <div className="p-8 text-center text-gray-400 dark:text-gray-500 text-sm">
+            Salve o equipamento primeiro para adicionar peças e serviços.
+          </div>
+        )}
+        {currentTab === "laudo" && isEdit && (
+          <ServiceOrderLaudoTab
+            setValue={setValue}
+            register={register}
+            watch={watch}
+            onSave={saveEquipment}
+            isClosed={isClosed}
+          />
+        )}
+        {currentTab === "laudo" && !isEdit && (
+          <div className="p-8 text-center text-gray-400 dark:text-gray-500 text-sm">
+            Salve o equipamento primeiro para preencher o laudo.
+          </div>
+        )}
+      </div>
+
+      {showCloseModal && isEdit && (
+        <ServiceOrderCloseModal
+          serviceOrderId={id!}
+          isWarranty={isWarranty}
+          onClose={() => setShowCloseModal(false)}
+          onSuccess={() => { setShowCloseModal(false); getById(id!); }}
+        />
+      )}
+
+      <CustomerModalCreate />
+      <SupplierModalCreate />
+    </>
+  );
+}
