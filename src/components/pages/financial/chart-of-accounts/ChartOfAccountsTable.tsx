@@ -12,10 +12,10 @@ import Pagination from "@/components/tables/Pagination";
 import { useModal } from "@/hooks/useModal";
 import { permissionDelete, permissionUpdate } from "@/utils/permission.util";
 import { IconEdit } from "@/components/iconEdit/IconEdit";
-import { IconDelete } from "@/components/global/iconDelete";
 import { useRouter } from "next/navigation";
 import ChartOfAccountsModalCreate from "./ChartOfAccountsModalCreate";
 import { chartOfAccountIdAtom, chartOfAccountModalAtom } from "@/jotai/financial/chart-of-account.jotai";
+import { IconDelete } from "@/components/iconDelete/IconDelete";
 
 export default function ChartOfAccountsTable() {
   const [pagination, setPagination] = useAtom(paginationAtom);
