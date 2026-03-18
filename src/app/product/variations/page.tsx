@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     "This is Next.js Form Elements page for TailAdmin - Next.js Tailwind CSS Admin Dashboard Template",
 };
 
+
 export default function Variation() {
   return (
     <div>
