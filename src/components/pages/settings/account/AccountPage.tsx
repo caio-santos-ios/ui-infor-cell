@@ -18,6 +18,8 @@ import { TSubscription, TPaymentHistory } from "@/types/setting/subscription.typ
 import { MdPerson, MdInfo, MdCheckCircle, MdWarning, MdCancel, MdOpenInNew, MdCalendarToday, MdStar, MdDiamond,
 } from "react-icons/md";
 import { FaUserCircle } from "react-icons/fa";
+import EcommerceConfigTab from "@/components/pages/settings/ecommerce/EcommerceConfigTab";
+import { MdStorefront } from "react-icons/md";
 
 
 const PAYMENT_STATUS: Record<string, { label: string; cls: string }> = {
@@ -437,6 +439,7 @@ function InstallationTab() {
 const TABS = [
   { key: "profile",      label: "Meu Perfil",       icon: <MdPerson /> },
   { key: "subscription", label: "Plano & Cobranças", icon: <MdStar /> },
+  { key: "ecommerce",    label: "Loja Virtual",      icon: <MdStorefront /> },
   { key: "info",         label: "Instalação",        icon: <MdInfo /> },
 ];
 
@@ -464,6 +467,7 @@ export default function AccountPage() {
       <div className="mb-2">
         {tab === "profile"      && <ProfileTab />}
         {tab === "subscription" && <SubscriptionTab />}
+        {tab === "ecommerce"    && <EcommerceConfigTab />}
         {tab === "info"         && <InstallationTab />}
       </div>
     </>
