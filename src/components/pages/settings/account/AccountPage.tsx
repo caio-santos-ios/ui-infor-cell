@@ -19,7 +19,6 @@ import { MdPerson, MdInfo, MdCheckCircle, MdWarning, MdCancel, MdOpenInNew, MdCa
 } from "react-icons/md";
 import { FaUserCircle } from "react-icons/fa";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const PAYMENT_STATUS: Record<string, { label: string; cls: string }> = {
     RECEIVED:  { label: "Pago",       cls: "text-success-600 bg-success-50 border-success-200 dark:text-success-400 dark:bg-success-500/10 dark:border-success-500/20" },
@@ -48,13 +47,16 @@ const PLAN_GRADIENT: Record<string, string> = {
     Platina: "from-violet-600 to-violet-400",
 };
 
-function fDate(d?: string | null) {
-    if (!d) return "—";
-    return new Date(d).toLocaleDateString("pt-BR");
+function fDate(d?: string | null, addMonth: boolean = false) {
+  if (!d) return "—";
+  const date = d.split("T")[0].split("-");
+  const month = addMonth ? parseInt(date[1]) : parseInt(date[1]) - 1;
+
+  return new Date(parseInt(date[0]), month, parseInt(date[2])).toLocaleDateString("pt-BR");
 }
 
 function fMoney(v: number) {
-    return v?.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) ?? "—";
+  return v?.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) ?? "—";
 }
 
 function Badge({ status, map }: { status: string; map: Record<string, { label: string; cls: string }> }) {
@@ -65,8 +67,6 @@ function Badge({ status, map }: { status: string; map: Record<string, { label: s
         </span>
     );
 }
-
-// ─── ABA: PERFIL ──────────────────────────────────────────────────────────────
 
 function ProfileTab() {
     const [_, setIsLoading] = useAtom(loadingAtom);
@@ -237,11 +237,11 @@ function SubscriptionTab() {
     try {
         setIsLoading(true);
         const [
-            subRes, 
-            histRes
+          subRes, 
+          histRes
         ] = await Promise.all([
-            api.get(`/subscriptions/current`, configApi()),
-            api.get(`/subscriptions/payments`, configApi()),
+          api.get(`/subscriptions/current`, configApi()),
+          api.get(`/subscriptions/payments`, configApi()),
         ]);
         setSubscription(subRes.data.result?.data ?? null);
         setHistory(histRes.data.result?.data ?? []);
@@ -281,7 +281,7 @@ function SubscriptionTab() {
               {subscription?.nextDueDate && (
                 <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1">
                   <MdCalendarToday className="text-sm" />
-                  Próx. vencimento: <strong className="text-gray-600 dark:text-gray-300 ml-1">{fDate(subscription.nextDueDate)}</strong>
+                  Próx. vencimento: <strong className="text-gray-600 dark:text-gray-300 ml-1">{fDate(subscription.nextDueDate, true)}</strong>
                 </p>
               )}
               {subscription?.startDate && (
