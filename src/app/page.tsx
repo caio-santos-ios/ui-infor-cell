@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import SignInForm from "@/components/auth/SignInForm";
 import { Metadata } from "next";
 
