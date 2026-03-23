@@ -26,6 +26,8 @@ import {
 } from "react-icons/md";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useAtom } from "jotai";
+import { loadingAtom } from "@/jotai/global/loading.jotai";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 const fMoney = (v: number) =>
@@ -45,9 +47,8 @@ function buildApi(plan: string, company: string, store: string) {
 
 type Screen = "store" | "product" | "cart" | "auth" | "checkout" | "success";
 
-// ─── Componente principal ─────────────────────────────────────────────────────
 export default function EcommercePage() {
-  // useSearchParams é seguro no Next.js App Router (client component)
+
   const searchParams = useSearchParams();
   const plan    = searchParams.get("plan")    ?? "";
   const company = searchParams.get("company") ?? "";
@@ -62,9 +63,9 @@ export default function EcommercePage() {
   const [order,    setOrder]    = useState<TEcommerceOrder | null>(null);
   const [search,   setSearch]   = useState("");
   const [loading,  setLoading]  = useState(true);
+  const [_,  setIsLoading]  = useAtom(loadingAtom);
   const [notFound, setNotFound] = useState(false);
 
-  // recuperar sessão salva
   useEffect(() => {
     const saved = localStorage.getItem("ec_customer");
     if (saved) setCustomer(JSON.parse(saved));
@@ -72,6 +73,7 @@ export default function EcommercePage() {
 
   // carregar config + produtos assim que plan/company/store estiverem disponíveis
   useEffect(() => {
+    setIsLoading(false);
     // se não veio parâmetro nenhum, não fica em loading infinito
     if (!plan || !company || !store) {
       setNotFound(true);
