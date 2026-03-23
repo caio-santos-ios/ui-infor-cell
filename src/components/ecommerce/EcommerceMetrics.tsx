@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Badge from "@/components/ui/badge/Badge";
 import { ArrowDownIcon, ArrowUpIcon, BoxIconLine, GroupIcon } from "@/icons";
 import { api } from "@/service/api.service";
@@ -31,8 +31,10 @@ export const EcommerceMetrics = () => {
       .get(`/dashboard/cards?selectedStore=${selectedStore}`, configApi())
       .then((res) => {
         setData(res.data?.result?.data ?? null);
+        setLoading(false);
       })
       .catch(() => {
+        setLoading(false);
         setData(null);
       })
       .finally(() => {

@@ -12,33 +12,35 @@ import {
   TEcommerceOrder,
 } from "@/types/ecommerce/ecommerce.type";
 import {
-  MdShoppingCart,
-  MdAdd,
-  MdRemove,
-  MdSearch,
-  MdStore,
-  MdCheckCircle,
-  MdContentCopy,
-  MdLocalShipping,
-  MdOpenInNew,
-  MdPerson,
-  MdLogout,
+  MdShoppingCart, MdAdd, MdRemove, MdSearch, MdStore,
+  MdCheckCircle, MdContentCopy, MdLocalShipping, MdOpenInNew,
+  MdPerson, MdLogout, MdFilterList, MdClose, MdExpandMore, MdExpandLess,
 } from "react-icons/md";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useAtom } from "jotai";
 import { loadingAtom } from "@/jotai/global/loading.jotai";
+import { useAtom } from "jotai";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 const fMoney = (v: number) =>
   v?.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) ?? "R$ 0,00";
 
+type EcommerceCategory = {
+  id: string;
+  name: string;
+  code: string;
+  subcategories: { code: string; name: string }[];
+};
+
 function buildApi(plan: string, company: string, store: string) {
   const base = `${uriBase}/api/ecommerce/public`;
   return {
-    config:   ()           => axios.get(`${base}/config/${plan}/${company}/${store}`),
-    products: (q?: string, cat?: string) =>
-      axios.get(`${base}/products/${plan}/${company}/${store}`, { params: { search: q, categoryId: cat } }),
+    config:     ()                              => axios.get(`${base}/config/${plan}/${company}/${store}`),
+    categories: ()                              => axios.get(`${base}/categories/${plan}/${company}/${store}`),
+    products:   (q?: string, cat?: string, sub?: string) =>
+      axios.get(`${base}/products/${plan}/${company}/${store}`, {
+        params: { search: q, categoryId: cat, subcategory: sub },
+      }),
     register: (body: object) => axios.post(`${base}/register`, { ...body, plan, company, store }),
     login:    (body: object) => axios.post(`${base}/login`,    { ...body, plan, company, store }),
     checkout: (body: object) => axios.post(`${base}/checkout`, { ...body, plan, company, store }),
@@ -48,88 +50,99 @@ function buildApi(plan: string, company: string, store: string) {
 type Screen = "store" | "product" | "cart" | "auth" | "checkout" | "success";
 
 export default function EcommercePage() {
-
   const searchParams = useSearchParams();
   const plan    = searchParams.get("plan")    ?? "";
   const company = searchParams.get("company") ?? "";
   const store   = searchParams.get("store")   ?? "";
+  const [_, setIsLoading] = useAtom(loadingAtom);
 
-  const [config,   setConfig]   = useState<TEcommerceConfig | null>(null);
-  const [products, setProducts] = useState<TEcommerceProduct[]>([]);
-  const [cart,     setCart]     = useState<TEcommerceCartItem[]>([]);
-  const [customer, setCustomer] = useState<TEcommerceCustomer | null>(null);
-  const [screen,   setScreen]   = useState<Screen>("store");
-  const [selected, setSelected] = useState<TEcommerceProduct | null>(null);
-  const [order,    setOrder]    = useState<TEcommerceOrder | null>(null);
-  const [search,   setSearch]   = useState("");
+  const [config,     setConfig]     = useState<TEcommerceConfig | null>(null);
+  const [categories, setCategories] = useState<EcommerceCategory[]>([]);
+  const [products,   setProducts]   = useState<TEcommerceProduct[]>([]);
+  const [cart,       setCart]       = useState<TEcommerceCartItem[]>([]);
+  const [customer,   setCustomer]   = useState<TEcommerceCustomer | null>(null);
+  const [screen,     setScreen]     = useState<Screen>("store");
+  const [selected,   setSelected]   = useState<TEcommerceProduct | null>(null);
+  const [order,      setOrder]      = useState<TEcommerceOrder | null>(null);
+
+  // filtros
+  const [search,          setSearch]          = useState("");
+  const [activeCategoryId,  setActiveCategoryId]  = useState<string | null>(null);
+  const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null);
+  const [expandedCats,    setExpandedCats]    = useState<Record<string, boolean>>({});
+  const [sidebarOpen,     setSidebarOpen]     = useState(false); // mobile
+
   const [loading,  setLoading]  = useState(true);
-  const [_,  setIsLoading]  = useAtom(loadingAtom);
   const [notFound, setNotFound] = useState(false);
 
+  // sessão salva
   useEffect(() => {
     const saved = localStorage.getItem("ec_customer");
     if (saved) setCustomer(JSON.parse(saved));
   }, []);
 
-  // carregar config + produtos assim que plan/company/store estiverem disponíveis
+  // carregar config + categorias + produtos
   useEffect(() => {
-    setIsLoading(false);
-    // se não veio parâmetro nenhum, não fica em loading infinito
-    if (!plan || !company || !store) {
-      setNotFound(true);
-      setLoading(false);
-      return;
-    }
-
+    if (!plan || !company || !store) { setNotFound(true); setLoading(false); return; }
     const a = buildApi(plan, company, store);
-
     (async () => {
       setLoading(true);
       try {
-        const [cfgRes, prodRes] = await Promise.all([a.config(), a.products()]);
+        const [cfgRes, catRes, prodRes] = await Promise.all([
+          a.config(), a.categories(), a.products(),
+        ]);
         const cfg = cfgRes.data?.result?.data;
-
-        if (!cfg || cfg.enabled === false) {
-          setNotFound(true);
-          setLoading(false);
-          return;
-        }
-
+        if (!cfg || cfg.enabled === false) { setNotFound(true); setLoading(false); return; }
         setConfig(cfg);
+        setCategories(catRes.data?.result?.data ?? []);
         setProducts(prodRes.data?.result?.data ?? []);
-      } catch {
-        setNotFound(true);
-      } finally {
+        setIsLoading(false);
+      } catch { setNotFound(true); }
+      finally  { 
         setLoading(false);
+        setIsLoading(false); 
       }
     })();
   }, [plan, company, store]);
 
-  const fetchProducts = useCallback(async (q?: string) => {
+  const fetchProducts = useCallback(async (q?: string, catId?: string | null, sub?: string | null) => {
     if (!plan) return;
     try {
-      const res = await buildApi(plan, company, store).products(q);
+      const res = await buildApi(plan, company, store).products(q, catId ?? undefined, sub ?? undefined);
       setProducts(res.data?.result?.data ?? []);
     } catch {}
   }, [plan, company, store]);
 
-  // ─── cart helpers ─────────────────────────────────────────────────────────
+  // aplicar filtro quando mudar categoria ou subcategoria
+  const selectCategory = (catId: string | null) => {
+    setActiveCategoryId(catId);
+    setActiveSubcategory(null);
+    fetchProducts(search, catId, null);
+  };
+
+  const selectSubcategory = (catId: string, sub: string | null) => {
+    setActiveCategoryId(catId);
+    setActiveSubcategory(sub);
+    fetchProducts(search, catId, sub);
+  };
+
+  const toggleExpand = (catId: string) =>
+    setExpandedCats((prev) => ({ ...prev, [catId]: !prev[catId] }));
+
+  // ─── cart ────────────────────────────────────────────────────────────────
   const addToCart = (product: TEcommerceProduct) => {
     const stock = product.stocks[0];
     if (!stock) return;
     setCart((prev) => {
       const idx = prev.findIndex((i) => i.productId === product.id);
       if (idx >= 0) {
-        const updated = [...prev];
-        updated[idx] = { ...updated[idx], quantity: updated[idx].quantity + 1 };
-        return updated;
+        const u = [...prev];
+        u[idx] = { ...u[idx], quantity: u[idx].quantity + 1 };
+        return u;
       }
       return [...prev, {
-        productId:   product.id,
-        stockId:     stock.id,
-        productName: product.name,
-        quantity:    1,
-        price:       stock.priceDiscount > 0 ? stock.priceDiscount : stock.price,
+        productId: product.id, stockId: stock.id, productName: product.name,
+        quantity: 1, price: stock.priceDiscount > 0 ? stock.priceDiscount : stock.price,
       }];
     });
     toast.success("Adicionado ao carrinho!", { theme: "colored", autoClose: 1500 });
@@ -141,23 +154,17 @@ export default function EcommercePage() {
           .filter((i) => i.quantity > 0)
     );
 
-  const cartTotal = cart.reduce((acc, i) => acc + i.price * i.quantity, 0);
-  const cartCount = cart.reduce((acc, i) => acc + i.quantity, 0);
+  const cartTotal = cart.reduce((a, i) => a + i.price * i.quantity, 0);
+  const cartCount = cart.reduce((a, i) => a + i.quantity, 0);
   const shipping  = config?.shippingEnabled
-    ? config.shippingFreeAbove > 0 && cartTotal >= config.shippingFreeAbove ? 0 : config.shippingFixedPrice
+    ? (config.shippingFreeAbove > 0 && cartTotal >= config.shippingFreeAbove ? 0 : config.shippingFixedPrice)
     : 0;
 
   const saveCustomer = (c: TEcommerceCustomer) => {
-    setCustomer(c);
-    localStorage.setItem("ec_customer", JSON.stringify(c));
+    setCustomer(c); localStorage.setItem("ec_customer", JSON.stringify(c));
   };
+  const logout = () => { setCustomer(null); localStorage.removeItem("ec_customer"); };
 
-  const logout = () => {
-    setCustomer(null);
-    localStorage.removeItem("ec_customer");
-  };
-
-  // ─── estados de tela ──────────────────────────────────────────────────────
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="animate-spin rounded-full h-10 w-10 border-4 border-purple-500 border-t-transparent" />
@@ -172,8 +179,83 @@ export default function EcommercePage() {
     </div>
   );
 
-  const primary = config?.primaryColor ?? "#7C3AED";
-  const apiClient = buildApi(plan, company, store);
+  const primary    = config?.primaryColor ?? "#7C3AED";
+  const apiClient  = buildApi(plan, company, store);
+
+  // ─── Sidebar de filtros ───────────────────────────────────────────────────
+  const FilterSidebar = () => (
+    <aside className="w-full space-y-1">
+      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 mb-3">Categorias</p>
+
+      {/* Todos */}
+      <button
+        onClick={() => { selectCategory(null); setSidebarOpen(false); }}
+        className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition ${
+          activeCategoryId === null
+            ? "text-white"
+            : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+        }`}
+        style={activeCategoryId === null ? { backgroundColor: primary } : {}}
+      >
+        Todos os produtos
+      </button>
+
+      {categories.map((cat) => {
+        const isActive   = activeCategoryId === cat.id;
+        const isExpanded = expandedCats[cat.id] ?? isActive;
+        const hasSubs    = cat.subcategories.length > 0;
+
+        return (
+          <div key={cat.id}>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => { selectCategory(cat.id); setSidebarOpen(false); }}
+                className={`flex-1 text-left px-3 py-2 rounded-lg text-sm font-medium transition ${
+                  isActive && !activeSubcategory
+                    ? "text-white"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                }`}
+                style={isActive && !activeSubcategory ? { backgroundColor: primary } : {}}
+              >
+                {cat.name}
+              </button>
+              {hasSubs && (
+                <button
+                  onClick={() => toggleExpand(cat.id)}
+                  className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                >
+                  {isExpanded ? <MdExpandLess size={18} /> : <MdExpandMore size={18} />}
+                </button>
+              )}
+            </div>
+
+            {/* Subcategorias */}
+            {hasSubs && isExpanded && (
+              <div className="ml-3 mt-1 space-y-0.5 border-l-2 border-gray-100 dark:border-gray-700 pl-3">
+                {cat.subcategories.map((sub) => {
+                  const subActive = isActive && activeSubcategory === sub.name;
+                  return (
+                    <button
+                      key={sub.code}
+                      onClick={() => { selectSubcategory(cat.id, sub.name); setSidebarOpen(false); }}
+                      className={`w-full text-left px-2 py-1.5 rounded-lg text-xs font-medium transition ${
+                        subActive
+                          ? "text-white"
+                          : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                      }`}
+                      style={subActive ? { backgroundColor: primary } : {}}
+                    >
+                      {sub.name}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </aside>
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
@@ -181,7 +263,7 @@ export default function EcommercePage() {
 
       {/* ── Header ── */}
       <header style={{ backgroundColor: primary }} className="sticky top-0 z-40 shadow-md">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
           <button onClick={() => setScreen("store")} className="flex items-center gap-2">
             {config?.logoUrl
               ? <img src={config.logoUrl} alt="logo" className="h-9 w-9 rounded-full object-cover" />
@@ -192,12 +274,19 @@ export default function EcommercePage() {
           </button>
 
           <div className="flex items-center gap-3">
+            {/* botão filtro mobile */}
+            {screen === "store" && categories.length > 0 && (
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden flex items-center gap-1 text-white/80 hover:text-white text-sm"
+              >
+                <MdFilterList size={20} />
+              </button>
+            )}
             {customer ? (
               <div className="flex items-center gap-2">
                 <span className="text-white/80 text-sm hidden sm:block">{customer.name}</span>
-                <button onClick={logout} className="text-white/70 hover:text-white">
-                  <MdLogout size={20} />
-                </button>
+                <button onClick={logout} className="text-white/70 hover:text-white"><MdLogout size={20} /></button>
               </div>
             ) : (
               <button onClick={() => setScreen("auth")} className="flex items-center gap-1 text-white/90 hover:text-white text-sm">
@@ -220,75 +309,138 @@ export default function EcommercePage() {
         </div>
       </header>
 
-      {/* ── Banner ── */}
+      {/* Banner */}
       {screen === "store" && config?.bannerUrl && (
-        <div className="w-full h-48 md:h-64 overflow-hidden">
+        <div className="w-full h-44 md:h-60 overflow-hidden">
           <img src={config.bannerUrl} alt="banner" className="w-full h-full object-cover" />
         </div>
       )}
 
-      <main className="max-w-6xl mx-auto px-4 py-6">
+      {/* ── Modal sidebar mobile ── */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-50 flex lg:hidden">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setSidebarOpen(false)} />
+          <div className="relative bg-white dark:bg-gray-900 w-72 h-full overflow-y-auto p-5 shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <p className="font-semibold text-gray-800 dark:text-white">Filtros</p>
+              <button onClick={() => setSidebarOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <MdClose size={22} />
+              </button>
+            </div>
+            <FilterSidebar />
+          </div>
+        </div>
+      )}
+
+      <main className="max-w-7xl mx-auto px-4 py-6">
 
         {/* ══ TELA: LOJA ══════════════════════════════════════════════════════ */}
         {screen === "store" && (
-          <>
-            {config?.storeDescription && (
-              <p className="text-gray-500 text-sm mb-4">{config.storeDescription}</p>
-            )}
-            <div className="relative mb-6">
-              <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-              <input
-                value={search}
-                onChange={(e) => { setSearch(e.target.value); fetchProducts(e.target.value); }}
-                placeholder="Buscar produtos..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-300 text-sm"
-              />
-            </div>
+          <div className="flex gap-6">
 
-            {products.length === 0 ? (
-              <div className="flex flex-col items-center gap-3 py-20 text-gray-400">
-                <MdStore size={48} className="text-gray-200" />
-                <p>Nenhum produto disponível no momento.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {products.map((p) => {
-                  const stock = p.stocks[0];
-                  const price = stock?.priceDiscount > 0 ? stock.priceDiscount : stock?.price ?? 0;
-                  const hasDiscount = stock?.priceDiscount > 0 && stock?.price > stock?.priceDiscount;
-                  return (
-                    <div
-                      key={p.id}
-                      onClick={() => { setSelected(p); setScreen("product"); }}
-                      className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition cursor-pointer overflow-hidden group"
-                    >
-                      <div className="h-40 bg-gray-100 flex items-center justify-center overflow-hidden">
-                        <MdStore size={48} className="text-gray-300 group-hover:scale-110 transition" />
-                      </div>
-                      <div className="p-3">
-                        <p className="text-sm font-semibold text-gray-800 line-clamp-2">{p.name}</p>
-                        {p.description && <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{p.description}</p>}
-                        <div className="mt-2 flex items-center justify-between gap-1">
-                          <div>
-                            {hasDiscount && <p className="text-xs text-gray-400 line-through">{fMoney(stock.price)}</p>}
-                            <p className="font-bold text-gray-900" style={{ color: primary }}>{fMoney(price)}</p>
-                          </div>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); addToCart(p); }}
-                            style={{ backgroundColor: primary }}
-                            className="rounded-full p-1.5 text-white hover:opacity-90 transition"
-                          >
-                            <MdAdd size={16} />
-                          </button>
-                        </div>
-                        <p className="text-xs text-gray-400 mt-1">{p.quantity} em estoque</p>
-                      </div>
-                    </div>
-                  );
-                })}
+            {/* ── Sidebar desktop ── */}
+            {categories.length > 0 && (
+              <div className="hidden lg:block w-52 shrink-0">
+                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-4 sticky top-20">
+                  <FilterSidebar />
+                </div>
               </div>
             )}
-          </>
+
+            {/* ── Conteúdo principal ── */}
+            <div className="flex-1 min-w-0">
+              {config?.storeDescription && (
+                <p className="text-gray-500 text-sm mb-4">{config.storeDescription}</p>
+              )}
+
+              {/* Breadcrumb filtro ativo */}
+              {(activeCategoryId || activeSubcategory) && (
+                <div className="flex items-center gap-2 mb-4 flex-wrap">
+                  {activeCategoryId && (
+                    <span
+                      className="flex items-center gap-1 text-xs font-medium px-3 py-1 rounded-full text-white"
+                      style={{ backgroundColor: primary }}
+                    >
+                      {categories.find((c) => c.id === activeCategoryId)?.name}
+                      <button onClick={() => selectCategory(null)} className="ml-1 hover:opacity-70">
+                        <MdClose size={13} />
+                      </button>
+                    </span>
+                  )}
+                  {activeSubcategory && (
+                    <span
+                      className="flex items-center gap-1 text-xs font-medium px-3 py-1 rounded-full border"
+                      style={{ borderColor: primary, color: primary }}
+                    >
+                      {activeSubcategory}
+                      <button onClick={() => selectSubcategory(activeCategoryId!, null)} className="ml-1 hover:opacity-70">
+                        <MdClose size={13} />
+                      </button>
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* Busca */}
+              <div className="relative mb-5">
+                <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    fetchProducts(e.target.value, activeCategoryId, activeSubcategory);
+                  }}
+                  placeholder="Buscar produtos..."
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-300 text-sm"
+                />
+              </div>
+
+              {/* Grid */}
+              {products.length === 0 ? (
+                <div className="flex flex-col items-center gap-3 py-20 text-gray-400">
+                  <MdStore size={48} className="text-gray-200" />
+                  <p>Nenhum produto encontrado.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {products.map((p) => {
+                    const stock      = p.stocks[0];
+                    const price      = stock?.priceDiscount > 0 ? stock.priceDiscount : stock?.price ?? 0;
+                    const hasDiscount = stock?.priceDiscount > 0 && stock?.price > stock?.priceDiscount;
+                    return (
+                      <div
+                        key={p.id}
+                        onClick={() => { setSelected(p); setScreen("product"); }}
+                        className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition cursor-pointer overflow-hidden group"
+                      >
+                        <div className="h-40 bg-gray-100 flex items-center justify-center overflow-hidden">
+                          <MdStore size={48} className="text-gray-300 group-hover:scale-110 transition" />
+                        </div>
+                        <div className="p-3">
+                          <p className="text-sm font-semibold text-gray-800 line-clamp-2">{p.name}</p>
+                          {p.description && <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{p.description}</p>}
+                          <div className="mt-2 flex items-center justify-between gap-1">
+                            <div>
+                              {hasDiscount && <p className="text-xs text-gray-400 line-through">{fMoney(stock.price)}</p>}
+                              <p className="font-bold" style={{ color: primary }}>{fMoney(price)}</p>
+                            </div>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); addToCart(p); }}
+                              style={{ backgroundColor: primary }}
+                              className="rounded-full p-1.5 text-white hover:opacity-90 transition"
+                            >
+                              <MdAdd size={16} />
+                            </button>
+                          </div>
+                          <p className="text-xs text-gray-400 mt-1">{p.quantity} em estoque</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
         )}
 
         {screen === "product" && selected && (
@@ -332,8 +484,8 @@ export default function EcommercePage() {
 function ProductScreen({ product, primary, onBack, onAddToCart }: {
   product: TEcommerceProduct; primary: string; onBack: () => void; onAddToCart: (p: TEcommerceProduct) => void;
 }) {
-  const stock = product.stocks[0];
-  const price = stock?.priceDiscount > 0 ? stock.priceDiscount : stock?.price ?? 0;
+  const stock       = product.stocks[0];
+  const price       = stock?.priceDiscount > 0 ? stock.priceDiscount : stock?.price ?? 0;
   const hasDiscount = stock?.priceDiscount > 0 && stock?.price > stock?.priceDiscount;
   return (
     <div>
@@ -424,8 +576,8 @@ function AuthScreen({ primary, api, onSuccess, onBack }: {
   primary: string; api: ReturnType<typeof buildApi>;
   onSuccess: (c: TEcommerceCustomer) => void; onBack: () => void;
 }) {
-  const [mode, setMode] = useState<"login" | "register">("login");
-  const [form, setForm] = useState({ name: "", email: "", password: "", phone: "", document: "" });
+  const [mode,    setMode]    = useState<"login" | "register">("login");
+  const [form,    setForm]    = useState({ name: "", email: "", password: "", phone: "", document: "" });
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
@@ -457,13 +609,13 @@ function AuthScreen({ primary, api, onSuccess, onBack }: {
         <div className="space-y-3">
           {mode === "register" && (
             <>
-              <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Nome completo" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200" />
-              <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="Telefone" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200" />
-              <input value={form.document} onChange={(e) => setForm({ ...form, document: e.target.value })} placeholder="CPF ou CNPJ" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200" />
+              <input value={form.name}     onChange={(e) => setForm({ ...form, name: e.target.value })}     placeholder="Nome completo" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200" />
+              <input value={form.phone}    onChange={(e) => setForm({ ...form, phone: e.target.value })}    placeholder="Telefone"      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200" />
+              <input value={form.document} onChange={(e) => setForm({ ...form, document: e.target.value })} placeholder="CPF ou CNPJ"   className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200" />
             </>
           )}
-          <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="E-mail" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200" />
-          <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="Senha" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200" />
+          <input type="email"    value={form.email}    onChange={(e) => setForm({ ...form, email: e.target.value })}    placeholder="E-mail" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200" />
+          <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="Senha"  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200" />
           <button onClick={submit} disabled={loading} style={{ backgroundColor: primary }}
             className="w-full py-3 rounded-xl text-white font-semibold hover:opacity-90 transition disabled:opacity-60">
             {loading ? "Aguarde..." : mode === "login" ? "Entrar" : "Criar conta"}
@@ -481,7 +633,7 @@ function CheckoutScreen({ cart, customer, shipping, total, primary, api, onSucce
 }) {
   const [billing, setBilling] = useState("PIX");
   const [address, setAddress] = useState({ zipCode: "", street: "", number: "", complement: "", neighborhood: "", city: "", state: "" });
-  const [card, setCard] = useState({ holderName: "", number: "", expiryMonth: "", expiryYear: "", cvv: "" });
+  const [card,    setCard]    = useState({ holderName: "", number: "", expiryMonth: "", expiryYear: "", cvv: "" });
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
@@ -498,7 +650,7 @@ function CheckoutScreen({ cart, customer, shipping, total, primary, api, onSucce
         body.cardExpiryMonth = card.expiryMonth; body.cardExpiryYear = card.expiryYear; body.cardCvv = card.cvv;
       }
       const res = await api.checkout(body);
-      const d = res.data?.result?.data;
+      const d   = res.data?.result?.data;
       if (!d) { toast.error(res.data?.result?.message ?? "Erro"); return; }
       onSuccess(d as TEcommerceOrder);
     } catch (e: any) {
@@ -512,7 +664,6 @@ function CheckoutScreen({ cart, customer, shipping, total, primary, api, onSucce
     <div className="max-w-xl mx-auto space-y-5">
       <button onClick={onBack} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700">← Voltar</button>
       <h2 className="text-lg font-bold text-gray-900">Finalizar pedido</h2>
-
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
         <h3 className="font-semibold text-gray-800 mb-3">Forma de pagamento</h3>
         <div className="grid grid-cols-3 gap-2">
@@ -525,26 +676,25 @@ function CheckoutScreen({ cart, customer, shipping, total, primary, api, onSucce
         </div>
         {billing === "CREDIT_CARD" && (
           <div className="mt-4 space-y-2">
-            <input value={card.holderName} onChange={(e) => setCard({ ...card, holderName: e.target.value })} placeholder="Nome no cartão" className={inp} />
-            <input value={card.number} onChange={(e) => setCard({ ...card, number: e.target.value })} placeholder="Número do cartão" className={inp} />
+            <input value={card.holderName}  onChange={(e) => setCard({ ...card, holderName: e.target.value })}  placeholder="Nome no cartão"    className={inp} />
+            <input value={card.number}      onChange={(e) => setCard({ ...card, number: e.target.value })}      placeholder="Número do cartão"  className={inp} />
             <div className="grid grid-cols-3 gap-2">
-              <input value={card.expiryMonth} onChange={(e) => setCard({ ...card, expiryMonth: e.target.value })} placeholder="Mês" className={inp} />
-              <input value={card.expiryYear} onChange={(e) => setCard({ ...card, expiryYear: e.target.value })} placeholder="Ano" className={inp} />
-              <input value={card.cvv} onChange={(e) => setCard({ ...card, cvv: e.target.value })} placeholder="CVV" className={inp} />
+              <input value={card.expiryMonth} onChange={(e) => setCard({ ...card, expiryMonth: e.target.value })} placeholder="Mês"  className={inp} />
+              <input value={card.expiryYear}  onChange={(e) => setCard({ ...card, expiryYear: e.target.value })}  placeholder="Ano"  className={inp} />
+              <input value={card.cvv}         onChange={(e) => setCard({ ...card, cvv: e.target.value })}         placeholder="CVV"  className={inp} />
             </div>
           </div>
         )}
       </div>
-
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
         <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2"><MdLocalShipping size={18} />Endereço de entrega</h3>
         <div className="space-y-2">
           <div className="grid grid-cols-2 gap-2">
-            <input value={address.zipCode} onChange={(e) => setAddress({ ...address, zipCode: e.target.value })} placeholder="CEP" className={inp} />
-            <input value={address.state} onChange={(e) => setAddress({ ...address, state: e.target.value })} placeholder="Estado" className={inp} />
+            <input value={address.zipCode} onChange={(e) => setAddress({ ...address, zipCode: e.target.value })} placeholder="CEP"    className={inp} />
+            <input value={address.state}   onChange={(e) => setAddress({ ...address, state: e.target.value })}   placeholder="Estado" className={inp} />
           </div>
-          <input value={address.city} onChange={(e) => setAddress({ ...address, city: e.target.value })} placeholder="Cidade" className={inp} />
-          <input value={address.neighborhood} onChange={(e) => setAddress({ ...address, neighborhood: e.target.value })} placeholder="Bairro" className={inp} />
+          <input value={address.city}         onChange={(e) => setAddress({ ...address, city: e.target.value })}         placeholder="Cidade"       className={inp} />
+          <input value={address.neighborhood} onChange={(e) => setAddress({ ...address, neighborhood: e.target.value })} placeholder="Bairro"       className={inp} />
           <div className="grid grid-cols-3 gap-2">
             <div className="col-span-2">
               <input value={address.street} onChange={(e) => setAddress({ ...address, street: e.target.value })} placeholder="Rua / Avenida" className={inp} />
@@ -554,7 +704,6 @@ function CheckoutScreen({ cart, customer, shipping, total, primary, api, onSucce
           <input value={address.complement} onChange={(e) => setAddress({ ...address, complement: e.target.value })} placeholder="Complemento (opcional)" className={inp} />
         </div>
       </div>
-
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 text-sm space-y-1">
         {cart.map((i) => (
           <div key={i.productId} className="flex justify-between text-gray-600">
@@ -566,7 +715,6 @@ function CheckoutScreen({ cart, customer, shipping, total, primary, api, onSucce
           <span>Total</span><span style={{ color: primary }}>{fMoney(total)}</span>
         </div>
       </div>
-
       <button onClick={submit} disabled={loading} style={{ backgroundColor: primary }}
         className="w-full py-3 rounded-xl text-white font-bold hover:opacity-90 transition disabled:opacity-60">
         {loading ? "Processando..." : `Pagar ${fMoney(total)}`}
@@ -584,12 +732,11 @@ function SuccessScreen({ order, primary, onBack }: { order: TEcommerceOrder; pri
         <MdCheckCircle size={56} className="mx-auto mb-2" style={{ color: primary }} />
         <h2 className="text-xl font-bold text-gray-900">Pedido #{order.code} realizado!</h2>
         <p className="text-gray-500 text-sm mt-1">
-          {order.billingType === "PIX" && "Escaneie o QR Code ou copie o código PIX abaixo."}
-          {order.billingType === "BOLETO" && "Pague o boleto para confirmar seu pedido."}
-          {order.billingType === "CREDIT_CARD" && "Pagamento com cartão processado!"}
+          {order.billingType === "PIX"         && "Escaneie o QR Code ou copie o código PIX abaixo."}
+          {order.billingType === "BOLETO"       && "Pague o boleto para confirmar seu pedido."}
+          {order.billingType === "CREDIT_CARD"  && "Pagamento com cartão processado!"}
         </p>
       </div>
-
       {order.billingType === "PIX" && order.pixQrCode && (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col items-center gap-3">
           {order.pixQrCodeImage && <img src={`data:image/png;base64,${order.pixQrCodeImage}`} alt="QR Code PIX" className="w-48 h-48" />}
@@ -604,7 +751,6 @@ function SuccessScreen({ order, primary, onBack }: { order: TEcommerceOrder; pri
           </div>
         </div>
       )}
-
       {order.billingType === "BOLETO" && (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-3">
           {order.identificationField && (
@@ -619,15 +765,13 @@ function SuccessScreen({ order, primary, onBack }: { order: TEcommerceOrder; pri
             </div>
           )}
           {order.paymentUrl && (
-            <a href={order.paymentUrl} target="_blank" rel="noopener noreferrer"
-              style={{ backgroundColor: primary }}
+            <a href={order.paymentUrl} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: primary }}
               className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-white font-semibold hover:opacity-90 transition">
               <MdOpenInNew size={18} /> Visualizar boleto
             </a>
           )}
         </div>
       )}
-
       <button onClick={onBack} className="w-full py-3 rounded-xl border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 transition">
         Continuar comprando
       </button>
