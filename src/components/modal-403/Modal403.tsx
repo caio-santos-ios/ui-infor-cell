@@ -2,10 +2,9 @@
 
 import { modal403Atom } from "@/jotai/auth/auth.jotai";
 import { useAtom } from "jotai";
-import { Modal } from "../ui/modal";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { Modal } from "../ui/modal";
 
 export const Modal403 = () => {
     const [modal, setModal] = useAtom(modal403Atom);
@@ -32,6 +31,6 @@ export const Modal403 = () => {
                     </div>
                 </form>
             </div>
-        </Modal>  
+        </Modal> 
     )
 }

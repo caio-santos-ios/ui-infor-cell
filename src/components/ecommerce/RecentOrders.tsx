@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import Badge from "../ui/badge/Badge";
+import Badge from "@/components/ui/badge/Badge";
 import { api } from "@/service/api.service";
 import { configApi } from "@/service/config.service";
 import { TDashboardRecentOrder } from "@/types/dashboard/dashboard-card.type";

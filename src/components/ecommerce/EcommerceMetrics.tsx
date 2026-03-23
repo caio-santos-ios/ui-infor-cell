@@ -1,6 +1,6 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import Badge from "../ui/badge/Badge";
+import { useEffect, useState } from "react";
+import Badge from "@/components/ui/badge/Badge";
 import { ArrowDownIcon, ArrowUpIcon, BoxIconLine, GroupIcon } from "@/icons";
 import { api } from "@/service/api.service";
 import { configApi } from "@/service/config.service";
