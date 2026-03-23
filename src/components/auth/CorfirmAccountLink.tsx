@@ -1,6 +1,5 @@
 "use client";
 
-import Label from "@/components/form/Label";
 import { loadingAtom } from "@/jotai/global/loading.jotai";
 import { api } from "@/service/api.service";
 import { resolveResponse } from "@/service/config.service";
@@ -9,7 +8,6 @@ import { useAtom } from "jotai";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SubmitHandler, useForm } from "react-hook-form";
-import Button from "../ui/button/Button";
 import { useEffect, useState } from "react";
 
 export default function CorfirmAccountLink({code}: {code: string}) {

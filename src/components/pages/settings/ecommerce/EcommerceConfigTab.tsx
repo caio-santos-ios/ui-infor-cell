@@ -25,6 +25,9 @@ export default function EcommerceConfigTab() {
     const fetch = async () => {
       try {
         const { data } = await api.get("/ecommerce/config", configApi());
+        const base = window.location.origin;
+        console.log(data.result.data)
+        setStoreUrl(`${base}/ecommerce?plan=${data?.result?.data?.plan}&company=${data?.result?.data?.company}&store=${data?.result?.data?.store}`);
         if (data?.result?.data) reset(data.result.data);
       } catch {}
     };
@@ -33,8 +36,12 @@ export default function EcommerceConfigTab() {
     if (typeof window !== "undefined") {
       const base = window.location.origin;
       // pega plan/company/store do localStorage
-      const plan = localStorage.getItem("telemovviToken") ? "configurado" : "";
-      setStoreUrl(`${base}/ecommerce`);
+      // const plan = localStorage.getItem("telemovviToken") ? "configurado" : "";
+      const plan = watch("plan");
+      const company = watch("company");
+      const store = watch("store");
+      console.log(plan)
+      // setStoreUrl(`${base}/ecommerce?plan=${plan}&company=${company}&store=${store}`);
     }
   }, []);
 
@@ -68,7 +75,6 @@ export default function EcommerceConfigTab() {
         </div>
       )}
 
-      {/* Habilitar loja */}
       <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
         <div>
           <p className="font-medium text-gray-800 dark:text-white">Loja virtual ativa</p>
@@ -80,7 +86,6 @@ export default function EcommerceConfigTab() {
         </label>
       </div>
 
-      {/* Informações da loja */}
       <div className="space-y-4 p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
         <div className="flex items-center gap-2 mb-2">
           <MdStore className="text-brand-500" size={18} />

@@ -10,6 +10,9 @@ export type TEcommerceConfig = {
   shippingFixedPrice: number;
   shippingFreeAbove: number;
   shippingDescription: string;
+  plan: string;
+  company: string;
+  store: string;
 };
 
 export const ResetEcommerceConfig: TEcommerceConfig = {
@@ -23,6 +26,9 @@ export const ResetEcommerceConfig: TEcommerceConfig = {
   shippingFixedPrice: 0,
   shippingFreeAbove: 0,
   shippingDescription: "",
+  plan: "",
+  company: "",
+  store: ""
 };
 
 export type TEcommerceProduct = {

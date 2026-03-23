@@ -68,7 +68,13 @@ export default function EcommercePage() {
     const p = params.get("plan") ?? "";
     const c = params.get("company") ?? "";
     const s = params.get("store") ?? "";
-    setPlan(p); setCompany(c); setStore(s);
+    console.log(p)
+    console.log(c)
+    console.log(s)
+    
+    setPlan(p); 
+    setCompany(c); 
+    setStore(s);
 
     // recuperar sessão salva
     const saved = localStorage.getItem("ec_customer");
