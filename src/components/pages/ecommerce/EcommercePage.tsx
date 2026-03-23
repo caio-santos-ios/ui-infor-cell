@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import { uriBase } from "@/service/api.service";
 import {
@@ -12,7 +13,6 @@ import {
 } from "@/types/ecommerce/ecommerce.type";
 import {
   MdShoppingCart,
-  MdClose,
   MdAdd,
   MdRemove,
   MdSearch,
@@ -27,85 +27,91 @@ import {
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-// ─── helpers ─────────────────────────────────────────────────────────────────
+// ─── helpers ──────────────────────────────────────────────────────────────────
 const fMoney = (v: number) =>
   v?.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) ?? "R$ 0,00";
 
-function api(plan: string, company: string, store: string) {
+function buildApi(plan: string, company: string, store: string) {
   const base = `${uriBase}/api/ecommerce/public`;
   return {
-    config: () => axios.get(`${base}/config/${plan}/${company}/${store}`),
-    products: (search?: string, cat?: string) =>
-      axios.get(`${base}/products/${plan}/${company}/${store}`, { params: { search, categoryId: cat } }),
+    config:   ()           => axios.get(`${base}/config/${plan}/${company}/${store}`),
+    products: (q?: string, cat?: string) =>
+      axios.get(`${base}/products/${plan}/${company}/${store}`, { params: { search: q, categoryId: cat } }),
     register: (body: object) => axios.post(`${base}/register`, { ...body, plan, company, store }),
-    login: (body: object) => axios.post(`${base}/login`, { ...body, plan, company, store }),
+    login:    (body: object) => axios.post(`${base}/login`,    { ...body, plan, company, store }),
     checkout: (body: object) => axios.post(`${base}/checkout`, { ...body, plan, company, store }),
   };
 }
 
-// ─── Tipos internos de tela ───────────────────────────────────────────────────
 type Screen = "store" | "product" | "cart" | "auth" | "checkout" | "success";
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 export default function EcommercePage() {
-  const [plan, setPlan] = useState("");
-  const [company, setCompany] = useState("");
-  const [store, setStore] = useState("");
-  const [config, setConfig] = useState<TEcommerceConfig | null>(null);
+  // useSearchParams é seguro no Next.js App Router (client component)
+  const searchParams = useSearchParams();
+  const plan    = searchParams.get("plan")    ?? "";
+  const company = searchParams.get("company") ?? "";
+  const store   = searchParams.get("store")   ?? "";
+
+  const [config,   setConfig]   = useState<TEcommerceConfig | null>(null);
   const [products, setProducts] = useState<TEcommerceProduct[]>([]);
-  const [cart, setCart] = useState<TEcommerceCartItem[]>([]);
+  const [cart,     setCart]     = useState<TEcommerceCartItem[]>([]);
   const [customer, setCustomer] = useState<TEcommerceCustomer | null>(null);
-  const [screen, setScreen] = useState<Screen>("store");
+  const [screen,   setScreen]   = useState<Screen>("store");
   const [selected, setSelected] = useState<TEcommerceProduct | null>(null);
-  const [order, setOrder] = useState<TEcommerceOrder | null>(null);
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [order,    setOrder]    = useState<TEcommerceOrder | null>(null);
+  const [search,   setSearch]   = useState("");
+  const [loading,  setLoading]  = useState(true);
   const [notFound, setNotFound] = useState(false);
 
-  // pegar parâmetros da URL: /ecommerce?plan=X&company=Y&store=Z
+  // recuperar sessão salva
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const p = params.get("plan") ?? "";
-    const c = params.get("company") ?? "";
-    const s = params.get("store") ?? "";
-    console.log(p)
-    console.log(c)
-    console.log(s)
-    
-    setPlan(p); 
-    setCompany(c); 
-    setStore(s);
-
-    // recuperar sessão salva
     const saved = localStorage.getItem("ec_customer");
     if (saved) setCustomer(JSON.parse(saved));
   }, []);
 
-  // carregar config e produtos
+  // carregar config + produtos assim que plan/company/store estiverem disponíveis
   useEffect(() => {
-    if (!plan || !company || !store) return;
-    const a = api(plan, company, store);
+    // se não veio parâmetro nenhum, não fica em loading infinito
+    if (!plan || !company || !store) {
+      setNotFound(true);
+      setLoading(false);
+      return;
+    }
+
+    const a = buildApi(plan, company, store);
 
     (async () => {
       setLoading(true);
       try {
         const [cfgRes, prodRes] = await Promise.all([a.config(), a.products()]);
         const cfg = cfgRes.data?.result?.data;
-        if (!cfg || cfg.enabled === false) { setNotFound(true); setLoading(false); return; }
+
+        if (!cfg || cfg.enabled === false) {
+          setNotFound(true);
+          setLoading(false);
+          return;
+        }
+
         setConfig(cfg);
         setProducts(prodRes.data?.result?.data ?? []);
-      } catch { setNotFound(true); }
-      setLoading(false);
+      } catch {
+        setNotFound(true);
+      } finally {
+        setLoading(false);
+      }
     })();
   }, [plan, company, store]);
 
-  const fetchProducts = useCallback(async (s?: string) => {
+  const fetchProducts = useCallback(async (q?: string) => {
     if (!plan) return;
-    const res = await api(plan, company, store).products(s);
-    setProducts(res.data?.result?.data ?? []);
+    try {
+      const res = await buildApi(plan, company, store).products(q);
+      setProducts(res.data?.result?.data ?? []);
+    } catch {}
   }, [plan, company, store]);
 
-  // ─── cart helpers ───────────────────────────────────────────────────────────
+  // ─── cart helpers ─────────────────────────────────────────────────────────
   const addToCart = (product: TEcommerceProduct) => {
     const stock = product.stocks[0];
     if (!stock) return;
@@ -117,30 +123,26 @@ export default function EcommercePage() {
         return updated;
       }
       return [...prev, {
-        productId: product.id,
-        stockId: stock.id,
+        productId:   product.id,
+        stockId:     stock.id,
         productName: product.name,
-        quantity: 1,
-        price: stock.priceDiscount > 0 ? stock.priceDiscount : stock.price,
+        quantity:    1,
+        price:       stock.priceDiscount > 0 ? stock.priceDiscount : stock.price,
       }];
     });
     toast.success("Adicionado ao carrinho!", { theme: "colored", autoClose: 1500 });
   };
 
-  const updateQty = (productId: string, delta: number) => {
+  const updateQty = (productId: string, delta: number) =>
     setCart((prev) =>
-      prev
-        .map((i) => i.productId === productId ? { ...i, quantity: i.quantity + delta } : i)
-        .filter((i) => i.quantity > 0)
+      prev.map((i) => i.productId === productId ? { ...i, quantity: i.quantity + delta } : i)
+          .filter((i) => i.quantity > 0)
     );
-  };
 
   const cartTotal = cart.reduce((acc, i) => acc + i.price * i.quantity, 0);
   const cartCount = cart.reduce((acc, i) => acc + i.quantity, 0);
-  const shipping = config?.shippingEnabled
-    ? config.shippingFreeAbove > 0 && cartTotal >= config.shippingFreeAbove
-      ? 0
-      : config.shippingFixedPrice
+  const shipping  = config?.shippingEnabled
+    ? config.shippingFreeAbove > 0 && cartTotal >= config.shippingFreeAbove ? 0 : config.shippingFixedPrice
     : 0;
 
   const saveCustomer = (c: TEcommerceCustomer) => {
@@ -153,6 +155,7 @@ export default function EcommercePage() {
     localStorage.removeItem("ec_customer");
   };
 
+  // ─── estados de tela ──────────────────────────────────────────────────────
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="animate-spin rounded-full h-10 w-10 border-4 border-purple-500 border-t-transparent" />
@@ -168,6 +171,7 @@ export default function EcommercePage() {
   );
 
   const primary = config?.primaryColor ?? "#7C3AED";
+  const apiClient = buildApi(plan, company, store);
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
@@ -229,8 +233,6 @@ export default function EcommercePage() {
             {config?.storeDescription && (
               <p className="text-gray-500 text-sm mb-4">{config.storeDescription}</p>
             )}
-
-            {/* Busca */}
             <div className="relative mb-6">
               <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
               <input
@@ -241,7 +243,6 @@ export default function EcommercePage() {
               />
             </div>
 
-            {/* Grid de produtos */}
             {products.length === 0 ? (
               <div className="flex flex-col items-center gap-3 py-20 text-gray-400">
                 <MdStore size={48} className="text-gray-200" />
@@ -267,9 +268,7 @@ export default function EcommercePage() {
                         {p.description && <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{p.description}</p>}
                         <div className="mt-2 flex items-center justify-between gap-1">
                           <div>
-                            {hasDiscount && (
-                              <p className="text-xs text-gray-400 line-through">{fMoney(stock.price)}</p>
-                            )}
+                            {hasDiscount && <p className="text-xs text-gray-400 line-through">{fMoney(stock.price)}</p>}
                             <p className="font-bold text-gray-900" style={{ color: primary }}>{fMoney(price)}</p>
                           </div>
                           <button
@@ -290,66 +289,37 @@ export default function EcommercePage() {
           </>
         )}
 
-        {/* ══ TELA: PRODUTO ════════════════════════════════════════════════════ */}
         {screen === "product" && selected && (
-          <ProductScreen
-            product={selected}
-            primary={primary}
-            onBack={() => setScreen("store")}
-            onAddToCart={addToCart}
-          />
+          <ProductScreen product={selected} primary={primary} onBack={() => setScreen("store")} onAddToCart={addToCart} />
         )}
 
-        {/* ══ TELA: CARRINHO ═══════════════════════════════════════════════════ */}
         {screen === "cart" && (
           <CartScreen
-            cart={cart}
-            shipping={shipping}
-            config={config}
-            primary={primary}
-            onUpdate={updateQty}
-            onBack={() => setScreen("store")}
-            onCheckout={() => {
-              if (!customer) { setScreen("auth"); return; }
-              setScreen("checkout");
-            }}
+            cart={cart} shipping={shipping} config={config} primary={primary}
+            onUpdate={updateQty} onBack={() => setScreen("store")}
+            onCheckout={() => { if (!customer) { setScreen("auth"); return; } setScreen("checkout"); }}
           />
         )}
 
-        {/* ══ TELA: AUTH ═══════════════════════════════════════════════════════ */}
         {screen === "auth" && (
           <AuthScreen
-            primary={primary}
-            api={api(plan, company, store)}
-            onSuccess={(c) => {
-              saveCustomer(c);
-              setScreen(cart.length > 0 ? "checkout" : "store");
-            }}
+            primary={primary} api={apiClient}
+            onSuccess={(c) => { saveCustomer(c); setScreen(cart.length > 0 ? "checkout" : "store"); }}
             onBack={() => setScreen("store")}
           />
         )}
 
-        {/* ══ TELA: CHECKOUT ═══════════════════════════════════════════════════ */}
         {screen === "checkout" && customer && (
           <CheckoutScreen
-            cart={cart}
-            customer={customer}
-            shipping={shipping}
-            total={cartTotal + shipping}
-            primary={primary}
-            api={api(plan, company, store)}
+            cart={cart} customer={customer} shipping={shipping} total={cartTotal + shipping}
+            primary={primary} api={apiClient}
             onSuccess={(o) => { setOrder(o); setCart([]); setScreen("success"); }}
             onBack={() => setScreen("cart")}
           />
         )}
 
-        {/* ══ TELA: SUCESSO ════════════════════════════════════════════════════ */}
         {screen === "success" && order && (
-          <SuccessScreen
-            order={order}
-            primary={primary}
-            onBack={() => setScreen("store")}
-          />
+          <SuccessScreen order={order} primary={primary} onBack={() => setScreen("store")} />
         )}
       </main>
     </div>
@@ -358,29 +328,21 @@ export default function EcommercePage() {
 
 // ─── Tela: Produto ────────────────────────────────────────────────────────────
 function ProductScreen({ product, primary, onBack, onAddToCart }: {
-  product: TEcommerceProduct;
-  primary: string;
-  onBack: () => void;
-  onAddToCart: (p: TEcommerceProduct) => void;
+  product: TEcommerceProduct; primary: string; onBack: () => void; onAddToCart: (p: TEcommerceProduct) => void;
 }) {
   const stock = product.stocks[0];
   const price = stock?.priceDiscount > 0 ? stock.priceDiscount : stock?.price ?? 0;
   const hasDiscount = stock?.priceDiscount > 0 && stock?.price > stock?.priceDiscount;
-
   return (
     <div>
-      <button onClick={onBack} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4">
-        ← Voltar
-      </button>
+      <button onClick={onBack} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4">← Voltar</button>
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 max-w-2xl">
         <div className="h-56 bg-gray-100 rounded-xl flex items-center justify-center mb-4">
           <MdStore size={80} className="text-gray-300" />
         </div>
         <h1 className="text-xl font-bold text-gray-900">{product.name}</h1>
         {product.description && <p className="text-gray-500 text-sm mt-1">{product.description}</p>}
-        {product.descriptionComplet && (
-          <p className="text-gray-600 text-sm mt-3 leading-relaxed">{product.descriptionComplet}</p>
-        )}
+        {product.descriptionComplet && <p className="text-gray-600 text-sm mt-3 leading-relaxed">{product.descriptionComplet}</p>}
         <div className="mt-4 flex items-center gap-4">
           <div>
             {hasDiscount && <p className="text-sm text-gray-400 line-through">{fMoney(stock.price)}</p>}
@@ -402,13 +364,8 @@ function ProductScreen({ product, primary, onBack, onAddToCart }: {
 
 // ─── Tela: Carrinho ───────────────────────────────────────────────────────────
 function CartScreen({ cart, shipping, config, primary, onUpdate, onBack, onCheckout }: {
-  cart: TEcommerceCartItem[];
-  shipping: number;
-  config: TEcommerceConfig | null;
-  primary: string;
-  onUpdate: (id: string, delta: number) => void;
-  onBack: () => void;
-  onCheckout: () => void;
+  cart: TEcommerceCartItem[]; shipping: number; config: TEcommerceConfig | null;
+  primary: string; onUpdate: (id: string, delta: number) => void; onBack: () => void; onCheckout: () => void;
 }) {
   const total = cart.reduce((a, i) => a + i.price * i.quantity, 0);
   return (
@@ -429,19 +386,13 @@ function CartScreen({ cart, shipping, config, primary, onUpdate, onBack, onCheck
                 <p className="text-xs text-gray-400">{fMoney(item.price)} cada</p>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={() => onUpdate(item.productId, -1)} className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50">
-                  <MdRemove size={14} />
-                </button>
+                <button onClick={() => onUpdate(item.productId, -1)} className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50"><MdRemove size={14} /></button>
                 <span className="w-5 text-center text-sm font-semibold">{item.quantity}</span>
-                <button onClick={() => onUpdate(item.productId, 1)} className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50">
-                  <MdAdd size={14} />
-                </button>
+                <button onClick={() => onUpdate(item.productId, 1)} className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50"><MdAdd size={14} /></button>
               </div>
               <p className="font-bold text-sm text-gray-900 w-20 text-right">{fMoney(item.price * item.quantity)}</p>
             </div>
           ))}
-
-          {/* Resumo */}
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 space-y-2 text-sm">
             <div className="flex justify-between text-gray-600"><span>Subtotal</span><span>{fMoney(total)}</span></div>
             {config?.shippingEnabled && (
@@ -457,12 +408,7 @@ function CartScreen({ cart, shipping, config, primary, onUpdate, onBack, onCheck
               <span>Total</span><span style={{ color: primary }}>{fMoney(total + shipping)}</span>
             </div>
           </div>
-
-          <button
-            onClick={onCheckout}
-            style={{ backgroundColor: primary }}
-            className="w-full py-3 rounded-xl text-white font-semibold hover:opacity-90 transition"
-          >
+          <button onClick={onCheckout} style={{ backgroundColor: primary }} className="w-full py-3 rounded-xl text-white font-semibold hover:opacity-90 transition">
             Finalizar pedido
           </button>
         </div>
@@ -473,10 +419,8 @@ function CartScreen({ cart, shipping, config, primary, onUpdate, onBack, onCheck
 
 // ─── Tela: Auth ───────────────────────────────────────────────────────────────
 function AuthScreen({ primary, api, onSuccess, onBack }: {
-  primary: string;
-  api: ReturnType<typeof import("./EcommercePage")["default"] extends any ? any : any>;
-  onSuccess: (c: TEcommerceCustomer) => void;
-  onBack: () => void;
+  primary: string; api: ReturnType<typeof buildApi>;
+  onSuccess: (c: TEcommerceCustomer) => void; onBack: () => void;
 }) {
   const [mode, setMode] = useState<"login" | "register">("login");
   const [form, setForm] = useState({ name: "", email: "", password: "", phone: "", document: "" });
@@ -502,17 +446,12 @@ function AuthScreen({ primary, api, onSuccess, onBack }: {
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
         <div className="flex rounded-xl overflow-hidden border border-gray-200 mb-5">
           {(["login", "register"] as const).map((m) => (
-            <button
-              key={m}
-              onClick={() => setMode(m)}
-              style={mode === m ? { backgroundColor: primary } : {}}
-              className={`flex-1 py-2 text-sm font-medium transition ${mode === m ? "text-white" : "text-gray-500"}`}
-            >
+            <button key={m} onClick={() => setMode(m)} style={mode === m ? { backgroundColor: primary } : {}}
+              className={`flex-1 py-2 text-sm font-medium transition ${mode === m ? "text-white" : "text-gray-500"}`}>
               {m === "login" ? "Entrar" : "Criar conta"}
             </button>
           ))}
         </div>
-
         <div className="space-y-3">
           {mode === "register" && (
             <>
@@ -523,13 +462,8 @@ function AuthScreen({ primary, api, onSuccess, onBack }: {
           )}
           <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="E-mail" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200" />
           <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="Senha" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200" />
-
-          <button
-            onClick={submit}
-            disabled={loading}
-            style={{ backgroundColor: primary }}
-            className="w-full py-3 rounded-xl text-white font-semibold hover:opacity-90 transition disabled:opacity-60"
-          >
+          <button onClick={submit} disabled={loading} style={{ backgroundColor: primary }}
+            className="w-full py-3 rounded-xl text-white font-semibold hover:opacity-90 transition disabled:opacity-60">
             {loading ? "Aguarde..." : mode === "login" ? "Entrar" : "Criar conta"}
           </button>
         </div>
@@ -540,14 +474,8 @@ function AuthScreen({ primary, api, onSuccess, onBack }: {
 
 // ─── Tela: Checkout ───────────────────────────────────────────────────────────
 function CheckoutScreen({ cart, customer, shipping, total, primary, api, onSuccess, onBack }: {
-  cart: TEcommerceCartItem[];
-  customer: TEcommerceCustomer;
-  shipping: number;
-  total: number;
-  primary: string;
-  api: any;
-  onSuccess: (o: TEcommerceOrder) => void;
-  onBack: () => void;
+  cart: TEcommerceCartItem[]; customer: TEcommerceCustomer; shipping: number; total: number;
+  primary: string; api: ReturnType<typeof buildApi>; onSuccess: (o: TEcommerceOrder) => void; onBack: () => void;
 }) {
   const [billing, setBilling] = useState("PIX");
   const [address, setAddress] = useState({ zipCode: "", street: "", number: "", complement: "", neighborhood: "", city: "", state: "" });
@@ -555,23 +483,17 @@ function CheckoutScreen({ cart, customer, shipping, total, primary, api, onSucce
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
-    if (!address.zipCode || !address.street || !address.number) {
-      toast.error("Preencha o endereço de entrega."); return;
-    }
+    if (!address.zipCode || !address.street || !address.number) { toast.error("Preencha o endereço de entrega."); return; }
     setLoading(true);
     try {
       const body: any = {
-        customerId: customer.id,
-        billingType: billing,
+        customerId: customer.id, billingType: billing,
         items: cart.map((i) => ({ productId: i.productId, stockId: i.stockId, productName: i.productName, quantity: i.quantity, price: i.price })),
         shippingAddress: address,
       };
       if (billing === "CREDIT_CARD") {
-        body.cardHolderName = card.holderName;
-        body.cardNumber = card.number;
-        body.cardExpiryMonth = card.expiryMonth;
-        body.cardExpiryYear = card.expiryYear;
-        body.cardCvv = card.cvv;
+        body.cardHolderName = card.holderName; body.cardNumber = card.number;
+        body.cardExpiryMonth = card.expiryMonth; body.cardExpiryYear = card.expiryYear; body.cardCvv = card.cvv;
       }
       const res = await api.checkout(body);
       const d = res.data?.result?.data;
@@ -589,22 +511,16 @@ function CheckoutScreen({ cart, customer, shipping, total, primary, api, onSucce
       <button onClick={onBack} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700">← Voltar</button>
       <h2 className="text-lg font-bold text-gray-900">Finalizar pedido</h2>
 
-      {/* Forma de pagamento */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
         <h3 className="font-semibold text-gray-800 mb-3">Forma de pagamento</h3>
         <div className="grid grid-cols-3 gap-2">
           {["PIX", "BOLETO", "CREDIT_CARD"].map((b) => (
-            <button
-              key={b}
-              onClick={() => setBilling(b)}
-              style={billing === b ? { backgroundColor: primary } : {}}
-              className={`py-2 rounded-xl text-sm font-medium border transition ${billing === b ? "text-white border-transparent" : "border-gray-200 text-gray-600"}`}
-            >
+            <button key={b} onClick={() => setBilling(b)} style={billing === b ? { backgroundColor: primary } : {}}
+              className={`py-2 rounded-xl text-sm font-medium border transition ${billing === b ? "text-white border-transparent" : "border-gray-200 text-gray-600"}`}>
               {b === "CREDIT_CARD" ? "Cartão" : b === "BOLETO" ? "Boleto" : "PIX"}
             </button>
           ))}
         </div>
-
         {billing === "CREDIT_CARD" && (
           <div className="mt-4 space-y-2">
             <input value={card.holderName} onChange={(e) => setCard({ ...card, holderName: e.target.value })} placeholder="Nome no cartão" className={inp} />
@@ -618,7 +534,6 @@ function CheckoutScreen({ cart, customer, shipping, total, primary, api, onSucce
         )}
       </div>
 
-      {/* Endereço */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
         <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2"><MdLocalShipping size={18} />Endereço de entrega</h3>
         <div className="space-y-2">
@@ -638,7 +553,6 @@ function CheckoutScreen({ cart, customer, shipping, total, primary, api, onSucce
         </div>
       </div>
 
-      {/* Resumo */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 text-sm space-y-1">
         {cart.map((i) => (
           <div key={i.productId} className="flex justify-between text-gray-600">
@@ -651,12 +565,8 @@ function CheckoutScreen({ cart, customer, shipping, total, primary, api, onSucce
         </div>
       </div>
 
-      <button
-        onClick={submit}
-        disabled={loading}
-        style={{ backgroundColor: primary }}
-        className="w-full py-3 rounded-xl text-white font-bold hover:opacity-90 transition disabled:opacity-60"
-      >
+      <button onClick={submit} disabled={loading} style={{ backgroundColor: primary }}
+        className="w-full py-3 rounded-xl text-white font-bold hover:opacity-90 transition disabled:opacity-60">
         {loading ? "Processando..." : `Pagar ${fMoney(total)}`}
       </button>
     </div>
@@ -666,7 +576,6 @@ function CheckoutScreen({ cart, customer, shipping, total, primary, api, onSucce
 // ─── Tela: Sucesso ────────────────────────────────────────────────────────────
 function SuccessScreen({ order, primary, onBack }: { order: TEcommerceOrder; primary: string; onBack: () => void }) {
   const copy = (text: string) => { navigator.clipboard.writeText(text); toast.success("Copiado!", { autoClose: 1000 }); };
-
   return (
     <div className="max-w-md mx-auto space-y-5">
       <div className="text-center py-4">
@@ -679,12 +588,9 @@ function SuccessScreen({ order, primary, onBack }: { order: TEcommerceOrder; pri
         </p>
       </div>
 
-      {/* PIX */}
       {order.billingType === "PIX" && order.pixQrCode && (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col items-center gap-3">
-          {order.pixQrCodeImage && (
-            <img src={`data:image/png;base64,${order.pixQrCodeImage}`} alt="QR Code PIX" className="w-48 h-48" />
-          )}
+          {order.pixQrCodeImage && <img src={`data:image/png;base64,${order.pixQrCodeImage}`} alt="QR Code PIX" className="w-48 h-48" />}
           <div className="w-full">
             <p className="text-xs text-gray-400 mb-1">Código Pix Copia e Cola</p>
             <div className="flex gap-2 items-center">
@@ -697,7 +603,6 @@ function SuccessScreen({ order, primary, onBack }: { order: TEcommerceOrder; pri
         </div>
       )}
 
-      {/* Boleto */}
       {order.billingType === "BOLETO" && (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-3">
           {order.identificationField && (
