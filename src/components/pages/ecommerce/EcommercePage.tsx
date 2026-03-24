@@ -261,7 +261,7 @@ export default function EcommercePage() {
             {config?.logoUrl
               ? <img src={config.logoUrl} alt="logo" className="h-9 w-9 rounded-full object-cover" />
               : <MdStore size={28} className="text-white" />}
-            <span className="font-bold text-white text-lg truncate max-w-[160px]">
+            <span className="font-bold text-white text-lg truncate max-w-40">
               {config?.storeName ?? "Loja Virtual"}
             </span>
           </button>
