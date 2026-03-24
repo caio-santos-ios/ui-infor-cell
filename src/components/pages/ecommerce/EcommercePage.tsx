@@ -20,6 +20,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { loadingAtom } from "@/jotai/global/loading.jotai";
 import { useAtom } from "jotai";
+import { maskPhone } from "@/utils/mask.util";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 const fMoney = (v: number) =>
@@ -75,13 +76,11 @@ export default function EcommercePage() {
   const [loading,  setLoading]  = useState(true);
   const [notFound, setNotFound] = useState(false);
 
-  // sessão salva
   useEffect(() => {
     const saved = localStorage.getItem("ec_customer");
     if (saved) setCustomer(JSON.parse(saved));
   }, []);
 
-  // carregar config + categorias + produtos
   useEffect(() => {
     if (!plan || !company || !store) { setNotFound(true); setLoading(false); return; }
     const a = buildApi(plan, company, store);
@@ -113,7 +112,6 @@ export default function EcommercePage() {
     } catch {}
   }, [plan, company, store]);
 
-  // aplicar filtro quando mudar categoria ou subcategoria
   const selectCategory = (catId: string | null) => {
     setActiveCategoryId(catId);
     setActiveSubcategory(null);
@@ -129,7 +127,6 @@ export default function EcommercePage() {
   const toggleExpand = (catId: string) =>
     setExpandedCats((prev) => ({ ...prev, [catId]: !prev[catId] }));
 
-  // ─── cart ────────────────────────────────────────────────────────────────
   const addToCart = (product: TEcommerceProduct) => {
     const stock = product.stocks[0];
     if (!stock) return;
@@ -182,12 +179,10 @@ export default function EcommercePage() {
   const primary    = config?.primaryColor ?? "#7C3AED";
   const apiClient  = buildApi(plan, company, store);
 
-  // ─── Sidebar de filtros ───────────────────────────────────────────────────
   const FilterSidebar = () => (
     <aside className="w-full space-y-1">
       <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 mb-3">Categorias</p>
 
-      {/* Todos */}
       <button
         onClick={() => { selectCategory(null); setSidebarOpen(false); }}
         className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition ${
@@ -229,7 +224,6 @@ export default function EcommercePage() {
               )}
             </div>
 
-            {/* Subcategorias */}
             {hasSubs && isExpanded && (
               <div className="ml-3 mt-1 space-y-0.5 border-l-2 border-gray-100 dark:border-gray-700 pl-3">
                 {cat.subcategories.map((sub) => {
@@ -261,7 +255,6 @@ export default function EcommercePage() {
     <div className="min-h-screen bg-gray-50 font-sans">
       <ToastContainer position="top-right" />
 
-      {/* ── Header ── */}
       <header style={{ backgroundColor: primary }} className="sticky top-0 z-40 shadow-md">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
           <button onClick={() => setScreen("store")} className="flex items-center gap-2">
@@ -274,7 +267,6 @@ export default function EcommercePage() {
           </button>
 
           <div className="flex items-center gap-3">
-            {/* botão filtro mobile */}
             {screen === "store" && categories.length > 0 && (
               <button
                 onClick={() => setSidebarOpen(true)}
@@ -309,14 +301,12 @@ export default function EcommercePage() {
         </div>
       </header>
 
-      {/* Banner */}
       {screen === "store" && config?.bannerUrl && (
         <div className="w-full h-44 md:h-60 overflow-hidden">
           <img src={config.bannerUrl} alt="banner" className="w-full h-full object-cover" />
         </div>
       )}
 
-      {/* ── Modal sidebar mobile ── */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 flex lg:hidden">
           <div className="absolute inset-0 bg-black/40" onClick={() => setSidebarOpen(false)} />
@@ -334,11 +324,9 @@ export default function EcommercePage() {
 
       <main className="max-w-7xl mx-auto px-4 py-6">
 
-        {/* ══ TELA: LOJA ══════════════════════════════════════════════════════ */}
         {screen === "store" && (
           <div className="flex gap-6">
 
-            {/* ── Sidebar desktop ── */}
             {categories.length > 0 && (
               <div className="hidden lg:block w-52 shrink-0">
                 <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-4 sticky top-20">
@@ -347,13 +335,11 @@ export default function EcommercePage() {
               </div>
             )}
 
-            {/* ── Conteúdo principal ── */}
             <div className="flex-1 min-w-0">
               {config?.storeDescription && (
                 <p className="text-gray-500 text-sm mb-4">{config.storeDescription}</p>
               )}
 
-              {/* Breadcrumb filtro ativo */}
               {(activeCategoryId || activeSubcategory) && (
                 <div className="flex items-center gap-2 mb-4 flex-wrap">
                   {activeCategoryId && (
@@ -381,7 +367,6 @@ export default function EcommercePage() {
                 </div>
               )}
 
-              {/* Busca */}
               <div className="relative mb-5">
                 <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                 <input
@@ -395,7 +380,6 @@ export default function EcommercePage() {
                 />
               </div>
 
-              {/* Grid */}
               {products.length === 0 ? (
                 <div className="flex flex-col items-center gap-3 py-20 text-gray-400">
                   <MdStore size={48} className="text-gray-200" />
@@ -480,7 +464,6 @@ export default function EcommercePage() {
   );
 }
 
-// ─── Tela: Produto ────────────────────────────────────────────────────────────
 function ProductScreen({ product, primary, onBack, onAddToCart }: {
   product: TEcommerceProduct; primary: string; onBack: () => void; onAddToCart: (p: TEcommerceProduct) => void;
 }) {
@@ -516,7 +499,6 @@ function ProductScreen({ product, primary, onBack, onAddToCart }: {
   );
 }
 
-// ─── Tela: Carrinho ───────────────────────────────────────────────────────────
 function CartScreen({ cart, shipping, config, primary, onUpdate, onBack, onCheckout }: {
   cart: TEcommerceCartItem[]; shipping: number; config: TEcommerceConfig | null;
   primary: string; onUpdate: (id: string, delta: number) => void; onBack: () => void; onCheckout: () => void;
@@ -571,7 +553,6 @@ function CartScreen({ cart, shipping, config, primary, onUpdate, onBack, onCheck
   );
 }
 
-// ─── Tela: Auth ───────────────────────────────────────────────────────────────
 function AuthScreen({ primary, api, onSuccess, onBack }: {
   primary: string; api: ReturnType<typeof buildApi>;
   onSuccess: (c: TEcommerceCustomer) => void; onBack: () => void;
@@ -610,7 +591,10 @@ function AuthScreen({ primary, api, onSuccess, onBack }: {
           {mode === "register" && (
             <>
               <input value={form.name}     onChange={(e) => setForm({ ...form, name: e.target.value })}     placeholder="Nome completo" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200" />
-              <input value={form.phone}    onChange={(e) => setForm({ ...form, phone: e.target.value })}    placeholder="Telefone"      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200" />
+              <input value={form.phone}    onChange={(e) => {
+                maskPhone(e);
+                setForm({ ...form, phone: e.target.value });
+              }}    placeholder="Telefone"      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200" />
               <input value={form.document} onChange={(e) => setForm({ ...form, document: e.target.value })} placeholder="CPF ou CNPJ"   className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200" />
             </>
           )}
