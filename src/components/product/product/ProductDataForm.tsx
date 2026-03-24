@@ -200,7 +200,7 @@ export default function ProductDataForm({id}: TProp) {
             </select>
           </div>  
           <div className="col-span-6 md:col-span-3 xl:col-span-2">
-            <Label title="Marca"  required={false}/>
+            <Label title="Grupo do Produto"  required={false}/>
             <select {...register("brandId")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
               <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Selecione</option>
               {
@@ -210,7 +210,7 @@ export default function ProductDataForm({id}: TProp) {
               }
             </select>
           </div>  
-          <div className="col-span-6 md:col-span-3 xl:col-span-1">
+          <div className="col-span-6 md:col-span-3 xl:col-span-2">
             <Label title="Unidade de Medida" required={false}/>
             <select {...register("unitOfMeasure")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
               <option value="" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Selecione</option>
@@ -229,6 +229,13 @@ export default function ProductDataForm({id}: TProp) {
             </select>
           </div>  
           <div className="col-span-6 md:col-span-2 xl:col-span-1">
+            <Label title="Possui Variações?" required={false}/>
+            <select {...register("hasVariations")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
+              <option value="yes" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Sim</option>
+              <option value="no" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Não</option>
+            </select>
+          </div>
+          <div className="col-span-6 md:col-span-2 xl:col-span-1">
             <Label title="Movimenta Estoque?" required={false}/>
             <select {...register("moveStock")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
               <option value="yes" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Sim</option>
@@ -244,13 +251,6 @@ export default function ProductDataForm({id}: TProp) {
               </div>
             )
           }
-          <div className="col-span-6 md:col-span-2 xl:col-span-1">
-            <Label title="Possui Variações?" required={false}/>
-            <select {...register("hasVariations")} className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 text-gray-800 dark:bg-dark-900">
-              <option value="yes" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Sim</option>
-              <option value="no" className="text-gray-700 dark:bg-gray-900 dark:text-gray-400">Não</option>
-            </select>
-          </div>    
           <div className="col-span-6 md:col-span-1 xl:col-span-1">
             <Label title={`${active ? 'Ativo' : 'Inativo'}`} required={false}/>
             <Switch defaultChecked={active} onChange={(e) => {setValue("active", e)}} />

@@ -5,7 +5,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Telemovvi | Marcas",
+  title: "Telemovvi | Grupo de Produtos",
   description:
     "This is Next.js Form Elements page for TailAdmin - Next.js Tailwind CSS Admin Dashboard Template",
 };
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default function Brands() {
   return (
     <div>
-      <PageBreadcrumb pageIcon="MdOutlineBrandingWatermark" pageTitle="Marcas" pageSubTitle="Gestão de Produtos" />
+      <PageBreadcrumb pageIcon="MdOutlineBrandingWatermark" pageTitle="Grupo de Produtos" pageSubTitle="Gestão de Produtos" />
       <div className="flex justify-end mb-2">
         <Link href="brands/create">
           <Button type="submit" className="" size="sm">Adicionar</Button>
